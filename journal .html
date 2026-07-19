@@ -456,7 +456,7 @@ footer span{color:var(--accent);}
   const dl=document.getElementById('ticker-datalist');
   dl.innerHTML=NSE_TICKERS.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('');
 })();
-const API_URL='https://script.google.com/macros/s/AKfycbz9TTgMmVvFDOhUda_L2Od3C1Qqip39nFkyK5QtHKbxaaMdz-usqV-zBs-IsQ3V5sBR/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbyD1-RkV850-svgsXkq7ao8wykaorA58qF-ce2kwb2BzuruncHnbAzNokFM__LAvE1C/exec';
 const BROKERAGE=40;
 let PORTFOLIO_CAPITAL=(function(){try{const v=parseFloat(localStorage.getItem('mickkk_capital'));return v>0?v:300000;}catch(e){return 300000;}})();
 const MAX_RISK_PCT=2.0;
