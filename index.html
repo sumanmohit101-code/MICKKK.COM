@@ -238,7 +238,7 @@ footer span{color:var(--accent);}
 <footer><span>MICKKK.com</span> · Trade Smarter. Track Everything. · Created by Mohit Suman</footer>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbz9TTgMmVvFDOhUda_L2Od3C1Qqip39nFkyK5QtHKbxaaMdz-usqV-zBs-IsQ3V5sBR/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyD1-RkV850-svgsXkq7ao8wykaorA58qF-ce2kwb2BzuruncHnbAzNokFM__LAvE1C/exec';
 const API_KEY='PUT_YOUR_SECRET_KEY_HERE'; // must match API_KEY in Apps Script Script Properties
 function apiUrl(action, extra){ let u=`${API_URL}?action=${action}&key=${encodeURIComponent(API_KEY)}`; if(extra) u+='&'+extra; return u; }
 function apiPost(payload){ return fetch(API_URL,{method:'POST',body:JSON.stringify({...payload, key:API_KEY})}); }
