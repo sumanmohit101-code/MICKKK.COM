@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MICKKK.com — Charts</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{--bg:#080b0f;--surface:#0e1318;--card:#131a22;--card2:#18212c;--border:#1e2d3d;--text:#d4e4f0;--muted:#5a7a94;--accent:#00d4ff;--green:#00e676;--red:#ff3d5a;--amber:#ffab00;--font:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden;}
+::-webkit-scrollbar{width:5px;height:5px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(8,11,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;}
+.logo{font-size:19px;font-weight:700;letter-spacing:3px;color:var(--accent);font-family:var(--mono);}
+.logo span{color:var(--muted);font-size:11px;font-weight:400;margin-left:8px;letter-spacing:1px;}
+.nav-links{display:flex;gap:4px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;padding:6px 14px;border-radius:6px;transition:all 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--accent);background:rgba(0,212,255,0.08);}
+
+.app{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex;flex-direction:column;}
+
+/* Ticker tape strip */
+#ticker-tape-wrap{flex-shrink:0;border-bottom:1px solid var(--border);background:var(--surface);}
+
+/* Watchlist tab bar */
+.wl-tabbar{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.wl-tab{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all 0.15s;white-space:nowrap;}
+.wl-tab.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
+.wl-tab:hover:not(.active){border-color:var(--accent);color:var(--accent);}
+.wl-spacer{flex:1;}
+.wl-add{display:flex;align-items:center;gap:6px;}
+.wl-add input{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px;font-family:var(--mono);width:130px;text-transform:uppercase;outline:none;}
+.wl-add input:focus{border-color:var(--accent);}
+.wl-add button{background:var(--green);color:#000;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+.wl-add button:hover{background:#33ff99;}
+.wl-toast{font-size:11px;color:var(--muted);}
+
+/* Main chart area */
+.chart-main{flex:1;position:relative;min-height:0;}
+#tv_chart_container{width:100%;height:100%;}
+.chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:13px;background:var(--bg);z-index:5;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">MICKKK<span>.com</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="journal.html">Trading Journal</a>
+    <a href="charts.html" class="active">Charts</a>
+  </div>
+</nav>
+
+<div class="app">
+  <div id="ticker-tape-wrap">
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          {"proName":"NSE:NIFTY","title":"NIFTY 50"},
+          {"proName":"NSE:BANKNIFTY","title":"BANK NIFTY"},
+          {"proName":"NSE:RELIANCE","title":"RELIANCE"},
+          {"proName":"NSE:TCS","title":"TCS"},
+          {"proName":"NSE:HDFCBANK","title":"HDFC BANK"},
+          {"proName":"NSE:INFY","title":"INFY"},
+          {"proName":"NSE:ICICIBANK","title":"ICICI BANK"}
+        ],
+        "colorTheme": "dark",
+        "isTransparent": true,
+        "displayMode": "adaptive",
+        "locale": "en"
+      }
+      </script>
+    </div>
+  </div>
+
+  <div class="wl-tabbar">
+    <button class="wl-tab active" data-wl="mywatchlist" onclick="switchWatchlist('mywatchlist')">⭐ My Watchlist</button>
+    <button class="wl-tab" data-wl="openpositions" onclick="switchWatchlist('openpositions')">📊 Open Positions</button>
+    <button class="wl-tab" data-wl="nifty50" onclick="switchWatchlist('nifty50')">Nifty 50</button>
+    <button class="wl-tab" data-wl="niftybank" onclick="switchWatchlist('niftybank')">Nifty Bank</button>
+    <div class="wl-spacer"></div>
+    <div class="wl-add">
+      <input type="text" id="wl-add-input" list="ticker-datalist" placeholder="e.g. RELIANCE">
+      <button onclick="addSymbolToMyWatchlist()">＋ Add to My Watchlist</button>
+      <span class="wl-toast" id="wl-toast"></span>
+    </div>
+  </div>
+
+  <div class="chart-main">
+    <div class="chart-loading" id="chart-loading"><div class="spinner"></div>Chart load ho raha hai…</div>
+    <div id="tv_chart_container"></div>
+  </div>
+</div>
+
+<datalist id="ticker-datalist"></datalist>
+
+<script src="tickers.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbz9TTgMmVvFDOhUda_L2Od3C1Qqip39nFkyK5QtHKbxaaMdz-usqV-zBs-IsQ3V5sBR/exec';
+
+// Populate ticker datalist for the "add symbol" input
+(function(){
+  const dl=document.getElementById('ticker-datalist');
+  dl.innerHTML=NSE_TICKERS.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('');
+})();
+
+const NIFTY50=["RELIANCE","TCS","HDFCBANK","ICICIBANK","INFY","SBIN","BHARTIARTL","BAJFINANCE","LICI","LT",
+  "HINDUNILVR","SUNPHARMA","MARUTI","ADANIPORTS","AXISBANK","ADANIENT","TITAN","KOTAKBANK","ITC","ONGC",
+  "NTPC","POWERGRID","M&M","TATAMOTORS","TATASTEEL","JSWSTEEL","WIPRO","HCLTECH","ASIANPAINT","ULTRACEMCO",
+  "NESTLEIND","BAJAJFINSV","BAJAJ-AUTO","HINDALCO","COALINDIA","DRREDDY","CIPLA","APOLLOHOSP","EICHERMOT",
+  "GRASIM","HEROMOTOCO","INDUSINDBK","SBILIFE","HDFCLIFE","BRITANNIA","TECHM","BPCL","SHRIRAMFIN","TATACONSUM","UPL"];
+
+const NIFTYBANK=["HDFCBANK","ICICIBANK","SBIN","KOTAKBANK","AXISBANK","INDUSINDBK","BANKBARODA","PNB",
+  "CANBK","FEDERALBNK","IDFCFIRSTB","AUBANK","BANDHANBNK"];
+
+let currentWatchlistKey='mywatchlist';
+let watchlists={mywatchlist:[],openpositions:[],nifty50:NIFTY50,niftybank:NIFTYBANK};
+let currentSymbol='NSE:NIFTY';
+let tvWidget=null;
+
+function toNSE(sym){ return sym.includes(':')?sym:('NSE:'+sym.toUpperCase()); }
+
+async function loadDynamicWatchlists(){
+  try{
+    const wd=await(await fetch(`${API_URL}?action=getWatchlist`)).json();
+    watchlists.mywatchlist=(wd.watchlist||[]).map(w=>w.ticker.toUpperCase());
+  }catch(e){console.error('watchlist load error:',e);}
+  try{
+    const td=await(await fetch(`${API_URL}?action=getTrades`)).json();
+    const trades=td.trades||[];
+    const open=trades.filter(t=>!t.exit);
+    watchlists.openpositions=[...new Set(open.map(t=>t.symbol.toUpperCase()))];
+  }catch(e){console.error('trades load error:',e);}
+  if(currentWatchlistKey==='mywatchlist'||currentWatchlistKey==='openpositions') renderChart();
+}
+
+function switchWatchlist(key){
+  currentWatchlistKey=key;
+  document.querySelectorAll('.wl-tab').forEach(b=>b.classList.toggle('active',b.dataset.wl===key));
+  renderChart();
+}
+
+function renderChart(){
+  const list=watchlists[currentWatchlistKey]||[];
+  const wlSymbols=list.length?list.map(toNSE):['NSE:NIFTY'];
+  const symbolToShow=wlSymbols.includes(currentSymbol)?currentSymbol:wlSymbols[0];
+
+  document.getElementById('chart-loading').style.display='flex';
+  document.getElementById('tv_chart_container').innerHTML='';
+
+  tvWidget=new TradingView.widget({
+    autosize:true,
+    symbol:symbolToShow,
+    interval:'D',
+    timezone:'Asia/Kolkata',
+    theme:'dark',
+    style:'1',
+    locale:'en',
+    toolbar_bg:'#131a22',
+    enable_publishing:false,
+    withdateranges:true,
+    hide_side_toolbar:false,
+    allow_symbol_change:true,
+    details:true,
+    hotlist:false,
+    calendar:false,
+    watchlist:wlSymbols,
+    studies:['RSI@tv-basicstudies','MASimple@tv-basicstudies'],
+    container_id:'tv_chart_container',
+  });
+
+  // tv.js doesn't expose a clean onload callback in the classic embed;
+  // hide the loading overlay after a short delay once iframe has painted.
+  setTimeout(()=>{document.getElementById('chart-loading').style.display='none';},2500);
+}
+
+async function addSymbolToMyWatchlist(){
+  const input=document.getElementById('wl-add-input');
+  const sym=input.value.trim().toUpperCase();
+  const toastEl=document.getElementById('wl-toast');
+  if(!sym){toastEl.textContent='Symbol daalo';toastEl.style.color='var(--red)';return;}
+  if(watchlists.mywatchlist.includes(sym)){toastEl.textContent=sym+' pehle se hai';toastEl.style.color='var(--amber)';return;}
+  try{
+    await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'addWatch',item:{ticker:sym}})});
+    watchlists.mywatchlist.push(sym);
+    toastEl.textContent='✓ '+sym+' add ho gaya';
+    toastEl.style.color='var(--green)';
+    input.value='';
+    if(currentWatchlistKey==='mywatchlist') renderChart();
+  }catch(e){
+    toastEl.textContent='Error — '+e.message;
+    toastEl.style.color='var(--red)';
+  }
+}
+
+// ── boot ──
+renderChart();
+loadDynamicWatchlists();
+</script>
+</body>
+</html>
