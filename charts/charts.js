@@ -1,3 +1,4 @@
+
 // ============================================================
 // MICKKK.com Charts — Professional Terminal Engine
 // ============================================================
@@ -89,23 +90,117 @@ let isLiveActive = false;
 let livePollTimer = null;
 const LIVE_POLL_MS = 45000;
 
+/* ============ FAST STATIC DATA / CDN ENGINE ============
+   Daily data is published by Apps Script into /charts/data/ on GitHub.
+   Cloudflare serves these files as static assets; Apps Script remains a fallback.
+*/
+const STATIC_DATA_ROOT = './data';
+let STATIC_DATA_VERSION = '0';
+let STATIC_DATA_MANIFEST = null;
+let staticManifestPromise = null;
+const MICKKK_IDB = { name:'mickkk-fast-cache', version:1, store:'kv' };
+
+function openMickkkIDB(){
+  return new Promise((resolve,reject)=>{
+    try{
+      const req=indexedDB.open(MICKKK_IDB.name,MICKKK_IDB.version);
+      req.onupgradeneeded=()=>{ const db=req.result; if(!db.objectStoreNames.contains(MICKKK_IDB.store)) db.createObjectStore(MICKKK_IDB.store); };
+      req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
+    }catch(e){ reject(e); }
+  });
+}
+async function idbGet_(key){ try{ const db=await openMickkkIDB(); return await new Promise((res,rej)=>{const r=db.transaction(MICKKK_IDB.store,'readonly').objectStore(MICKKK_IDB.store).get(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}); }catch(e){return null;} }
+async function idbSet_(key,value){ try{ const db=await openMickkkIDB(); await new Promise((res,rej)=>{const r=db.transaction(MICKKK_IDB.store,'readwrite').objectStore(MICKKK_IDB.store).put(value,key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);}); }catch(e){} }
+
+function staticShardFor_(symbol){
+  const s=String(symbol||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return (s.slice(0,2) || 'XX');
+}
+
+function normalizeCandlePayload_(payload){
+  if (!payload) return [];
+  let raw = payload.candles || payload.data || payload;
+  if (typeof raw === 'string') {
+    return raw.split('|').map(b=>{
+      const p=b.split(',');
+      return {time:formatToDateOnly(p[0]),open:Number(p[1])||0,high:Number(p[2])||0,low:Number(p[3])||0,close:Number(p[4])||0,volume:Number(p[5])||0};
+    }).filter(c=>c.time && c.close>0);
+  }
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(c=>c&&c.time&&!isNaN(Number(c.close))&&Number(c.close)>0).map(c=>({
+    time:formatToDateOnly(c.time),open:Number(c.open||c.close),high:Number(c.high||c.close),low:Number(c.low||c.close),close:Number(c.close),volume:Number(c.volume||0)
+  })).sort((a,b)=>a.time<b.time?-1:1);
+}
+
+async function loadStaticManifest_(){
+  if (STATIC_DATA_MANIFEST) return STATIC_DATA_MANIFEST;
+  if (staticManifestPromise) return staticManifestPromise;
+  staticManifestPromise=(async()=>{
+    try{
+      const r=await fetch(`${STATIC_DATA_ROOT}/manifest.json?v=${Date.now()}`,{cache:'no-store'});
+      if(!r.ok) throw new Error('static manifest '+r.status);
+      const m=await r.json();
+      STATIC_DATA_MANIFEST=m||{}; STATIC_DATA_VERSION=String(m.version||Date.now());
+      if(Array.isArray(m.symbols)&&m.symbols.length) allSymbols=m.symbols;
+      if(Array.isArray(m.priceBands)){
+        priceBandsMap={}; m.priceBands.forEach(b=>{if(b&&b.symbol) priceBandsMap[String(b.symbol).toUpperCase()]=b;});
+      }
+      return STATIC_DATA_MANIFEST;
+    }catch(e){ STATIC_DATA_MANIFEST=null; return null; }
+    finally{ staticManifestPromise=null; }
+  })();
+  return staticManifestPromise;
+}
+
+async function fetchStaticCandles_(symbol){
+  const m=await loadStaticManifest_();
+  const shard=(m&&m.shards&&m.shards[String(symbol).toUpperCase()])||staticShardFor_(symbol);
+  const url=`${STATIC_DATA_ROOT}/candles/${encodeURIComponent(shard)}.json?v=${encodeURIComponent(STATIC_DATA_VERSION)}`;
+  const r=await fetch(url,{cache:'force-cache'});
+  if(!r.ok) throw new Error('static candle '+r.status);
+  const payload=await r.json();
+  const packed=payload && payload[String(symbol).toUpperCase()];
+  if(!packed) throw new Error('static symbol missing');
+  return normalizeCandlePayload_({candles:packed});
+}
+
+async function refreshStaticCandleInBackground_(symbol){
+  try{
+    const fresh=await fetchStaticCandles_(symbol);
+    if(fresh.length) { symbolCandleCache[symbol]=fresh; await idbSet_(`candles:${symbol}`,{version:STATIC_DATA_VERSION,candles:fresh,savedAt:Date.now()}); }
+  }catch(e){}
+}
+
+async function bootstrapFastData(){
+  const manifestPromise=loadStaticManifest_();
+  // Warm the static manifest without blocking chart construction.
+  manifestPromise.then(()=>{
+    if(Array.isArray(allSymbols)&&allSymbols.length) renderSearchModalResults(allSymbols);
+    if(priceBandsMap && Object.keys(priceBandsMap).length && panelsArray[0]?.rawDailyCandles) renderCombinedInfoCard(aggregate(panelsArray[0].rawDailyCandles,'D'));
+  }).catch(()=>{});
+  // Watchlists are user data: show cached state first, then sync from Apps Script.
+  try{
+    const saved=localStorage.getItem('MICKKK_WATCHLIST_CACHE');
+    if(saved){ const parsed=JSON.parse(saved); if(Array.isArray(parsed.watchlists)){watchlists=parsed.watchlists; if(!activeWatchlistName&&watchlists.length)activeWatchlistName=watchlists[0].name; renderWatchlists();} }
+  }catch(e){}
+  refreshWatchlists(false).then(()=>{try{localStorage.setItem('MICKKK_WATCHLIST_CACHE',JSON.stringify({watchlists, savedAt:Date.now()}));}catch(e){}}).catch(()=>{});
+}
+
 /* ============ FETCH PRICE BANDS & GSM SURVEILLANCE FROM GOOGLE SHEET ============ */
 async function fetchPriceBandsData() {
+  try {
+    const m=await loadStaticManifest_();
+    if(m && Array.isArray(m.priceBands)) return;
+  } catch(e){}
   try {
     const res = await fetch(`${CHARTS_API_URL}?action=getPriceBands`);
     const data = await res.json();
     if (data.priceBands && Array.isArray(data.priceBands)) {
       priceBandsMap = {};
-      data.priceBands.forEach(b => {
-        if (b.symbol) priceBandsMap[b.symbol.toUpperCase()] = b;
-      });
-      if (panelsArray[0] && panelsArray[0].rawDailyCandles) {
-        renderCombinedInfoCard(aggregate(panelsArray[0].rawDailyCandles, 'D'));
-      }
+      data.priceBands.forEach(b => { if (b.symbol) priceBandsMap[b.symbol.toUpperCase()] = b; });
+      if (panelsArray[0] && panelsArray[0].rawDailyCandles) renderCombinedInfoCard(aggregate(panelsArray[0].rawDailyCandles, 'D'));
     }
-  } catch(e) {
-    console.warn("Price bands fetch error:", e);
-  }
+  } catch(e) { console.warn("Price bands fetch error:", e); }
 }
 
 /* ============ DATE FORMATTER UTILITY ============ */
@@ -244,7 +339,7 @@ async function openMyAlertsModal() {
       renderMyAlerts(data.alerts);
       return;
     }
-  } catch(e){}
+  } catch (e){}
   renderMyAlerts(activeAlerts);
 }
 
@@ -524,6 +619,9 @@ function updateTimeScaleVisibility(panel) {
   if (paneRs) paneRs.style.display = showRs ? 'block' : 'none';
   if (splitter2) splitter2.style.display = showRs && showRsi ? 'block' : 'none';
 
+  // EXACTLY ONE date axis: only the bottom-most visible pane owns the x-axis.
+  // Non-bottom panes must have their timeScale completely hidden; setting height:0
+  // still leaves a rendered axis in Lightweight Charts.
   const bottomChart = showRs ? panel.rsChart : (showRsi ? panel.rsiChart : panel.priceChart);
   const common = {
     timeVisible: false,
@@ -538,7 +636,6 @@ function updateTimeScaleVisibility(panel) {
   });
   try { bottomChart.timeScale().applyOptions({ ...common, visible: true, ticksVisible: true }); } catch(e) {}
 }
-
 function createPanelChartInstance(index, tf) {
   const isDark = currentTheme === 'dark';
   let scaleMode = LightweightCharts.PriceScaleMode.Normal;
@@ -710,9 +807,7 @@ function createPanelChartInstance(index, tf) {
 
   priceC.subscribeCrosshairMove(param => {
     onCrosshairMove(param, instObj.candleSeries, volS);
-    if (!param || !param.sourceEvent) return; // Prevent loop
-
-    if (!param.point || !instObj.candleSeries || !param.time) {
+    if (!param || !param.point || !instObj.candleSeries || !param.time) {
       clearSyncedCrosshair(); return;
     }
     const candle = param.seriesData && param.seriesData.get(instObj.candleSeries);
@@ -725,9 +820,7 @@ function createPanelChartInstance(index, tf) {
   });
 
   rsiC.subscribeCrosshairMove(param => {
-    if (!param || !param.sourceEvent) return; // Prevent loop
-
-    if (!param.point || !instObj.candleSeries || !param.time) {
+    if (!param || !param.point || !instObj.candleSeries || !param.time) {
       clearSyncedCrosshair(); return;
     }
     const rsiBar = instObj.rsiSeries && param.seriesData && param.seriesData.get(instObj.rsiSeries);
@@ -740,9 +833,7 @@ function createPanelChartInstance(index, tf) {
   });
 
   rsC.subscribeCrosshairMove(param => {
-    if (!param || !param.sourceEvent) return; // Prevent loop
-
-    if (!param.point || !param.time) {
+    if (!param || !param.point || !param.time) {
       clearSyncedCrosshair(); return;
     }
     const rsBar = instObj.rsSeries && param.seriesData && param.seriesData.get(instObj.rsSeries);
@@ -870,7 +961,7 @@ function navigateStockKeyboard(direction) {
 
 function initSystem(){
   rebuildGridSystem();
-  fetchPriceBandsData(); 
+  fetchPriceBandsData(); // FETCH PRICE BANDS & SURVEILLANCE STAGES ON INIT
 
   const container = document.getElementById('chart-grid-container');
   if (container) {
@@ -1416,14 +1507,24 @@ async function addStockUI(){
 
 async function loadSymbolList(){
   try{
+    const m=await loadStaticManifest_();
+    if(m && Array.isArray(m.symbols) && m.symbols.length){
+      allSymbols=m.symbols;
+      refreshWatchlists(false);
+      return;
+    }
+  }catch(e){}
+  try{
+    const cached=await idbGet_('symbols');
+    if(cached && Array.isArray(cached.symbols) && cached.symbols.length){ allSymbols=cached.symbols; renderSearchModalResults(allSymbols); }
+  }catch(e){}
+  try{
     const res = await fetch(`${CHARTS_API_URL}?action=getSymbols`);
     const data = await res.json();
     if (data.error) return;
     const fetched = data.symbols || [];
-    if (fetched.length) allSymbols = fetched;
-    if (allSymbols.length > 0 && !currentSymbol) {
-      loadSymbol(allSymbols[0].symbol, allSymbols[0].name, -1);
-    }
+    if (fetched.length) { allSymbols = fetched; await idbSet_('symbols',{symbols:fetched,savedAt:Date.now()}); }
+    if (allSymbols.length > 0 && !currentSymbol) loadSymbol(allSymbols[0].symbol, allSymbols[0].name, -1);
     refreshWatchlists(false);
   }catch(e){ refreshWatchlists(false); }
 }
@@ -1476,84 +1577,42 @@ function renderSearchModalResults(list) {
   });
 }
 
-/* ============ FAST FETCH WITH CLEAN DATE PARSING & PERSISTENT CACHING ============ */
+/* ============ FAST FETCH WITH CLEAN DATE PARSING ============ */
 async function fetchSymbolCandles(symbol) {
+  symbol=String(symbol||'').trim().toUpperCase();
   if (symbolCandleCache[symbol]) return symbolCandleCache[symbol];
-
-  // Try to load from persistent localStorage for instant 0ms chart load
-  try {
-    const cached = localStorage.getItem(`MICKKK_CANDLES_DATA_${symbol}`);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      symbolCandleCache[symbol] = parsed;
-      // Fetch fresh data in the background silently
-      refreshCacheInBackground(symbol);
-      return parsed;
-    }
-  } catch(e){}
-
-  return await fetchAndCacheSymbolCandles(symbol);
-}
-
-async function fetchAndCacheSymbolCandles(symbol) {
   if (symbolCandlePromiseCache[symbol]) return symbolCandlePromiseCache[symbol];
 
-  symbolCandlePromiseCache[symbol] = (async () => {
-    const res = await fetch(`${CHARTS_API_URL}?action=getOHLC&symbol=${encodeURIComponent(symbol)}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-
-    const candles = (data.candles || [])
-      .filter(c => c && c.time && !isNaN(Number(c.close)) && Number(c.close) > 0)
-      .map(c => ({
-        time: formatToDateOnly(c.time),
-        open: Number(c.open || c.close),
-        high: Number(c.high || c.close),
-        low: Number(c.low || c.close),
-        close: Number(c.close),
-        volume: Number(c.volume || 0)
-      }))
-      .sort((a,b)=> a.time < b.time ? -1 : 1);
-
-    symbolCandleCache[symbol] = candles;
-    try {
-      localStorage.setItem(`MICKKK_CANDLES_DATA_${symbol}`, JSON.stringify(candles));
-    } catch(e){
-      // Fail-Safe Cleanup Safeguard
-      for (let key in localStorage) {
-        if (key.startsWith('MICKKK_CANDLES_DATA_')) {
-          localStorage.removeItem(key);
-        }
-      }
-      try { localStorage.setItem(`MICKKK_CANDLES_DATA_${symbol}`, JSON.stringify(candles)); } catch(err){}
+  // 1) IndexedDB: instant local chart on repeat visits.
+  try{
+    const local=await idbGet_(`candles:${symbol}`);
+    if(local && Array.isArray(local.candles) && local.candles.length){
+      symbolCandleCache[symbol]=local.candles;
+      // Revalidate from Cloudflare static data in the background; never block the chart.
+      refreshStaticCandleInBackground_(symbol);
+      return local.candles;
     }
-    return candles;
+  }catch(e){}
+
+  // 2) Static Cloudflare/GitHub data: primary source.
+  symbolCandlePromiseCache[symbol]=(async()=>{
+    try{
+      const candles=await fetchStaticCandles_(symbol);
+      symbolCandleCache[symbol]=candles;
+      await idbSet_(`candles:${symbol}`,{version:STATIC_DATA_VERSION,candles,savedAt:Date.now()});
+      return candles;
+    }catch(staticErr){
+      // 3) Existing Apps Script API remains a safe fallback.
+      const res=await fetch(`${CHARTS_API_URL}?action=getOHLC&symbol=${encodeURIComponent(symbol)}`);
+      const data=await res.json();
+      if(data.error) throw new Error(data.error);
+      const candles=normalizeCandlePayload_(data);
+      symbolCandleCache[symbol]=candles;
+      await idbSet_(`candles:${symbol}`,{version:'api',candles,savedAt:Date.now()});
+      return candles;
+    }
   })();
-
-  try { return await symbolCandlePromiseCache[symbol]; } finally { delete symbolCandlePromiseCache[symbol]; }
-}
-
-async function refreshCacheInBackground(symbol) {
-  try {
-    const candles = await fetchAndCacheSymbolCandles(symbol);
-    panelsArray.forEach(panel => {
-      if (panel.symbol === symbol) {
-        const data = aggregate(candles, panel.interval);
-        if (currentChartType === 'line') {
-          panel.candleSeries.setData(data.map(d => ({ time: d.time, value: d.close })));
-        } else {
-          panel.candleSeries.setData(processCandleColoringAndIB(data, panel, panel.interval));
-        }
-        if (volVisible) renderPocketPivotVolume(data, panel);
-        renderEditableEMAs(data, panel);
-        renderRSIPane(data, panel);
-        renderRelativeStrengthPane(panel, data);
-        drawPanelOverlays(panel);
-      }
-    });
-  } catch(e) {
-    console.warn("Background refresh failed for", symbol, e);
-  }
+  try{return await symbolCandlePromiseCache[symbol];}finally{delete symbolCandlePromiseCache[symbol];}
 }
 
 /* ============ LOAD SYMBOL ============ */
@@ -1565,15 +1624,8 @@ async function loadSymbol(symbol, name, targetIdx){
     if (btnLbl) btnLbl.innerText = `🔍 ${symbol}`;
   }
 
-  // Only show the screen block loading spinner if there is no local cache for this symbol!
-  const hasCache = localStorage.getItem(`MICKKK_CANDLES_DATA_${symbol}`);
-  if (!hasCache) {
-    document.getElementById('empty-state').style.display = 'none';
-    document.getElementById('loading').style.display = 'flex';
-  } else {
-    document.getElementById('empty-state').style.display = 'none';
-    document.getElementById('loading').style.display = 'none';
-  }
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
 
   loadDrawingsFromLocalStorage(symbol);
 
@@ -2392,6 +2444,9 @@ function normalizeSymbolKey(v){
 }
 
 async function fetchNifty500Candles(){
+  // Resolve the benchmark from the same Symbols list used by the chart.
+  // This avoids assuming the sheet/API uses exactly one spelling such as
+  // "NIFTY500" vs "NIFTY 500".
   const candidates = [];
   const pushCandidate = (v) => {
     if (v && !candidates.includes(v)) candidates.push(v);
@@ -2438,6 +2493,8 @@ function buildBenchmarkCloseMap(candles){
 }
 
 function getAsOfBenchmarkClose(sortedCandles, targetTime, startIndexObj){
+  // Use the latest benchmark close on or before the stock candle.
+  // This keeps RS working even when the two series have a missing/non-trading day.
   let i = Number(startIndexObj.value || 0);
   while (i < sortedCandles.length && String(sortedCandles[i].time) <= String(targetTime)) i++;
   startIndexObj.value = Math.max(0, i - 1);
@@ -2470,15 +2527,14 @@ async function renderRelativeStrengthPane(panel, data) {
       const stockClose = Number(c.close);
       let niftyClose = niftyMap.get(String(c.time));
 
+      // Exact date match first; if it is absent, use the latest benchmark close
+      // available on/before that stock candle.
       if (!isFinite(niftyClose) || niftyClose <= 0) {
         niftyClose = getAsOfBenchmarkClose(sortedNifty, c.time, asOfIndex);
       }
 
       if (isFinite(stockClose) && stockClose > 0 && isFinite(niftyClose) && niftyClose > 0) {
         rsData.push({ time: c.time, value: +(stockClose / niftyClose).toFixed(6) });
-      } else {
-        // Push whitespace point to maintain exact 1:1 timeline alignment!
-        rsData.push({ time: c.time });
       }
     });
 
@@ -2497,7 +2553,7 @@ async function renderRelativeStrengthPane(panel, data) {
       });
     }
     panel.rsSeries.setData(rsData);
-    panel.rsValueByTime = rsData.filter(d => typeof d.value === 'number');
+    panel.rsValueByTime = rsData;
 
     if (rsConfig.avgEnabled && rsData.length) {
       const len = Math.max(1, Number(rsConfig.avgLen) || 20);
@@ -2539,6 +2595,7 @@ async function renderRelativeStrengthPane(panel, data) {
       localization: { priceFormatter: value => Number(value).toFixed(4) }
     });
 
+    // Resize only. Do not fitContent here because that resets a user's horizontal pan.
     requestAnimationFrame(() => {
       try { panel.rsChart.resize(panel.rsChartContainerWidth || document.getElementById(`pane-rs-${panel.index}`)?.clientWidth || 0, document.getElementById(`pane-rs-${panel.index}`)?.clientHeight || 0); } catch(e){}
     });
@@ -2701,6 +2758,7 @@ function renderCombinedInfoCard(data){
     }
     const atrPct = close ? ((atr / close) * 100) : 0;
 
+    // LOOKUP PRICE BAND & GSM SURVEILLANCE STAGE FROM CACHE
     const bandInfo = priceBandsMap[currentSymbol.toUpperCase()];
     const rawBand = bandInfo ? bandInfo.band : '20';
     const bandDisplay = (rawBand === 'NO BAND' || rawBand === '20') ? '20%' : `${rawBand}%`;
@@ -2767,6 +2825,9 @@ function restorePanelView(panel, data) {
       try { panel.rsiChart.timeScale().setVisibleLogicalRange(range); } catch(e){}
       try { panel.rsChart.timeScale().setVisibleLogicalRange(range); } catch(e){}
     };
+    // setData()/pane resizing can make Lightweight Charts recalculate its range
+    // on the next frame. Apply the saved range immediately and once more after
+    // layout settles so live refresh cannot snap the chart back to the last candle.
     applyRange();
     requestAnimationFrame(() => { applyRange(); requestAnimationFrame(applyRange); });
     panel._pendingViewState = null;
@@ -2825,11 +2886,7 @@ function applyRangeToPanel(panel, data, forceFit=false) {
   else if (currentRange === '6M') bars = 130;
   else if (currentRange === '1Y') bars = 252;
   try {
-    const pad = Math.round(bars * 0.08); // Right margin padding (TradingView-style)
-    const range = { 
-      from: Math.max(0, data.length - bars), 
-      to: data.length - 1 + pad 
-    };
+    const range = { from: Math.max(0, data.length - bars), to: data.length - 1 };
     panel.priceChart.timeScale().setVisibleLogicalRange(range);
     [panel.rsiChart, panel.rsChart].forEach(c => { try { c.timeScale().setVisibleLogicalRange(range); } catch(e){} });
     panel._viewInitialized = true;
@@ -2916,6 +2973,8 @@ function applyLivePrice(price){
   
   checkPriceAlerts(currentSymbol, p);
   updateHeader();
+  // Live refresh must never change the user's horizontal study position.
+  // Capture it before rebuilding because the live candle/indicators are redrawn.
   const savedViews = panelsArray.map(panel => ({
     panel,
     view: capturePanelView(panel),
@@ -2936,3 +2995,4 @@ function applyLivePrice(price){
 /* ============ INIT START ============ */
 initSystem();
 loadSymbolList();
+bootstrapFastData();

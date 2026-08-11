@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 :root{
   --bg:#080b0f;--surface:#0e1318;--card:#131a22;--card2:#18212c;--border:#1e2d3d;
   --text:#d4e4f0;--muted:#5a7a94;--accent:#00d4ff;--green:#00e676;--red:#ff3d5a;
@@ -173,7 +172,7 @@ body.light-theme .ppv-table-row{background:rgba(255,255,255,0.95);}
 .ppv-cell.bg-neutral{background:rgba(42,46,57,0.5);color:var(--text);}
 
 /* ZERO GAP CHART CONTAINER & SEPARATE PANES */
-.chart-wrap{flex:1;position:relative;min-height:0;width:100%;margin:0;padding:0;overflow:hidden;transition:padding-left .2s ease;} /* Fixed flexbox height:100% bug */
+.chart-wrap{flex:1;position:relative;min-height:0;width:100%;height:100%;margin:0;padding:0;overflow:hidden;transition:padding-left .2s ease;}
 
 .chart-grid {
   width: 100%; height: 100%; display: grid; gap: 2px; background: var(--border);
@@ -224,15 +223,16 @@ body.light-theme .ppv-table-row{background:rgba(255,255,255,0.95);}
 
 .panel-chart-container {
   flex: 1; display: flex; flex-direction: column;
-  position: relative; width: 100%; height: calc(100% - 26px); overflow: hidden;
+  position: relative; width: 100%; height: 100%; overflow: hidden;
 }
 
 .pane-box { position: relative; width: 100%; min-height: 40px; overflow: hidden; }
 .pane-price { flex: 4.0; }
-.pane-rsi { flex: 1.0; min-height: 75px; }
+.pane-rsi { flex: 1.0; min-height: 90px; }
+/* Relative Strength is a dedicated pane below RSI. Keep it independent from the price/RSI panes. */
 .pane-rs {
   flex: 1.0;
-  min-height: 75px;
+  min-height: 90px;
   width: 100%;
   position: relative;
   overflow: hidden;
