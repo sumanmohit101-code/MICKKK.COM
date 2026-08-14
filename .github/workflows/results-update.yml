@@ -1,6 +1,6 @@
 name: Update NSE Results Data
 
-"on":
+on:
   schedule:
     - cron: "30 11 * * 1-5"
   workflow_dispatch:
@@ -26,8 +26,96 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      - name: Test workflow
+      - name: Fetch NSE results
         run: |
-          echo "NSE Results workflow started"
-          echo "UTC time: $(date -u)"
-          echo "IST time: $(TZ=Asia/Kolkata date)"
+          python <<'PY'
+          import requests
+          import json
+          import os
+          from datetime import datetime, timedelta
+
+          url = "https://www.nseindia.com/api/corporate-financial-results"
+
+          session = requests.Session()
+
+          headers = {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 Safari/537.36",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://www.nseindia.com/"
+          }
+
+          session.headers.update(headers)
+
+          # First open NSE homepage to obtain cookies
+          session.get(
+              "https://www.nseindia.com/",
+              timeout=30
+          )
+
+          today = datetime.now()
+          from_date = (today - timedelta(days=400)).strftime("%d-%m-%Y")
+          to_date = today.strftime("%d-%m-%Y")
+
+          params = {
+              "index": "equities",
+              "from_date": from_date,
+              "to_date": to_date,
+              "csv": "false"
+          }
+
+          print("Fetching NSE results...")
+          print("From:", from_date)
+          print("To:", to_date)
+
+          response = session.get(
+              url,
+              params=params,
+              timeout=60
+          )
+
+          response.raise_for_status()
+
+          data = response.json()
+
+          if not isinstance(data, list):
+              raise Exception("Unexpected NSE response format")
+
+          print("Records received:", len(data))
+
+          os.makedirs("results", exist_ok=True)
+
+          output = {
+              "updatedAt": datetime.utcnow().isoformat() + "Z",
+              "source": "NSE",
+              "records": data
+          }
+
+          with open(
+              "results/results.json",
+              "w",
+              encoding="utf-8"
+          ) as f:
+              json.dump(
+                  output,
+                  f,
+                  ensure_ascii=False,
+                  separators=(",", ":")
+              )
+
+          print("Saved results/results.json")
+          PY
+
+      - name: Commit results data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add results/results.json
+
+          if git diff --cached --quiet; then
+            echo "No result data changes."
+          else
+            git commit -m "Auto-update NSE results data"
+            git push
+          fi
