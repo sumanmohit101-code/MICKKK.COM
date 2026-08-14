@@ -26,147 +26,88 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Fetch NSE results
+      - name: Fetch NSE Results from Google Apps Script
+        env:
+          APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx65jssEWWjfjj53X6x8twwZ83kGoEwVOVA6ms_OHS7u9FDRn56U2sYbfW1SvisibwI/exec"
         run: |
           python <<'PY'
           import requests
           import json
           import os
-          import time
-          from datetime import datetime, timedelta
+          from datetime import datetime, timezone
 
-          API_URL = "https://www.nseindia.com/api/corporates-financial-results"
-          HOME_URL = "https://www.nseindia.com/"
-
-          headers = {
-              "User-Agent": (
-                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/131.0.0.0 Safari/537.36"
-              ),
-              "Accept": "application/json, text/plain, */*",
-              "Accept-Language": "en-US,en;q=0.9",
-              "Referer": "https://www.nseindia.com/",
-              "Connection": "keep-alive",
-          }
-
-          today = datetime.now()
-          from_date = (today - timedelta(days=400)).strftime("%d-%m-%Y")
-          to_date = today.strftime("%d-%m-%Y")
-
-          params = {
-              "index": "equities",
-              "from_date": from_date,
-              "to_date": to_date,
-          }
+          url = os.environ["APPS_SCRIPT_URL"]
 
           print("======================================")
           print("NSE RESULTS UPDATE")
           print("======================================")
-          print("From:", from_date)
-          print("To:", to_date)
-          print("API:", API_URL)
-          print()
+          print("Source: Google Apps Script")
+          print("URL:", url)
 
-          data = None
+          headers = {
+              "User-Agent": "Mozilla/5.0",
+              "Accept": "application/json,text/plain,*/*"
+          }
 
-          for attempt in range(1, 5):
-              print(f"Attempt {attempt}/4")
+          print("Fetching NSE results...")
 
-              session = requests.Session()
-              session.headers.update(headers)
+          response = requests.get(
+              url,
+              headers=headers,
+              timeout=120
+          )
 
-              try:
-                  print("Opening NSE homepage...")
+          print("HTTP status:", response.status_code)
+          print("Final URL:", response.url)
+          print("Content-Type:", response.headers.get("content-type"))
 
-                  home = session.get(
-                      HOME_URL,
-                      timeout=(20, 40)
-                  )
+          response.raise_for_status()
 
-                  print("Homepage status:", home.status_code)
+          text = response.text.strip()
 
-                  # Small delay so NSE session/cookies are established
-                  time.sleep(3)
+          print("Response length:", len(text))
 
-                  print("Fetching financial results...")
+          if not text:
+              raise Exception("Google Apps Script returned an empty response")
 
-                  response = session.get(
-                      API_URL,
-                      params=params,
-                      timeout=(30, 120)
-                  )
-
-                  print("API status:", response.status_code)
-                  print("Response URL:", response.url)
-
-                  response.raise_for_status()
-
-                  data = response.json()
-
-                  print(
-                      "Response type:",
-                      type(data).__name__
-                  )
-
-                  break
-
-              except requests.exceptions.Timeout as e:
-                  print("TIMEOUT:", e)
-
-              except requests.exceptions.RequestException as e:
-                  print("REQUEST ERROR:", e)
-
-              except ValueError as e:
-                  print("JSON ERROR:", e)
-
-              except Exception as e:
-                  print("UNEXPECTED ERROR:", e)
-
-              if attempt < 4:
-                  print("Waiting 10 seconds before retry...")
-                  time.sleep(10)
-
-          if data is None:
+          try:
+              data = response.json()
+          except Exception as e:
+              print("First 500 characters of response:")
+              print(text[:500])
               raise Exception(
-                  "NSE API could not be reached after 4 attempts."
+                  f"Google Apps Script did not return valid JSON: {e}"
               )
 
-          # NSE normally returns an object containing data.
-          if isinstance(data, dict):
-              records = data.get("data", data)
-
-          elif isinstance(data, list):
+          # Accept either:
+          # 1. Direct list of NSE records
+          # 2. Object containing records
+          if isinstance(data, list):
               records = data
 
+          elif isinstance(data, dict):
+              if isinstance(data.get("records"), list):
+                  records = data["records"]
+              elif isinstance(data.get("data"), list):
+                  records = data["data"]
+              else:
+                  records = data
+
           else:
-              raise Exception(
-                  f"Unexpected NSE response type: {type(data)}"
-              )
+              raise Exception("Unexpected response format from Apps Script")
 
-          if not isinstance(records, list):
-              raise Exception(
-                  "Unexpected NSE response format. "
-                  "Expected a list of records."
-              )
-
-          print()
-          print("Records received:", len(records))
+          print("Records received:", len(records) if isinstance(records, list) else "object")
 
           os.makedirs("results", exist_ok=True)
 
           output = {
-              "updatedAt": datetime.utcnow().isoformat() + "Z",
-              "source": "NSE",
-              "fromDate": from_date,
-              "toDate": to_date,
+              "updatedAt": datetime.now(timezone.utc).isoformat(),
+              "source": "NSE via Google Apps Script",
               "records": records
           }
 
-          output_file = "results/results.json"
-
           with open(
-              output_file,
+              "results/results.json",
               "w",
               encoding="utf-8"
           ) as f:
@@ -177,10 +118,10 @@ jobs:
                   separators=(",", ":")
               )
 
-          print()
-          print("Saved:", output_file)
-          print("Total records:", len(records))
-          print("NSE RESULTS UPDATE COMPLETED")
+          print("Saved: results/results.json")
+          print("======================================")
+          print("NSE RESULTS UPDATE COMPLETE")
+          print("======================================")
           PY
 
       - name: Commit results data
