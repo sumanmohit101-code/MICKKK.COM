@@ -133,35 +133,45 @@
     </button>
 
     <div>
-      <!-- Brand Logo Container: 4 Theme/Layout Variations -->
-      <div class="brand-container flex items-center px-1 py-0.5 min-h-[44px]">
+      <!-- Brand Logo Container: Optimized Full Width & Large Size -->
+      <div class="brand-container flex items-center justify-center px-0.5 py-1 min-h-[56px]">
         
-        <!-- 1. FULL LOGO - LIGHT THEME (Sidebar Expanded) -->
+        <!-- 1. FULL LOGO - LIGHT THEME (Expanded Sidebar, Bada Size) -->
         <img src="logo-full-light.png" 
              alt="Mickkk.com" 
-             class="brand-full-light h-9 w-auto max-w-[200px] object-contain"
-             onerror="this.onerror=null; this.src='logo-light.png';" />
+             class="brand-full-light w-full h-[52px] object-contain rounded-lg transition-all"
+             onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-full-light.png.png';}else if(this.dataset.tried==1){this.dataset.tried=2;this.src='logo-light.png';}" />
 
-        <!-- 2. FULL LOGO - DARK THEME (Sidebar Expanded) -->
+        <!-- 2. FULL LOGO - DARK THEME (Expanded Sidebar, Bada Size) -->
         <img src="logo-full-dark.png" 
              alt="Mickkk.com" 
-             class="brand-full-dark h-9 w-auto max-w-[200px] object-contain"
-             onerror="this.onerror=null; this.src='logo-dark.png';" />
+             class="brand-full-dark w-full h-[52px] object-contain rounded-lg transition-all"
+             onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-full-dark.png.png';}else if(this.dataset.tried==1){this.dataset.tried=2;this.src='logo-dark.png';}" />
 
-        <!-- 3. ICON LOGO - LIGHT THEME (Sidebar Collapsed) -->
-        <div class="brand-icon-light items-center justify-center w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 p-1 shrink-0">
+        <!-- 3. ICON LOGO - LIGHT THEME (Collapsed Sidebar Mode) -->
+        <div class="brand-icon-light items-center justify-center w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 p-1 shrink-0 overflow-hidden shadow-sm">
           <img src="logo-icon-light.png" 
                alt="Mickkk" 
                class="w-full h-full object-contain"
-               onerror="this.onerror=null; this.src='logo-light.png';" />
+               onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-icon-light.png.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}" />
+          <!-- High-Tech Fallback Vector Icon (Kabhi broken nahi aayega) -->
+          <svg viewBox="0 0 100 100" class="w-full h-full hidden" fill="none">
+            <path d="M15 75V25L40 50L65 25V75" stroke="#10b981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="65,15 85,25 75,45" fill="#10b981"/>
+          </svg>
         </div>
 
-        <!-- 4. ICON LOGO - DARK THEME (Sidebar Collapsed) -->
-        <div class="brand-icon-dark items-center justify-center w-9 h-9 rounded-xl bg-[#070d18] border border-slate-800 p-1 shrink-0">
+        <!-- 4. ICON LOGO - DARK THEME (Collapsed Sidebar Mode) -->
+        <div class="brand-icon-dark items-center justify-center w-10 h-10 rounded-xl bg-[#040914] border border-slate-800 p-1 shrink-0 overflow-hidden shadow-sm">
           <img src="logo-icon-dark.png" 
                alt="Mickkk" 
                class="w-full h-full object-contain"
-               onerror="this.onerror=null; this.src='logo-dark.png';" />
+               onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-icon-dark.png.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}" />
+          <!-- High-Tech Fallback Vector Icon (Kabhi broken nahi aayega) -->
+          <svg viewBox="0 0 100 100" class="w-full h-full hidden" fill="none">
+            <path d="M15 75V25L40 50L65 25V75" stroke="#00f5a0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="65,15 85,25 75,45" fill="#00f5a0"/>
+          </svg>
         </div>
 
       </div>
@@ -532,8 +542,8 @@
       <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
         <div class="flex items-center gap-2">
           <!-- Footer Mini Logo -->
-          <img src="logo-light.png" alt="Mickkk.com" class="dark:hidden h-5 w-auto object-contain" onerror="this.onerror=null; this.src='logo-icon-light.png';" />
-          <img src="logo-dark.png" alt="Mickkk.com" class="hidden dark:block h-5 w-auto object-contain" onerror="this.onerror=null; this.src='logo-icon-dark.png';" />
+          <img src="logo-full-light.png" alt="Mickkk.com Logo" class="dark:hidden h-6 w-auto object-contain" onerror="this.onerror=null; this.src='logo-full-light.png.png';" />
+          <img src="logo-full-dark.png" alt="Mickkk.com Logo" class="hidden dark:block h-6 w-auto object-contain" onerror="this.onerror=null; this.src='logo-full-dark.png.png';" />
           <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence & Trading Platform</span>
         </div>
 
@@ -877,7 +887,7 @@
       setKPI('kpi-nifty', latest.nifty50, true);
       setKPI('kpi-nifty500', latest.nifty500, true);
       setKPI('kpi-cnxsmall', latest.cnxSmall, true);
-      setKPI('kpi-midsmall', latest.midSmall, true);
+      setKPI('midsmall', latest.midSmall, true);
 
       // 7 Color Cards
       const setVal = (id, str) => { const el = document.getElementById(id); if (el) el.innerText = str; };
@@ -1075,7 +1085,7 @@
           labels: labels,
           datasets: [
             { label: 'Stocks Up 4%+', data: filteredDataset.map(r => r.up4), borderColor: '#10b981', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
-            { label: 'Stocks Down 4%+', data: filteredDataset.map(r => r.dn4), borderColor: '#f43f5e', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: 'Stocks Down 4%+', data: filteredDataset.map(r => -r.dn4), borderColor: '#f43f5e', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
             { label: '10% Line', data: labels.map(() => 10), borderColor: '#f59e0b', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
             ...indexDatasets
           ]
