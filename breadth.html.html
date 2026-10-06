@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Breadth Dashboard - Mickkk.com</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark");}catch(e){}</script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#080d1a',
+            sidebarDark: '#0b1329',
+            cardDark: '#0f172a',
+            borderDark: '#1e293b',
+            accentCyan: '#00d4ff',
+            accentGreen: '#10b981',
+            accentRed: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js & Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    .tagline-font { font-family: 'Montserrat', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
+    
+
+    /* ===== Mickkk Logo (theme-aware) ===== */
+    :root { --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
+            --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; }
+    .dark { --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
+            --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; }
+    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
+    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
+               background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
+    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
+    .mk-arrow { transition: transform .25s ease; }
+    .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
+    .mk-logo:hover .mk-icon { transform: scale(1.07); }
+    .mk-icon { transition: transform .25s ease; }
+
+    /* Sidebar Collapsed Icon Mode (JournalToday Exact Match) */
+    .sidebar-collapsed { width: 4.2rem !important; }
+    .sidebar-collapsed .brand-text,
+    .sidebar-collapsed .nav-text,
+    .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
+    .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
+    .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+
+    /* Tooltip when collapsed */
+    .sidebar-collapsed .nav-item:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 4.2rem;
+      background: #0f172a;
+      color: #fff;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      border: 1px solid #1e293b;
+    }
+
+    /* Floating Arrow Button overlapping the right edge border */
+    .collapse-float-btn {
+      position: absolute;
+      right: -12px;
+      top: 22px;
+      z-index: 60;
+    }
+
+    /* Bi-Directional Divergent Bars */
+    .bi-bar-container { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 90px; }
+    .bi-bar-track { position: relative; flex: 1; height: 11px; background: rgba(100, 116, 139, 0.2); border-radius: 2px; overflow: hidden; }
+    .bi-bar-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1.5px; background: #64748b; z-index: 3; }
+    .bi-bar-fill-pos { position: absolute; left: 50%; top: 1px; bottom: 1px; background: #10b981; border-radius: 0 2px 2px 0; }
+    .bi-bar-fill-neg { position: absolute; right: 50%; top: 1px; bottom: 1px; background: #ef4444; border-radius: 2px 0 0 2px; }
+
+    /* Compact Cell Bars */
+    .cell-bar-wrap { position: relative; width: 100%; min-width: 48px; background: rgba(100, 116, 139, 0.15); border-radius: 2px; height: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .cell-bar-fill { position: absolute; left: 0; top: 0; height: 100%; opacity: 0.35; border-radius: 2px; }
+
+    /* Sticky Freeze Date Column - 100% OPAQUE */
+    .sticky-date-cell {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 20 !important;
+      box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .date-bullish { background-color: #ecfdf5 !important; color: #059669 !important; border-left: 3.5px solid #10b981 !important; }
+    .dark .date-bullish { background-color: #064e3b !important; color: #34d399 !important; border-left: 3.5px solid #10b981 !important; }
+
+    .date-bearish { background-color: #fff1f2 !important; color: #e11d48 !important; border-left: 3.5px solid #ef4444 !important; }
+    .dark .date-bearish { background-color: #4c0519 !important; color: #fb7185 !important; border-left: 3.5px solid #ef4444 !important; }
+
+    .date-neutral { background-color: #f8fafc !important; color: #64748b !important; border-left: 3.5px solid #94a3b8 !important; }
+    .dark .date-neutral { background-color: #0f172a !important; color: #94a3b8 !important; border-left: 3.5px solid #64748b !important; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200">
+  <!-- Mickkk logo icon (shared symbol, light + dark aware) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <g clip-path="url(#mkClip)">
+          <!-- right half of M (fades into the arrow) -->
+          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
+          <!-- left stem + diagonal, slanted foot -->
+          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
+          <!-- gloss -->
+          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
+        </g>
+        <!-- rising bars -->
+        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
+        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
+        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
+        <!-- breakout arrow -->
+        <g class="mk-glow mk-arrow">
+          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
+          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
+    
+    <!-- Floating Circular Collapse Arrow (Exact JournalToday Placement on border) -->
+    <button onclick="toggleSidebar()" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
+      <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
+    </button>
+
+    <div>
+      <!-- Brand Logo + Mickkk.com Native High-Impact Branding -->
+      <a href="index.html" title="Mickkk.com" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
+
+        <!-- Icon (only this stays visible when sidebar is collapsed) -->
+        <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
+
+        <!-- Right side: top = Mickkk.com, bottom = tagline -->
+        <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
+          <div class="flex items-baseline whitespace-nowrap">
+            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
+            <span class="mk-tag text-[6.5px] tracking-[0.2em]">Market Intelligence</span>
+          </div>
+        </div>
+
+      </a>
+
+      <!-- Clean Horizontal Partition Line (Exact JournalToday Match) -->
+      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
+
+      <!-- Navigation Links -->
+      <nav class="space-y-1 text-xs font-semibold">
+        <a href="index.html" data-title="Dashboard" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="index.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="line-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
+        </a>
+        <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="scan" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Stock Screener</span>
+        </a>
+        <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layers" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Index Terminal</span>
+        </a>
+        <!-- ACTIVE: Market Breadth -->
+        <a href="#" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
+          <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
+        </a>
+        <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
+        </a>
+        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
+        </a>
+        <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
+        </a>
+        <a href="#" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Trading Journal</span>
+        </a>
+        <a href="#" data-title="Analytics" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Analytics</span>
+        </a>
+        <a href="#" data-title="Watchlist" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bookmark" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Watchlist</span>
+        </a>
+        <a href="#" data-title="Market Tools" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="wrench" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Tools</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- ================= BOTTOM PANEL ================= -->
+    <div>
+      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">M</div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">mohit su...</div>
+              <div class="text-[9px] text-slate-400 truncate">sumanmohit...</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-slate-400">
+            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white">
+              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
+              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+            </button>
+            <a href="#" class="p-1 hover:text-slate-800 dark:hover:text-white">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.41</div>
+      </div>
+
+      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white">
+          <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
+          <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
+        </button>
+        <button class="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= RIGHT CONTENT AREA ================= -->
+  <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
+    <main class="p-5 md:p-7 space-y-5 w-full">
+
+      <!-- Header Title Banner + Top Toolbar -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-borderDark">
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight">Market Breadth Dashboard</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Track market participation, trend strength and overall market sentiment.</p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-[11px] font-bold text-slate-500 shadow-sm">
+            <i data-lucide="timer" class="w-3.5 h-3.5 text-emerald-500 animate-pulse"></i>
+            <span>Refresh:</span>
+            <select id="auto-refresh-select" onchange="setupAutoRefreshTimer()" class="bg-transparent font-mono outline-none text-slate-700 dark:text-slate-300 font-bold cursor-pointer">
+              <option value="60">1 Min</option>
+              <option value="300" selected>5 Mins</option>
+              <option value="900">15 Mins</option>
+              <option value="0">OFF</option>
+            </select>
+            <span id="refreshTimer" class="text-emerald-500 font-mono font-bold ml-1">(05:00)</span>
+          </div>
+
+          <span class="text-xs font-bold text-slate-500 font-mono-num px-2 hidden sm:block" id="headerClock">--:--:--</span>
+
+          <button onclick="loadDashboardData()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-sm">
+            <i data-lucide="refresh-cw" id="manualSpinIcon" class="w-3.5 h-3.5"></i> Refresh Now
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 1. REORGANIZED TOP CONTAINER ================= -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+        
+        <!-- Left Container: Grid of 2 balanced rows -->
+        <div class="xl:col-span-9 grid grid-rows-2 gap-3.5 h-full">
+          
+          <!-- Top Row: 6 Cards Centered -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">LATEST DATE</span>
+              <div class="text-sm sm:text-base font-extrabold font-mono-num mt-1 text-slate-800 dark:text-slate-100" id="kpi-date">-</div>
+            </div>
+
+            <div id="kpi-signal-card" class="bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center transition-colors">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">SIGNAL-MBI</span>
+              <div class="text-sm sm:text-base font-extrabold font-mono-num mt-1 flex items-center justify-center gap-1.5" id="kpi-signal-merged">-</div>
+            </div>
+
+            <div class="bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">NIFTY 50</span>
+              <div class="text-sm sm:text-base font-extrabold font-mono-num mt-1" id="kpi-nifty">-</div>
+            </div>
+            <div class="bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">NIFTY 500</span>
+              <div class="text-sm sm:text-base font-extrabold font-mono-num mt-1" id="kpi-nifty500">-</div>
+            </div>
+            <div class="bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">CNX SMALL</span>
+              <div class="text-sm sm:text-base font-extrabold font-mono-num mt-1" id="kpi-cnxsmall">-</div>
+            </div>
+            <div class="bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">MIDSMALL</span>
+              <div class="text-sm sm:text-base font-extrabold font-mono-num mt-1" id="kpi-midsmall">-</div>
+            </div>
+          </div>
+
+          <!-- Bottom Row: 7 Color Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div class="p-3 rounded-xl bg-gradient-to-br from-sky-700/80 to-blue-800 text-white shadow-sm border border-sky-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">% &gt; 10 EMA</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-10ema">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-gradient-to-br from-teal-700/80 to-emerald-800 text-white shadow-sm border border-teal-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">% &gt; 20 EMA</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-20ema">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-gradient-to-br from-indigo-700/80 to-purple-800 text-white shadow-sm border border-indigo-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">% &gt; 50 EMA</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-50ema">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-gradient-to-br from-amber-700/80 to-orange-800 text-white shadow-sm border border-amber-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">% &gt; 200 EMA</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-200ema">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-gradient-to-br from-rose-700/80 to-pink-800 text-white shadow-sm border border-rose-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">&lt; 15% 52WH</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-52wh">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-gradient-to-br from-emerald-800/80 to-green-900 text-white shadow-sm border border-emerald-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">NET BREADTH</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-netbreadth">-</div>
+            </div>
+            <div class="p-3 rounded-xl bg-gradient-to-br from-cyan-800/80 to-teal-900 text-white shadow-sm border border-cyan-500/20 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-90">VOL RATIO</span>
+              <div class="text-2xl font-black font-mono-num mt-1" id="neon-volratio">-</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Side: MBI Meter -->
+        <div class="xl:col-span-3 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between items-center relative overflow-hidden h-full">
+          <div class="w-full text-center">
+            <span class="text-xs font-black uppercase text-slate-600 dark:text-slate-300 tracking-wider">MARKET BREADTH METER</span>
+          </div>
+
+          <div class="relative w-64 h-32 my-1 flex items-center justify-center">
+            <svg viewBox="0 0 240 135" class="w-full h-full">
+              <path d="M 45 115 A 75 75 0 0 1 83 55" fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>
+              <path d="M 83 55 A 75 75 0 0 1 157 55" fill="none" stroke="#f59e0b" stroke-width="16"/>
+              <path d="M 157 55 A 75 75 0 0 1 195 115" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round"/>
+              
+              <text x="18" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-3</text>
+              <text x="50" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-2</text>
+              <text x="82" y="30" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-1</text>
+              <text x="120" y="20" font-size="12" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">0</text>
+              <text x="158" y="30" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+1</text>
+              <text x="190" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+2</text>
+              <text x="222" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+3</text>
+
+              <circle cx="120" cy="115" r="7" class="fill-slate-800 dark:fill-slate-100"/>
+
+              <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 1s ease-out;">
+                <polygon points="118.5,115 121.5,115 120,40" class="fill-[#0f172a] dark:fill-[#ffffff]"/>
+              </g>
+            </svg>
+          </div>
+
+          <div class="text-center w-full pt-1 border-t border-slate-100 dark:border-borderDark">
+            <div class="text-2xl font-black font-mono-num leading-none" id="meterScoreVal">--</div>
+            <p class="text-[11px] font-black tracking-wider uppercase text-emerald-500 mt-1" id="meterScoreStatus">--</p>
+            <p class="text-[9.5px] text-slate-400 font-medium font-mono-num mt-0.5">(≥ +3 Bullish | ≤ -3 Bearish)</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= 2. CHARTS CONTROL TOOLBAR & 7 CHARTS GRID ================= -->
+      <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs font-semibold">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 text-[11px] font-bold">TIMEFRAME:</span>
+          <button onclick="setPresetDays(30, this)" class="chart-time-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">30D</button>
+          <button onclick="setPresetDays(90, this)" class="chart-time-btn active px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-500">90D</button>
+          <button onclick="setPresetDays(180, this)" class="chart-time-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">180D</button>
+          <button onclick="setPresetDays(365, this)" class="chart-time-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">1Y</button>
+          <button onclick="setPresetDays('ALL', this)" class="chart-time-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">All</button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-toggle-dates" onclick="toggleXAxisDates()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Toggle X-Axis Dates
+          </button>
+
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-borderDark">
+            <button id="btn-layout-2col" onclick="setChartsLayout('2col')" class="px-2.5 py-1 rounded text-[11px] font-bold bg-white dark:bg-cardDark text-emerald-500 shadow-sm flex items-center gap-1">
+              <i data-lucide="columns" class="w-3.5 h-3.5"></i> 2 Col
+            </button>
+            <button id="btn-layout-1col" onclick="setChartsLayout('1col')" class="px-2.5 py-1 rounded text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center gap-1">
+              <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Full Width
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400 text-[11px] font-bold">COMPARE:</span>
+            <select id="compare-index-select" class="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 outline-none font-bold text-xs" onchange="renderAllCharts()">
+              <option value="none">None</option>
+              <option value="nifty50">Nifty 50</option>
+              <option value="nifty500">Nifty 500</option>
+              <option value="cnxSmall">CNX Smallcap</option>
+              <option value="midSmall">MidSmall 400</option>
+              <option value="all">⚡ All 4 Indices</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7 Interactive Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="charts-wrapper">
+        <div class="chart-card-box bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">Volume Ratio Trend (Heavy > 2.0 | Neutral = 1.0 | Dull < 0.5)</h4>
+          <div class="h-64"><canvas id="chartVolRatio"></canvas></div>
+        </div>
+
+        <div class="chart-card-box bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">% Stocks Above 10 / 20 / 50 / 200 EMA (80 Overbought | 20 Oversold)</h4>
+          <div class="h-64"><canvas id="chartEMAs"></canvas></div>
+        </div>
+
+        <div class="chart-card-box bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">Signal-MBI Trend (Bullish ≥ +3 | Bearish ≤ -3)</h4>
+          <div class="h-64"><canvas id="chartSignalMBI"></canvas></div>
+        </div>
+
+        <div class="chart-card-box bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">Stocks Up 4%+ vs Down 4%+ (Daily %)</h4>
+          <div class="h-64"><canvas id="chartUpDn4"></canvas></div>
+        </div>
+
+        <div class="chart-card-box bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">New 52-Week Highs vs Lows (%)</h4>
+          <div class="h-64"><canvas id="chart52WHighLow"></canvas></div>
+        </div>
+
+        <div class="chart-card-box bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">4 Broad Indices Comparative Daily % Change</h4>
+          <div class="h-64"><canvas id="chart4Indices"></canvas></div>
+        </div>
+
+        <div class="chart-card-box lg:col-span-2 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between" id="boxNetBreadth">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">Net Breadth Trend (Up 4% − Down 4%) [Daily Bar Chart]</h4>
+          <div class="h-72"><canvas id="chartNetBreadth"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ================= 3. BREADTH DATA TABLE ================= -->
+      <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 text-xs font-semibold">
+          <div class="flex items-center gap-2">
+            <i data-lucide="table" class="w-4 h-4 text-emerald-500"></i>
+            <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">BREADTH DATA — SELECTED DATE RANGE TABLE</h3>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-slate-400 text-[11px]">FROM:</span>
+            <input type="date" id="date-from" class="px-2 py-1 rounded-lg border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 text-xs outline-none">
+            <span class="text-slate-400 text-[11px]">TO:</span>
+            <input type="date" id="date-to" class="px-2 py-1 rounded-lg border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 text-xs outline-none">
+            <button onclick="applyDateRangeFilter()" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold transition-all text-xs">Apply</button>
+            <button onclick="exportToCSV()" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1 text-xs">
+              <i data-lucide="download" class="w-3 h-3"></i> CSV
+            </button>
+            <button id="btn-toggle-ratios" onclick="toggleRatioColumns()" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1 text-xs">
+              <i data-lucide="eye" class="w-3 h-3"></i> Ratios
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-[540px] custom-scroll relative border border-slate-100 dark:border-borderDark rounded-lg">
+          <table class="w-full text-xs text-left border-collapse" id="mbi-table">
+            <thead class="text-slate-500 dark:text-slate-400 border-b-2 border-slate-200 dark:border-borderDark text-[10px] sticky top-0 bg-slate-50 dark:bg-cardDark z-30 shadow-sm uppercase tracking-wider text-center">
+              <tr id="table-headers"></tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= 4. EXACT 12 CRITERIA & METRIC EXPLANATIONS ================= -->
+      <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+        <h4 class="font-extrabold text-xs uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4"></i> ℹ️ Criteria & Metric Explanations
+        </h4>
+        <div class="overflow-x-auto custom-scroll pr-3">
+          <table class="w-full text-xs text-left">
+            <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+              <tr>
+                <th class="pb-2 w-1/4">Metric Name</th>
+                <th class="pb-2 w-1/3">Formula / Threshold</th>
+                <th class="pb-2">Description & Practical Meaning</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-borderDark text-[11px] font-medium text-slate-600 dark:text-slate-300">
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">TOTAL UNIVERSE</td><td>Active Traded Count</td><td>Total active NSE stocks processed on the trading day.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Index % Changes</td><td>Nifty 50, Nifty 500, CNX Smallcap, MidSmall 400</td><td>Daily percentage performance of broad market indices.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Up 4%+ / Dn 4%+</td><td>Daily Change % ≥ +4% / ≤ -4%</td><td>Percentage of stocks showing strong daily bullish/bearish momentum.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Net Breadth</td><td>(Up 4%+) − (Dn 4%+)</td><td>Measures short-term net buying vs selling pressure. Positive (Green) = Buyers dominant.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Volume Ratio</td><td>Above Avg Vol / Below Avg Vol</td><td>• Above Avg Vol: Volume > 1.5x 20 DMA<br>• Below Avg Vol: Volume < 0.5x 20 DMA<br>Ratio > 1.0 shows institutional participation. > 2.0 reflects heavy momentum.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">5-Day Momentum</td><td>+15% 5D / -15% 5D</td><td>Percentage of stocks up ≥ +15% (Leaders) or down ≤ -15% (Losers) in 5 sessions.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">New 52 WH / 52 WL</td><td>Close ≥ 52W High / Close ≤ 52W Low</td><td>Percentage of stocks reaching new 52-week highs or lows.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Net NH-NL</td><td>(New 52WH %) − (New 52WL %)</td><td>Broad structural market trend strength. Positive (Green) = Healthy structural bull phase.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Within 15% from 52WH</td><td>Close ≥ 85% of 52-Week High</td><td>Percentage of stocks trading near multi-month highs. > 50% confirms strong bull market.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">% Above EMAs</td><td>Close ≥ 10 / 20 / 50 / 200 EMA</td><td>Moving average participation. > 80% Overbought zone, < 20% Oversold zone.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">Signal-MBI</td><td>Sum of 6 ratio boxes (-6 to +6)</td><td>Composite market score. ≥ +3 Solid Bullish, ≤ -3 Bearish, in-between Neutral.</td></tr>
+              <tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400">MBI Trend & Divergence</td><td>10-Day Shift & Index vs Breadth</td><td>Tracks MBI trajectory over 10 days and alerts when Index and Breadth diverge.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= COMPACT SLEEK FOOTER ================= -->
+      <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
+        <div class="flex items-center gap-2">
+          <!-- Footer Mini Logo Icon -->
+          <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
+          <span class="text-slate-800 dark:text-slate-200 font-extrabold tracking-tight">Mickkk<span class="text-emerald-600 dark:text-[#00f5a0] font-black">.com</span></span>
+          <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence & Trading Platform</span>
+        </div>
+
+        <div class="flex items-center gap-5 text-[11px]">
+          <a href="index.html" class="hover:text-emerald-500 transition-colors">Market Overview</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">Features</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">Pricing</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">About</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">Contact</a>
+        </div>
+
+        <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
+          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
+          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="youtube" class="w-3.5 h-3.5"></i></a>
+          <span class="ml-1">© 2026 Mickkk.com.</span>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ================= JAVASCRIPT & ENGINE ================= -->
+  <script>
+    const SPREADSHEET_ID = "1N5LGJUqsTMIKicd9G_hBGIV_sGS2MSjqEziILduitJ8";
+    const SHEET_NAME = "Market Breadth Signals";
+    
+    let rawDataset = [];
+    let filteredDataset = [];
+    let showRatios = false;
+    let showXAxisDates = false;
+    let charts = {};
+    let autoRefreshTimer = null;
+    let refreshCountdown = 300;
+
+    // 🎯 VERTICAL DOTTED CROSSHAIR HOVER PLUGIN (Safely Guarded)
+    const crosshairPlugin = {
+      id: 'crosshair',
+      afterDraw: (chart) => {
+        if (chart.tooltip?._active?.length) {
+          const x = chart.tooltip._active[0].element.x;
+          const topY = chart.scales.y.top;
+          const bottomY = chart.scales.y.bottom;
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x, topY);
+          ctx.lineTo(x, bottomY);
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = '#00d4ff';
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    };
+
+    function safeInitChartPlugins() {
+      if (typeof Chart !== 'undefined' && Chart.register) {
+        try {
+          Chart.register(crosshairPlugin);
+        } catch (e) {
+          console.warn("Crosshair plugin registration bypassed:", e);
+        }
+      }
+    }
+
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const arrow = document.getElementById("collapseArrow");
+
+      sidebar.classList.toggle("sidebar-collapsed");
+      if (sidebar.classList.contains("sidebar-collapsed")) {
+        mainContent.classList.remove("ml-60");
+        mainContent.classList.add("ml-[4.2rem]");
+        arrow.setAttribute("data-lucide", "chevron-right");
+      } else {
+        mainContent.classList.remove("ml-[4.2rem]");
+        mainContent.classList.add("ml-60");
+        arrow.setAttribute("data-lucide", "chevron-left");
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Theme Switcher
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle("dark");
+      document.getElementById("sunIconSide").classList.toggle("hidden", isDark);
+      document.getElementById("moonIconSide").classList.toggle("hidden", !isDark);
+      document.getElementById("sunIconMini").classList.toggle("hidden", isDark);
+      document.getElementById("moonIconMini").classList.toggle("hidden", !isDark);
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      renderAllCharts();
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
+      document.getElementById("sunIconSide").classList.add("hidden");
+      document.getElementById("moonIconSide").classList.remove("hidden");
+      document.getElementById("sunIconMini").classList.add("hidden");
+      document.getElementById("moonIconMini").classList.remove("hidden");
+    }
+
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      const clockEl = document.getElementById("headerClock");
+      if (clockEl) {
+        clockEl.innerText = now.toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+      }
+    }
+
+    // Auto-Refresh Setup
+    function setupAutoRefreshTimer() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      const selectEl = document.getElementById('auto-refresh-select');
+      const intervalSec = selectEl ? parseInt(selectEl.value, 10) : 300;
+      const badge = document.getElementById('refreshTimer');
+
+      if (intervalSec === 0) {
+        if (badge) badge.innerText = '(OFF)';
+        return;
+      }
+
+      refreshCountdown = intervalSec;
+      if (badge) badge.innerText = `(${formatSeconds(refreshCountdown)})`;
+
+      autoRefreshTimer = setInterval(() => {
+        refreshCountdown--;
+        if (badge) badge.innerText = `(${formatSeconds(refreshCountdown)})`;
+
+        if (refreshCountdown <= 0) {
+          refreshCountdown = intervalSec;
+          loadDashboardData();
+        }
+      }, 1000);
+    }
+
+    function formatSeconds(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    // Robust Initialization
+    function initializeApp() {
+      safeInitChartPlugins();
+      if (window.lucide) lucide.createIcons();
+      updateClock();
+      setInterval(updateClock, 1000);
+      setupAutoRefreshTimer();
+      loadDashboardData();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
+    }
+
+    /**
+     * 🚀 ZERO-FAIL JSONP DATA LOADER
+     */
+    function loadDashboardData() {
+      const spin = document.getElementById("manualSpinIcon");
+      if (spin) spin.classList.add("animate-spin");
+
+      const script = document.createElement("script");
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetData&sheet=${encodeURIComponent(SHEET_NAME)}&_ts=${new Date().getTime()}`;
+      script.src = url;
+
+      document.body.appendChild(script);
+
+      script.onload = () => {
+        if (spin) spin.classList.remove("animate-spin");
+        script.remove();
+      };
+      script.onerror = () => {
+        if (spin) spin.classList.remove("animate-spin");
+        script.remove();
+        console.error("Failed to load Google Sheet data.");
+      };
+    }
+
+    function parseCustomDate(dStr) {
+      if (!dStr) return 0;
+      const parts = String(dStr).trim().split(/[\-\s]/);
+      if (parts.length === 3) {
+        const months = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+        const d = parseInt(parts[0], 10);
+        const m = months[parts[1].toLowerCase().slice(0, 3)];
+        const y = parseInt(parts[2], 10);
+        if (!isNaN(d) && m !== undefined && !isNaN(y)) {
+          return new Date(y, m, d).getTime();
+        }
+      }
+      return new Date(dStr).getTime() || 0;
+    }
+
+    // Global GViz Callback
+    window.handleGoogleSheetData = function(gviz) {
+      if (!gviz || !gviz.table || !gviz.table.rows) return;
+      const rows = gviz.table.rows;
+      const parsed = [];
+
+      for (let i = 3; i < rows.length; i++) {
+        const c = rows[i].c;
+        if (!c || !c[0] || c[0].v === null) continue;
+
+        const v = (idx) => (c[idx] && c[idx].v !== null && !isNaN(c[idx].v)) ? Number(c[idx].v) : 0;
+        const s = (idx) => (c[idx] && c[idx].v !== null) ? String(c[idx].f || c[idx].v).trim() : '-';
+
+        let dateVal = s(0);
+        if (c[0].f) dateVal = c[0].f;
+
+        parsed.push({
+          date: dateVal,
+          dateTimestamp: parseCustomDate(dateVal),
+          nifty50: v(1),
+          nifty500: v(2),
+          cnxSmall: v(3),
+          midSmall: v(4),
+          universe: v(5),
+          up4: v(6),
+          dn4: v(7),
+          netBreadth: v(8),
+          volRatio: v(9),
+          breakout: v(10),
+          breakdown: v(11),
+          new52WH: v(12),
+          new52WL: v(13),
+          netNHNL: v(14),
+          ema10: v(15),
+          ema20: v(16),
+          ema50: v(17),
+          ema200: v(18),
+          r4: v(19),
+          chg4R: v(20),
+          r20: v(21),
+          chg20R: v(22),
+          r50: v(23),
+          chg50R: v(24),
+          r200: v(25),
+          chg200R: v(26),
+          signalMBI: v(27),
+          nhnlBias: s(34),
+          signalLabel: s(35) === '-' ? (v(27) >= 3 ? 'Bullish' : (v(27) <= -3 ? 'Bearish' : 'Neutral')) : s(35),
+          trend10D: s(36),
+          divergence: s(37)
+        });
+      }
+
+      parsed.sort((a, b) => a.dateTimestamp - b.dateTimestamp);
+      rawDataset = parsed;
+
+      if (rawDataset.length > 0) {
+        const toD = new Date(rawDataset[rawDataset.length - 1].dateTimestamp).toISOString().split('T')[0];
+        const fromD = new Date(rawDataset[Math.max(0, rawDataset.length - 90)].dateTimestamp).toISOString().split('T')[0];
+        const df = document.getElementById('date-from');
+        const dt = document.getElementById('date-to');
+        if (df) df.value = fromD;
+        if (dt) dt.value = toD;
+      }
+
+      setPresetDays(90);
+    };
+
+    function setPresetDays(days, el) {
+      if (el) {
+        document.querySelectorAll('.chart-time-btn').forEach(b => b.classList.remove('active', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-500'));
+        el.classList.add('active', 'bg-emerald-50', 'text-emerald-600', 'border-emerald-500');
+      }
+
+      if (rawDataset.length === 0) return;
+
+      if (days === 'ALL') {
+        filteredDataset = [...rawDataset];
+      } else {
+        const count = parseInt(days, 10);
+        filteredDataset = rawDataset.slice(-count);
+      }
+
+      updateTopCardsAndMeter();
+      renderBreadthTable();
+      renderAllCharts();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function applyDateRangeFilter() {
+      const fromStr = document.getElementById('date-from').value;
+      const toStr = document.getElementById('date-to').value;
+      if (!fromStr || !toStr) return;
+
+      const fromTime = new Date(fromStr).getTime();
+      const toTime = new Date(toStr).getTime() + (24 * 60 * 60 * 1000) - 1;
+
+      filteredDataset = rawDataset.filter(r => r.dateTimestamp >= fromTime && r.dateTimestamp <= toTime);
+      if (filteredDataset.length === 0) filteredDataset = rawDataset.slice(-30);
+
+      updateTopCardsAndMeter();
+      renderBreadthTable();
+      renderAllCharts();
+    }
+
+    function updateTopCardsAndMeter() {
+      if (rawDataset.length === 0) return;
+      const latest = rawDataset[rawDataset.length - 1];
+
+      const kpiDate = document.getElementById('kpi-date');
+      if (kpiDate) kpiDate.innerText = latest.date;
+
+      const score = latest.signalMBI;
+      const scoreFormatted = score > 0 ? `+${score}` : score;
+      const kpiSigMerged = document.getElementById('kpi-signal-merged');
+      if (kpiSigMerged) {
+        kpiSigMerged.innerHTML = `
+          <span class="${score >= 3 ? 'text-emerald-500' : (score <= -3 ? 'text-rose-500' : 'text-slate-400')} font-black">${scoreFormatted}</span>
+          <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${latest.signalLabel === 'Bullish' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500' : (latest.signalLabel === 'Bearish' ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-500' : 'bg-slate-100 dark:bg-slate-800 text-slate-400')}">${latest.signalLabel}</span>
+        `;
+      }
+
+      const sigCard = document.getElementById('kpi-signal-card');
+      if (sigCard) {
+        if (score >= 3) {
+          sigCard.className = "p-3 rounded-xl border border-emerald-500/40 bg-emerald-50/60 dark:bg-emerald-950/30 shadow-sm flex flex-col items-center justify-center text-center";
+        } else if (score <= -3) {
+          sigCard.className = "p-3 rounded-xl border border-rose-500/40 bg-rose-50/60 dark:bg-rose-950/30 shadow-sm flex flex-col items-center justify-center text-center";
+        } else {
+          sigCard.className = "bg-white dark:bg-cardDark p-3 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center";
+        }
+      }
+
+      const setKPI = (id, val, isPct) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerText = (val >= 0 ? '+' : '') + (isPct ? (val * 100).toFixed(2) + '%' : val.toFixed(2));
+        el.className = `text-sm sm:text-base font-extrabold font-mono-num mt-1 ${val >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+      };
+
+      setKPI('kpi-nifty', latest.nifty50, true);
+      setKPI('kpi-nifty500', latest.nifty500, true);
+      setKPI('kpi-cnxsmall', latest.cnxSmall, true);
+      setKPI('midsmall', latest.midSmall, true);
+
+      // 7 Color Cards
+      const setVal = (id, str) => { const el = document.getElementById(id); if (el) el.innerText = str; };
+      setVal('neon-10ema', latest.ema10.toFixed(1) + '%');
+      setVal('neon-20ema', latest.ema20.toFixed(1) + '%');
+      setVal('neon-50ema', latest.ema50.toFixed(1) + '%');
+      setVal('neon-200ema', latest.ema200.toFixed(1) + '%');
+      setVal('neon-52wh', (latest.new52WH * 10).toFixed(1) + '%');
+      setVal('neon-netbreadth', (latest.netBreadth >= 0 ? '+' : '') + latest.netBreadth.toFixed(2));
+      setVal('neon-volratio', latest.volRatio.toFixed(2));
+
+      // Speedometer MBI Meter
+      setVal('meterScoreVal', scoreFormatted);
+      const meterStatus = document.getElementById('meterScoreStatus');
+      if (meterStatus) {
+        meterStatus.innerText = latest.signalLabel;
+        meterStatus.className = `text-[11px] font-extrabold tracking-wider uppercase ${score >= 3 ? 'text-emerald-500' : (score <= -3 ? 'text-rose-500' : 'text-amber-500')}`;
+      }
+
+      const clampedScore = Math.max(-3, Math.min(3, score));
+      const angle = (clampedScore / 3) * 75;
+      const needle = document.getElementById('meterNeedleGroup');
+      if (needle) needle.style.transform = `rotate(${angle}deg)`;
+    }
+
+    function renderBreadthTable() {
+      const headerRow = document.getElementById('table-headers');
+      const tableBody = document.getElementById('table-body');
+      if (!headerRow || !tableBody) return;
+
+      let headers = [
+        "DATE", "NIFTY 50", "NIFTY 500", "CNX SMALL", "MIDSMALL", "UNIVERSE",
+        "UP 4%+", "DN 4%+", "NET BREADTH", "VOL RATIO",
+        "BREAKOUT", "BREAKDOWN", "52W HIGH", "52W LOW", "NET NH-NL",
+        "% 10EMA", "% 20EMA", "% 50EMA", "% 200EMA"
+      ];
+
+      if (showRatios) {
+        headers.push("4R", "4R %CHG", "20R", "20R %CHG", "50R", "50R %CHG", "200R", "200R %CHG");
+      }
+      headers.push("SIGNAL-MBI & LABEL", "NH-NL BIAS", "10D TREND", "DIVERGENCE");
+
+      headerRow.innerHTML = headers.map((h, i) => `
+        <th class="py-2 px-2.5 font-bold border-r border-slate-200 dark:border-borderDark whitespace-nowrap text-center ${i === 0 ? 'sticky-date-cell bg-slate-100 dark:bg-slate-900 border-r-2 border-slate-300 dark:border-slate-700' : ''}">${h}</th>
+      `).join('');
+
+      const displayRows = [...filteredDataset].reverse();
+
+      tableBody.innerHTML = displayRows.map(r => {
+        const nbVal = r.netBreadth;
+        const nbPct = Math.min((Math.abs(nbVal) / 40) * 50, 50);
+        const nbBarHTML = `
+          <div class="bi-bar-container">
+            <div class="bi-bar-track">
+              <div class="bi-bar-center"></div>
+              ${nbVal >= 0 ? `<div class="bi-bar-fill-pos" style="width: ${nbPct}%;"></div>` : `<div class="bi-bar-fill-neg" style="width: ${nbPct}%;"></div>`}
+            </div>
+            <span class="font-mono-num text-[10px] font-bold ${nbVal >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${nbVal >= 0 ? '+' : ''}${nbVal.toFixed(2)}</span>
+          </div>
+        `;
+
+        const nhnlVal = r.netNHNL;
+        const nhnlPct = Math.min((Math.abs(nhnlVal) / 10) * 50, 50);
+        const nhnlBarHTML = `
+          <div class="bi-bar-container">
+            <div class="bi-bar-track">
+              <div class="bi-bar-center"></div>
+              ${nhnlVal >= 0 ? `<div class="bi-bar-fill-pos" style="width: ${nhnlPct}%;"></div>` : `<div class="bi-bar-fill-neg" style="width: ${nhnlPct}%;"></div>`}
+            </div>
+            <span class="font-mono-num text-[10px] font-bold ${nhnlVal >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${nhnlVal >= 0 ? '+' : ''}${nhnlVal.toFixed(2)}</span>
+          </div>
+        `;
+
+        const dateStyle = r.signalMBI >= 3 ? 'date-bullish' : (r.signalMBI <= -3 ? 'date-bearish' : 'date-neutral');
+
+        let rowHTML = `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="sticky-date-cell py-1.5 px-2 font-mono-num font-bold border-r-2 border-slate-300 dark:border-slate-700 whitespace-nowrap text-center ${dateStyle}">${r.date}</td>
+            <td class="font-mono-num px-2 text-center border-r border-slate-100 dark:border-borderDark ${r.nifty50 >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(r.nifty50 * 100).toFixed(2)}%</td>
+            <td class="font-mono-num px-2 text-center border-r border-slate-100 dark:border-borderDark ${r.nifty500 >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(r.nifty500 * 100).toFixed(2)}%</td>
+            <td class="font-mono-num px-2 text-center border-r border-slate-100 dark:border-borderDark ${r.cnxSmall >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(r.cnxSmall * 100).toFixed(2)}%</td>
+            <td class="font-mono-num px-2 text-center border-r border-slate-100 dark:border-borderDark ${r.midSmall >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(r.midSmall * 100).toFixed(2)}%</td>
+            <td class="font-mono-num px-2 text-center text-slate-500 border-r border-slate-100 dark:border-borderDark">${r.universe}</td>
+            
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-emerald-500" style="width: ${Math.min(r.up4 * 7, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-emerald-500">${r.up4.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-rose-500" style="width: ${Math.min(r.dn4 * 7, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-rose-500">${r.dn4.toFixed(1)}%</span></div></td>
+            
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark">${nbBarHTML}</td>
+            
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-sky-500" style="width: ${Math.min(r.volRatio * 40, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-sky-500">${r.volRatio.toFixed(2)}</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-emerald-500" style="width: ${Math.min(r.breakout * 4, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-emerald-500">${r.breakout.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-rose-500" style="width: ${Math.min(r.breakdown * 4, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-rose-500">${r.breakdown.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-sky-400" style="width: ${Math.min(r.new52WH * 20, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-sky-400">${r.new52WH.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-rose-400" style="width: ${Math.min(r.new52WL * 20, 100)}%;"></div><span class="font-mono-num text-[10px] font-bold text-rose-400">${r.new52WL.toFixed(1)}%</span></div></td>
+            
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark">${nhnlBarHTML}</td>
+            
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-sky-500" style="width: ${r.ema10}%;"></div><span class="font-mono-num text-[10px] font-bold">${r.ema10.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-emerald-500" style="width: ${r.ema20}%;"></div><span class="font-mono-num text-[10px] font-bold">${r.ema20.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-purple-500" style="width: ${r.ema50}%;"></div><span class="font-mono-num text-[10px] font-bold">${r.ema50.toFixed(1)}%</span></div></td>
+            <td class="px-1 border-r border-slate-100 dark:border-borderDark"><div class="cell-bar-wrap"><div class="cell-bar-fill bg-amber-500" style="width: ${r.ema200}%;"></div><span class="font-mono-num text-[10px] font-bold">${r.ema200.toFixed(1)}%</span></div></td>
+        `;
+
+        if (showRatios) {
+          rowHTML += `
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark">${r.r4.toFixed(1)}</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark ${r.chg4R >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${r.chg4R.toFixed(1)}%</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark">${r.r20.toFixed(1)}</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark ${r.chg20R >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${r.chg20R.toFixed(1)}%</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark">${r.r50.toFixed(1)}</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark ${r.chg50R >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${r.chg50R.toFixed(1)}%</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark">${r.r200.toFixed(1)}</td>
+            <td class="font-mono-num px-1.5 text-center border-r border-slate-100 dark:border-borderDark ${r.chg200R >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${r.chg200R.toFixed(1)}%</td>
+          `;
+        }
+
+        rowHTML += `
+            <td class="px-2 border-r border-slate-100 dark:border-borderDark whitespace-nowrap text-center">
+              <span class="font-mono-num font-bold ${r.signalMBI >= 3 ? 'text-emerald-500' : (r.signalMBI <= -3 ? 'text-rose-500' : 'text-slate-400')}">${r.signalMBI > 0 ? '+' : ''}${r.signalMBI}</span>
+              <span class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded ${r.signalLabel === 'Bullish' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500' : (r.signalLabel === 'Bearish' ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-500' : 'bg-slate-100 dark:bg-slate-800 text-slate-400')}">${r.signalLabel}</span>
+            </td>
+            <td class="px-2.5 border-r border-slate-100 dark:border-borderDark whitespace-nowrap text-slate-600 dark:text-slate-300 text-center">${r.nhnlBias}</td>
+            <td class="px-2.5 border-r border-slate-100 dark:border-borderDark whitespace-nowrap text-slate-600 dark:text-slate-300 text-center">${r.trend10D}</td>
+            <td class="px-2 whitespace-nowrap text-[10px] text-center ${r.divergence.includes('Bullish') ? 'text-amber-500 font-bold' : (r.divergence.includes('Bearish') ? 'text-orange-500 font-bold' : 'text-slate-400')}">${r.divergence}</td>
+          </tr>`;
+        return rowHTML;
+      }).join('');
+    }
+
+    // 3. Render 7 Exact Institutional Charts
+    function renderAllCharts() {
+      if (typeof Chart === 'undefined') return;
+      const labels = filteredDataset.map(r => r.date);
+      const isDark = document.documentElement.classList.contains("dark");
+      const gridColor = isDark ? "#1e293b" : "#f1f5f9";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
+
+      const compSelect = document.getElementById('compare-index-select');
+      const compareIndex = compSelect ? compSelect.value : 'none';
+      const indexDatasets = getCompareIndexDatasets(compareIndex);
+      const hasIndexComp = indexDatasets.length > 0;
+
+      // Chart 1: Volume Ratio Trend
+      renderChart('chartVolRatio', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Volume Ratio', data: filteredDataset.map(r => r.volRatio), borderColor: '#00d4ff', backgroundColor: 'rgba(0,212,255,0.08)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 0, yAxisID: 'y' },
+            { label: '2.0 Heavy Level', data: labels.map(() => 2.0), borderColor: '#10b981', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, yAxisID: 'y' },
+            { label: '0.5 Dull Level', data: labels.map(() => 0.5), borderColor: '#f43f5e', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, yAxisID: 'y' },
+            ...indexDatasets
+          ]
+        },
+        options: getChartOptions('Ratio', 0, 3, hasIndexComp, gridColor, textColor)
+      });
+
+      // Chart 2: EMAs Heatmap
+      renderChart('chartEMAs', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: '10 EMA', data: filteredDataset.map(r => r.ema10), borderColor: '#00d4ff', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: '20 EMA', data: filteredDataset.map(r => r.ema20), borderColor: '#10b981', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: '50 EMA', data: filteredDataset.map(r => r.ema50), borderColor: '#a855f7', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: '200 EMA', data: filteredDataset.map(r => r.ema200), borderColor: '#f59e0b', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: '80% Overbought', data: labels.map(() => 80), borderColor: '#059669', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
+            { label: '50% Midline', data: labels.map(() => 50), borderColor: '#64748b', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
+            { label: '20% Oversold', data: labels.map(() => 20), borderColor: '#e11d48', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
+            ...indexDatasets
+          ]
+        },
+        options: getChartOptions('%', 0, 100, hasIndexComp, gridColor, textColor)
+      });
+
+      // Chart 3: Signal-MBI Trend
+      renderChart('chartSignalMBI', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Signal-MBI', data: filteredDataset.map(r => r.signalMBI), borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.1)', fill: true, tension: 0.2, borderWidth: 2, pointRadius: 0, yAxisID: 'y' },
+            { label: '+3 Bullish', data: labels.map(() => 3), borderColor: '#10b981', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
+            { label: '-3 Bearish', data: labels.map(() => -3), borderColor: '#f43f5e', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
+            ...indexDatasets
+          ]
+        },
+        options: getChartOptions('Score', -6, 6, hasIndexComp, gridColor, textColor)
+      });
+
+      // Chart 4: Stocks Up 4%+ vs Down 4%+
+      renderChart('chartUpDn4', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Stocks Up 4%+', data: filteredDataset.map(r => r.up4), borderColor: '#10b981', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: 'Stocks Down 4%+', data: filteredDataset.map(r => -r.dn4), borderColor: '#f43f5e', borderWidth: 2, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+            { label: '10% Line', data: labels.map(() => 10), borderColor: '#f59e0b', borderDash: [4, 4], borderWidth: 1, pointRadius: 0, yAxisID: 'y' },
+            ...indexDatasets
+          ]
+        },
+        options: getChartOptions('% of Universe', 0, 20, hasIndexComp, gridColor, textColor)
+      });
+
+      // Chart 5: 52W Highs vs Lows
+      renderChart('chart52WHighLow', {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'New 52W Highs (%)', data: filteredDataset.map(r => r.new52WH), backgroundColor: '#10b981', borderRadius: 2, yAxisID: 'y' },
+            { label: 'New 52W Lows (%)', data: filteredDataset.map(r => -r.new52WL), backgroundColor: '#f43f5e', borderRadius: 2, yAxisID: 'y' }
+          ]
+        },
+        options: getChartOptions('%', -10, 10, false, gridColor, textColor)
+      });
+
+      // Chart 6: 4 Indices Comparative Line Chart
+      renderChart('chart4Indices', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Nifty 50', data: filteredDataset.map(r => (r.nifty50 * 100).toFixed(2)), borderColor: '#00d4ff', borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: 'y' },
+            { label: 'Nifty 500', data: filteredDataset.map(r => (r.nifty500 * 100).toFixed(2)), borderColor: '#10b981', borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: 'y' },
+            { label: 'CNX Small', data: filteredDataset.map(r => (r.cnxSmall * 100).toFixed(2)), borderColor: '#f59e0b', borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: 'y' },
+            { label: 'MidSmall 400', data: filteredDataset.map(r => (r.midSmall * 100).toFixed(2)), borderColor: '#a855f7', borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: 'y' }
+          ]
+        },
+        options: getChartOptions('% Daily Change', -4, 4, false, gridColor, textColor)
+      });
+
+      // Chart 7: Net Breadth Daily Bar Chart
+      renderChart('chartNetBreadth', {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Net Breadth (Up 4% − Down 4%)',
+              data: filteredDataset.map(r => r.netBreadth),
+              backgroundColor: filteredDataset.map(r => r.netBreadth >= 0 ? '#10b981' : '#ef4444'),
+              borderRadius: 3,
+              yAxisID: 'y'
+            },
+            ...indexDatasets
+          ]
+        },
+        options: getChartOptions('Net %', -30, 30, hasIndexComp, gridColor, textColor)
+      });
+    }
+
+    function getCompareIndexDatasets(indexType) {
+      if (indexType === 'none') return [];
+      const out = [];
+      if (indexType === 'nifty50' || indexType === 'all') {
+        out.push({ label: 'Nifty 50 (%Chg)', data: filteredDataset.map(r => (r.nifty50 * 100).toFixed(2)), borderColor: '#ffffff', borderDash: [3, 3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'yIndex' });
+      }
+      if (indexType === 'nifty500' || indexType === 'all') {
+        out.push({ label: 'Nifty 500 (%Chg)', data: filteredDataset.map(r => (r.nifty500 * 100).toFixed(2)), borderColor: '#38bdf8', borderDash: [3, 3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'yIndex' });
+      }
+      if (indexType === 'cnxSmall' || indexType === 'all') {
+        out.push({ label: 'CNX Small (%Chg)', data: filteredDataset.map(r => (r.cnxSmall * 100).toFixed(2)), borderColor: '#facc15', borderDash: [3, 3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'yIndex' });
+      }
+      if (indexType === 'midSmall' || indexType === 'all') {
+        out.push({ label: 'MidSmall (%Chg)', data: filteredDataset.map(r => (r.midSmall * 100).toFixed(2)), borderColor: '#c084fc', borderDash: [3, 3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'yIndex' });
+      }
+      return out;
+    }
+
+    function renderChart(canvasId, config) {
+      if (typeof Chart === 'undefined') return;
+      if (charts[canvasId]) charts[canvasId].destroy();
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      charts[canvasId] = new Chart(canvas.getContext('2d'), config);
+    }
+
+    function getChartOptions(unit, min, max, hasIndexComparison, gridColor, textColor) {
+      const scales = {
+        x: { grid: { display: false }, ticks: { display: showXAxisDates, maxTicksLimit: 12, color: textColor, font: { size: 9.5 } } },
+        y: { position: 'left', grid: { color: gridColor }, min: min, max: max, ticks: { color: textColor, font: { size: 9.5 } } }
+      };
+
+      if (hasIndexComparison) {
+        scales.yIndex = {
+          position: 'right',
+          grid: { display: false },
+          ticks: { color: textColor, font: { size: 9.5 }, callback: (val) => (val >= 0 ? '+' : '') + val.toFixed(1) + '%' },
+          title: { display: true, text: 'Index % Change', color: textColor, font: { size: 9 } }
+        };
+      }
+
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 10, color: textColor, font: { size: 9.5, weight: 'bold' } } }
+        },
+        scales: scales
+      };
+    }
+
+    function toggleXAxisDates() {
+      showXAxisDates = !showXAxisDates;
+      renderAllCharts();
+    }
+
+    function setChartsLayout(mode) {
+      const wrapper = document.getElementById('charts-wrapper');
+      const btn2Col = document.getElementById('btn-layout-2col');
+      const btn1Col = document.getElementById('btn-layout-1col');
+      const netBox = document.getElementById('boxNetBreadth');
+
+      if (mode === '1col') {
+        wrapper.classList.remove('lg:grid-cols-2');
+        wrapper.classList.add('grid-cols-1');
+        btn1Col.classList.add('bg-white', 'dark:bg-cardDark', 'text-emerald-500', 'shadow-sm');
+        btn1Col.classList.remove('text-slate-500');
+        btn2Col.classList.remove('bg-white', 'dark:bg-cardDark', 'text-emerald-500', 'shadow-sm');
+        btn2Col.classList.add('text-slate-500');
+        if (netBox) netBox.classList.remove('lg:col-span-2');
+      } else {
+        wrapper.classList.add('lg:grid-cols-2');
+        wrapper.classList.remove('grid-cols-1');
+        btn2Col.classList.add('bg-white', 'dark:bg-cardDark', 'text-emerald-500', 'shadow-sm');
+        btn2Col.classList.remove('text-slate-500');
+        btn1Col.classList.remove('bg-white', 'dark:bg-cardDark', 'text-emerald-500', 'shadow-sm');
+        btn1Col.classList.add('text-slate-500');
+        if (netBox) netBox.classList.add('lg:col-span-2');
+      }
+
+      Object.values(charts).forEach(c => c.resize());
+    }
+
+    function toggleRatioColumns() {
+      showRatios = !showRatios;
+      renderBreadthTable();
+    }
+
+    function exportToCSV() {
+      if (filteredDataset.length === 0) return;
+      let csv = "Date,Nifty50,Nifty500,CNXSmallcap,MidSmall400,Universe,Up4Pct,Dn4Pct,NetBreadth,VolumeRatio,Breakout,Breakdown,New52WH,New52WL,NetNHNL,EMA10,EMA20,EMA50,EMA200,R4,Chg4R,R20,Chg20R,R50,Chg50R,R200,Chg200R,SignalMBI,SignalLabel,NHNLBias,Trend10D,Divergence\n";
+      filteredDataset.forEach(r => {
+        csv += `${r.date},${r.nifty50},${r.nifty500},${r.cnxSmall},${r.midSmall},${r.universe},${r.up4},${r.dn4},${r.netBreadth},${r.volRatio},${r.breakout},${r.breakdown},${r.new52WH},${r.new52WL},${r.netNHNL},${r.ema10},${r.ema20},${r.ema50},${r.ema200},${r.r4},${r.chg4R},${r.r20},${r.chg20R},${r.r50},${r.chg50R},${r.r200},${r.chg200R},${r.signalMBI},"${r.signalLabel}","${r.nhnlBias}","${r.trend10D}","${r.divergence}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `Market_Breadth_${filteredDataset[0].date}_to_${filteredDataset[filteredDataset.length-1].date}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>

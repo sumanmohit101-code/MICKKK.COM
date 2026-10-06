@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Overview - Mickkk.com</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark");}catch(e){}</script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#080d1a',
+            sidebarDark: '#0b1329',
+            cardDark: '#0f172a',
+            borderDark: '#1e293b',
+            accentCyan: '#00d4ff',
+            accentGreen: '#10b981',
+            accentRed: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js & Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    .tagline-font { font-family: 'Montserrat', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* ===== Mickkk Logo (theme-aware) ===== */
+    :root { --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
+            --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; }
+    .dark { --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
+            --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; }
+    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
+    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
+               background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
+    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
+    .mk-arrow { transition: transform .25s ease; }
+    .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
+    .mk-logo:hover .mk-icon { transform: scale(1.07); }
+    .mk-icon { transition: transform .25s ease; }
+
+    /* Sidebar Collapsed Icon Mode (JournalToday Exact Match) */
+    .sidebar-collapsed { width: 4.2rem !important; }
+    .sidebar-collapsed .brand-text,
+    .sidebar-collapsed .nav-text,
+    .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
+    .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
+    .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+
+    /* Tooltip when collapsed */
+    .sidebar-collapsed .nav-item:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 4.2rem;
+      background: #0f172a;
+      color: #fff;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      border: 1px solid #1e293b;
+    }
+
+    /* Floating Arrow Button overlapping the right edge border */
+    .collapse-float-btn {
+      position: absolute;
+      right: -12px;
+      top: 22px;
+      z-index: 60;
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200">
+  <!-- Mickkk logo icon (shared symbol, light + dark aware) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <g clip-path="url(#mkClip)">
+          <!-- right half of M (fades into the arrow) -->
+          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
+          <!-- left stem + diagonal, slanted foot -->
+          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
+          <!-- gloss -->
+          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
+        </g>
+        <!-- rising bars -->
+        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
+        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
+        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
+        <!-- breakout arrow -->
+        <g class="mk-glow mk-arrow">
+          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
+          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
+    
+    <!-- Floating Circular Collapse Arrow on Border -->
+    <button onclick="toggleSidebar()" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
+      <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
+    </button>
+
+    <div>
+      <!-- Brand Logo + Mickkk.com Native High-Impact Branding -->
+      <a href="index.html" title="Mickkk.com" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
+        <!-- Icon -->
+        <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
+
+        <!-- Right side: top = Mickkk.com, bottom = Trade Smarter tagline -->
+        <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
+          <div class="flex items-baseline whitespace-nowrap">
+            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
+            <span class="mk-tag text-[7.5px] tracking-[0.16em]">Trade Smarter</span>
+            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Clean Horizontal Partition Line -->
+      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
+
+      <!-- Navigation Links -->
+      <nav class="space-y-1 text-xs font-semibold">
+        <a href="index.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
+        </a>
+        <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="scan" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Stock Screener</span>
+        </a>
+        <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layers" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Index Terminal</span>
+        </a>
+        <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="activity" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Breadth</span>
+        </a>
+        <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
+        </a>
+        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
+        </a>
+        <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
+        </a>
+        <a href="#" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Trading Journal</span>
+        </a>
+        <a href="#" data-title="Analytics" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Analytics</span>
+        </a>
+        <a href="#" data-title="Watchlist" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bookmark" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Watchlist</span>
+        </a>
+        <a href="#" data-title="Market Tools" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="wrench" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Tools</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- ================= BOTTOM PANEL ================= -->
+    <div>
+      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">M</div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">mohit su...</div>
+              <div class="text-[9px] text-slate-400 truncate">sumanmohit...</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-slate-400">
+            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer">
+              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
+              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+            </button>
+            <a href="#" class="p-1 hover:text-slate-800 dark:hover:text-white">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer">
+          <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
+          <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
+        </button>
+        <button class="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= RIGHT CONTENT AREA ================= -->
+  <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
+    <main class="p-5 md:p-7 space-y-6 w-full">
+
+      <!-- Header Title Banner + Top Toolbar with Search, Auto-Refresh, Clock -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-borderDark">
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight">Market Overview</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Real-time market data, insights and powerful tools for smarter trading decisions.</p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <!-- Search Bar -->
+          <div class="relative w-64 hidden sm:block">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+            <input type="text" id="globalSearch" onkeyup="handleGlobalSearch(event)" placeholder="Search stocks, indices..." class="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark focus:border-emerald-500 focus:outline-none transition-all">
+          </div>
+
+          <!-- 5-Minute Auto-Refresh Timer -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-[11px] font-bold text-slate-500 shadow-sm">
+            <i data-lucide="timer" class="w-3.5 h-3.5 text-emerald-500 animate-pulse"></i>
+            <span>Auto-Refresh: <span id="refreshTimer" class="text-emerald-500 font-mono font-bold">05:00</span></span>
+          </div>
+
+          <!-- Live Clock -->
+          <span class="text-xs font-bold text-slate-500 hidden lg:block font-mono-num" id="headerClock">--:-- IST</span>
+
+          <!-- Manual Refresh Button -->
+          <button onclick="fetchTerminalData(true)" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-sm cursor-pointer">
+            <i data-lucide="refresh-cw" id="manualSpinIcon" class="w-3.5 h-3.5"></i> Refresh Now
+          </button>
+        </div>
+      </div>
+
+      <!-- 1. SPARKLINE CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="sparkCardsRow">
+        <!-- Rendered instantly from cache -->
+      </div>
+
+      <!-- 2. INDICES TERMINAL TABLE + SCREENSHOT-STYLE MARKET BREADTH METER -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Indices Terminal Table (8 Cols) - Center-Aligned & Full Scroll -->
+        <div class="lg:col-span-8 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">INDICES TERMINAL</h3>
+                <span id="indicesCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono-num">0</span>
+              </div>
+              <button onclick="openModal('All Indices Terminal', allDataStore.indices, ['Sr.No', 'Index Name', 'Index Symbol', 'Close', '% Change (D)'] )" class="text-xs font-bold text-emerald-600 hover:underline cursor-pointer">View All →</button>
+            </div>
+            <div class="overflow-y-auto max-h-60 custom-scroll pr-1">
+              <table class="w-full text-xs text-center table-fixed">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                  <tr>
+                    <th class="pb-2 w-1/3 text-center">Index Name</th>
+                    <th class="pb-2 w-1/4 text-center">Symbol</th>
+                    <th class="pb-2 text-center w-1/5">Close Value</th>
+                    <th class="pb-2 text-center">Change %</th>
+                  </tr>
+                </thead>
+                <tbody id="indicesTableBody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Market Breadth Gauge Meter (4 Cols) -->
+        <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-extrabold text-xs uppercase tracking-wider">Market Breadth</h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50" id="meterScoreBadge">Score: --</span>
+          </div>
+
+          <div class="relative flex flex-col items-center justify-center my-1">
+            <div class="w-48 h-24 overflow-hidden relative">
+              <div class="w-48 h-48 rounded-full border-[14px] border-slate-200 dark:border-slate-800 border-b-transparent border-l-rose-500 border-t-amber-400 border-r-emerald-500 rotate-[-45deg]"></div>
+            </div>
+            <div class="absolute bottom-1 text-center">
+              <div class="text-2xl font-black font-mono-num" id="breadthScore">--</div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" id="breadthLabel">Calculating...</p>
+            </div>
+          </div>
+
+          <div class="space-y-1.5 text-xs border-t border-slate-100 dark:border-borderDark pt-3 font-semibold">
+            <div class="flex justify-between text-slate-500">
+              <span>Total Stocks:</span> <span class="font-mono-num text-slate-800 dark:text-slate-200" id="meterTotal">-</span>
+            </div>
+            <div class="flex justify-between text-emerald-600">
+              <span>Advances:</span> <span class="font-mono-num" id="meterAdv">-</span>
+            </div>
+            <div class="flex justify-between text-rose-600">
+              <span>Declines:</span> <span class="font-mono-num" id="meterDec">-</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3. TOP GAINERS & LOSERS + STYLISH ADVANCES/DECLINES (SCREENSHOT 2 MATCH) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Top Gainers Table (4 Cols) - Center-Aligned & Full Scroll -->
+        <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h3 class="font-extrabold text-xs tracking-wider uppercase">Top Gainers</h3>
+              <span id="gainersCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 font-mono-num">0</span>
+            </div>
+            <button onclick="openModal('Top Gainers (4%+)', allDataStore.gainers)" class="text-xs font-bold text-emerald-600 hover:underline cursor-pointer">View All</button>
+          </div>
+          <div class="overflow-y-auto max-h-72 custom-scroll pr-1">
+            <table class="w-full text-xs text-center table-fixed">
+              <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                <tr>
+                  <th class="pb-2 w-2/5 text-center">Symbol</th>
+                  <th class="pb-2 text-center w-1/3">Price (₹)</th>
+                  <th class="pb-2 text-center">Change %</th>
+                </tr>
+              </thead>
+              <tbody id="gainersTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Losers Table (4 Cols) - Center-Aligned & Full Scroll -->
+        <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              <h3 class="font-extrabold text-xs tracking-wider uppercase">Top Losers</h3>
+              <span id="losersCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-600 font-mono-num">0</span>
+            </div>
+            <button onclick="openModal('Top Losers (4%-)', allDataStore.losers)" class="text-xs font-bold text-rose-600 hover:underline cursor-pointer">View All</button>
+          </div>
+          <div class="overflow-y-auto max-h-72 custom-scroll pr-1">
+            <table class="w-full text-xs text-center table-fixed">
+              <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                <tr>
+                  <th class="pb-2 w-2/5 text-center">Symbol</th>
+                  <th class="pb-2 text-center w-1/3">Price (₹)</th>
+                  <th class="pb-2 text-center">Change %</th>
+                </tr>
+              </thead>
+              <tbody id="losersTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Exact Screenshot 2 Style: Advancing and Declining Card (4 Cols) -->
+        <div class="lg:col-span-4 flex flex-col justify-between gap-4">
+          
+          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between h-full">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">Advancing and declining</h3>
+                <span class="text-[10px] font-bold text-slate-400 font-mono-num" id="adTotalBadge">Total: 0</span>
+              </div>
+
+              <!-- Top Bar Labels -->
+              <div class="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                <span>Advancing</span>
+                <span>Declining</span>
+              </div>
+
+              <!-- Split Ratio Bar (Exact Screenshot 2 Match) -->
+              <div class="w-full flex h-3.5 rounded-full overflow-hidden my-1.5 bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-800">
+                <div id="advBarFill" class="bg-[#10b981] h-full rounded-l-full transition-all duration-500" style="width: 50%;"></div>
+                <div id="decBarFill" class="bg-[#ef4444] h-full rounded-r-full transition-all duration-500" style="width: 50%;"></div>
+              </div>
+
+              <!-- Counts at Ends of Bar -->
+              <div class="flex justify-between items-center text-xs font-bold font-mono-num text-slate-700 dark:text-slate-300 mt-1">
+                <span id="advCountLabel">0</span>
+                <span id="decCountLabel">0</span>
+              </div>
+            </div>
+
+            <!-- Bottom Stats Grid: Net advances + A/D ratio (Up/down volume removed) -->
+            <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-100 dark:border-borderDark">
+              <div>
+                <p class="text-[11px] font-semibold text-slate-400">Net advances</p>
+                <p id="netAdvValue" class="text-2xl font-black font-mono-num text-emerald-500 mt-0.5">0</p>
+              </div>
+              <div>
+                <p class="text-[11px] font-semibold text-slate-400">A/D ratio</p>
+                <p id="adRatioValue" class="text-2xl font-black font-mono-num text-slate-800 dark:text-slate-100 mt-0.5">0.00</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 4. THREE INTRADAY CHARTS (INCL. SCREENSHOT 1 NEW HIGHS & LOWS COMBO CHART) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Chart 1: Intraday 4% Top Gainers & Losers -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-extrabold text-xs uppercase tracking-tight">Intraday 4% Gainers & Losers</h3>
+              <p class="text-[11px] text-slate-400">Momentum Counts (09:15 - 15:35 IST)</p>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] font-bold">
+              <span class="text-emerald-500">● Gain</span>
+              <span class="text-rose-500">● Lose</span>
+            </div>
+          </div>
+          <div class="h-60">
+            <canvas id="glLineChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Advance & Decline Dual Chart with A/D Ratio -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-extrabold text-xs uppercase tracking-tight">Advance, Decline & A/D Ratio</h3>
+              <p class="text-[11px] text-slate-400">Intraday Dual Breadth + Ratio Curve</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-cyan-500 font-mono-num" id="adRatioBadge">A/D: 0.00</span>
+          </div>
+          <div class="h-60">
+            <canvas id="adDualChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: EXACT SCREENSHOT 1 MATCH: New Highs and Lows Bidirectional Combo Chart -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-extrabold text-xs uppercase tracking-tight">New highs and lows</h3>
+              <p class="text-[11px] text-slate-400">Bidirectional Bars & Net % Curve</p>
+            </div>
+            <div class="flex items-center gap-2 text-[9.5px] font-bold">
+              <span class="text-[#10b981]">● Highs</span>
+              <span class="text-[#ef4444]">● Lows</span>
+              <span class="text-[#f59e0b]">● Net %</span>
+            </div>
+          </div>
+          <div class="h-60">
+            <canvas id="hlDualChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 5. FIVE BOTTOM TABLES (INCLUDING IPO SCANS, CENTER-ALIGNED & FULL SCROLL) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Table 1: IPO Momentum & Scans Table -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <h3 class="font-extrabold text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400">IPO Scans & Momentum</h3>
+              <span id="ipoCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-600 font-mono-num">0</span>
+            </div>
+            <button onclick="openModal('IPO Scans & Momentum', allDataStore.ipo)" class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">View All</button>
+          </div>
+          <div class="overflow-y-auto max-h-64 custom-scroll pr-1">
+            <table class="w-full text-xs text-center table-fixed">
+              <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                <tr>
+                  <th class="pb-2 w-2/5 text-center">Company Name</th>
+                  <th class="pb-2 w-1/4 text-center">Symbol</th>
+                  <th class="pb-2 text-center w-1/5">Price (₹)</th>
+                  <th class="pb-2 text-center">% Chg</th>
+                </tr>
+              </thead>
+              <tbody id="ipoTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 2: Near 52 week high -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <h3 class="font-extrabold text-xs uppercase tracking-wider">Near 52 week high</h3>
+              <span id="nearHighCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 font-mono-num">0</span>
+            </div>
+            <button onclick="openModal('Near 52 week high', allDataStore.nearHigh)" class="text-xs font-bold text-emerald-600 hover:underline cursor-pointer">View All</button>
+          </div>
+          <div class="overflow-y-auto max-h-64 custom-scroll pr-1">
+            <table class="w-full text-xs text-center table-fixed">
+              <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                <tr>
+                  <th class="pb-2 w-2/5 text-center">Stock Name</th>
+                  <th class="pb-2 w-1/4 text-center">Symbol</th>
+                  <th class="pb-2 text-center w-1/5">Price (₹)</th>
+                  <th class="pb-2 text-center">% Chg</th>
+                </tr>
+              </thead>
+              <tbody id="nearHighTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 3: New Highs -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <h3 class="font-extrabold text-xs uppercase tracking-wider text-emerald-600">New Highs</h3>
+              <span id="newHighsCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 font-mono-num">0</span>
+            </div>
+            <button onclick="openModal('New Highs Full List', allDataStore.newHighs)" class="text-xs font-bold text-emerald-600 hover:underline cursor-pointer">View All</button>
+          </div>
+          <div class="overflow-y-auto max-h-64 custom-scroll pr-1">
+            <table class="w-full text-xs text-center table-fixed">
+              <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                <tr>
+                  <th class="pb-2 w-2/5 text-center">Stock Name</th>
+                  <th class="pb-2 w-1/4 text-center">Symbol</th>
+                  <th class="pb-2 text-center w-1/5">Price (₹)</th>
+                  <th class="pb-2 text-center">% Chg</th>
+                </tr>
+              </thead>
+              <tbody id="newHighsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 4: New Lows -->
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <h3 class="font-extrabold text-xs uppercase tracking-wider text-rose-600">New Lows</h3>
+              <span id="newLowsCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-600 font-mono-num">0</span>
+            </div>
+            <button onclick="openModal('New Lows Full List', allDataStore.newLows)" class="text-xs font-bold text-rose-600 hover:underline cursor-pointer">View All</button>
+          </div>
+          <div class="overflow-y-auto max-h-64 custom-scroll pr-1">
+            <table class="w-full text-xs text-center table-fixed">
+              <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark pb-2 text-[11px]">
+                <tr>
+                  <th class="pb-2 w-2/5 text-center">Stock Name</th>
+                  <th class="pb-2 w-1/4 text-center">Symbol</th>
+                  <th class="pb-2 text-center w-1/5">Price (₹)</th>
+                  <th class="pb-2 text-center">% Chg</th>
+                </tr>
+              </thead>
+              <tbody id="newLowsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= COMPACT & SLEEK FOOTER ================= -->
+      <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
+        <div class="flex items-center gap-2">
+          <!-- Footer Mini Logo Icon -->
+          <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
+          <span class="text-slate-800 dark:text-slate-200 font-extrabold tracking-tight">Mickkk<span class="text-emerald-600 dark:text-[#00f5a0] font-black">.com</span></span>
+          <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence & Trading Platform</span>
+        </div>
+
+        <div class="flex items-center gap-5 text-[11px]">
+          <a href="index.html" class="hover:text-emerald-500 transition-colors">Market Overview</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">Features</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">Pricing</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">About</a>
+          <a href="#" class="hover:text-emerald-500 transition-colors">Contact</a>
+        </div>
+
+        <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
+          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
+          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="youtube" class="w-3.5 h-3.5"></i></a>
+          <span class="ml-1">© 2026 Mickkk.com.</span>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ================= VIEW ALL POPUP MODAL ================= -->
+  <div id="fullViewModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-6xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-3.5 border-b border-slate-200 dark:border-borderDark flex items-center justify-between shrink-0 bg-white dark:bg-cardDark">
+        <div>
+          <h3 id="modalTitle" class="font-extrabold text-base">Full Data View</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Click any column header to sort A-Z / 0-9</p>
+        </div>
+        <button onclick="closeModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Filter Search Bar -->
+      <div class="px-6 py-2.5 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-borderDark flex items-center justify-between shrink-0">
+        <input type="text" id="modalSearch" onkeyup="filterModalTable()" placeholder="Type to filter stocks..." class="text-xs px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark w-72 focus:outline-none">
+        <span id="modalRowCount" class="text-xs font-bold text-slate-400 font-mono-num">Total: 0</span>
+      </div>
+
+      <!-- Modal Table Body -->
+      <div class="flex-1 overflow-y-auto custom-scroll relative">
+        <table class="w-full text-xs text-center" id="modalTable">
+          <thead id="modalThead" class="text-slate-600 dark:text-slate-300 border-b-2 border-slate-200 dark:border-borderDark sticky top-0 bg-slate-100 dark:bg-slate-900 z-30 shadow-sm"></thead>
+          <tbody id="modalTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT & STALE-WHILE-REVALIDATE CACHING ENGINE ================= -->
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGXkNmnhPB8mzbpw2Zc2EowqVcHGu-ATOPHjsJ6a0escQkpxFXVPz5zynSjg1EIttYgA/exec";
+    const CACHE_KEY = "mickkk_market_overview_cache_v2";
+
+    let allDataStore = {};
+    let glChartInstance = null;
+    let adChartInstance = null;
+    let hlChartInstance = null;
+
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const arrow = document.getElementById("collapseArrow");
+
+      sidebar.classList.toggle("sidebar-collapsed");
+      if (sidebar.classList.contains("sidebar-collapsed")) {
+        mainContent.classList.remove("ml-60");
+        mainContent.classList.add("ml-[4.2rem]");
+        if (arrow) arrow.setAttribute("data-lucide", "chevron-right");
+      } else {
+        mainContent.classList.remove("ml-[4.2rem]");
+        mainContent.classList.add("ml-60");
+        if (arrow) arrow.setAttribute("data-lucide", "chevron-left");
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Theme Switcher
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle("dark");
+      const sunIconSide = document.getElementById("sunIconSide");
+      const moonIconSide = document.getElementById("moonIconSide");
+      const sunIconMini = document.getElementById("sunIconMini");
+      const moonIconMini = document.getElementById("moonIconMini");
+
+      if (sunIconSide) sunIconSide.classList.toggle("hidden", isDark);
+      if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
+      if (sunIconMini) sunIconMini.classList.toggle("hidden", isDark);
+      if (moonIconMini) moonIconMini.classList.toggle("hidden", !isDark);
+
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      if (allDataStore.indices) {
+        renderCharts(allDataStore.glIntraday || [], allDataStore.adIntraday || [], allDataStore.hlIntraday || []);
+      }
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
+      const sunIconSide = document.getElementById("sunIconSide");
+      const moonIconSide = document.getElementById("moonIconSide");
+      const sunIconMini = document.getElementById("sunIconMini");
+      const moonIconMini = document.getElementById("moonIconMini");
+      if (sunIconSide) sunIconSide.classList.add("hidden");
+      if (moonIconSide) moonIconSide.classList.remove("hidden");
+      if (sunIconMini) sunIconMini.classList.add("hidden");
+      if (moonIconMini) moonIconMini.classList.remove("hidden");
+    }
+
+    // Live Clock & 5-Min Timer
+    let countdownSeconds = 300;
+    function updateClockAndTimer() {
+      const now = new Date();
+      const clockEl = document.getElementById("headerClock");
+      if (clockEl) {
+        clockEl.innerText = now.toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" }) + " IST";
+      }
+
+      countdownSeconds--;
+      if (countdownSeconds <= 0) {
+        countdownSeconds = 300;
+        fetchTerminalData(false);
+      }
+      const mins = Math.floor(countdownSeconds / 60).toString().padStart(2, '0');
+      const secs = (countdownSeconds % 60).toString().padStart(2, '0');
+      const timerEl = document.getElementById("refreshTimer");
+      if (timerEl) timerEl.innerText = `${mins}:${secs}`;
+    }
+    setInterval(updateClockAndTimer, 1000);
+    updateClockAndTimer();
+
+    // ================= 🚀 INSTANT LOCALSTORAGE CACHE PAINT =================
+    function renderFromCache() {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const data = JSON.parse(cached);
+          if (data && data.indices) {
+            allDataStore = data;
+            renderSparklineCards(data.indices || []);
+            renderIndicesTable(data.indices || []);
+            renderGainersLosers(data.gainers || [], data.losers || []);
+            renderCountsStats(data);
+            renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
+            renderBottomTables(data);
+          }
+        }
+      } catch (e) {
+        console.warn("Cache read error:", e);
+      }
+    }
+
+    // Data Fetcher (Silent Background Fetch & Auto-Update Cache)
+    async function fetchTerminalData(isManual = false) {
+      const spin = document.getElementById("manualSpinIcon");
+      if (isManual && spin) spin.classList.add("animate-spin");
+
+      try {
+        const response = await fetch(WEB_APP_URL);
+        const data = await response.json();
+        
+        if (data && data.indices) {
+          allDataStore = data;
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          } catch(e) {}
+
+          renderSparklineCards(data.indices || []);
+          renderIndicesTable(data.indices || []);
+          renderGainersLosers(data.gainers || [], data.losers || []);
+          renderCountsStats(data);
+          renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
+          renderBottomTables(data);
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      } finally {
+        if (isManual && spin) spin.classList.remove("animate-spin");
+        countdownSeconds = 300;
+      }
+    }
+
+    // 1. Sparkline Cards
+    function renderSparklineCards(indices) {
+      const row = document.getElementById("sparkCardsRow");
+      if (!indices.length || !row) return;
+      row.innerHTML = "";
+
+      const targets = [
+        { label: "NIFTY 50", matchFunc: (name) => name === "NIFTY" || name === "NIFTY 50" },
+        { label: "NIFTY 500", matchFunc: (name) => name.includes("500") },
+        { label: "NIFTYMIDSMALLCAP400", matchFunc: (name) => name.includes("MIDSMALL") || name.includes("400") },
+        { label: "CNXSMALLCAP", matchFunc: (name) => name.includes("SMALLCAP") },
+        { label: "INDIA VIX", matchFunc: (name) => name.includes("VIX") }
+      ];
+
+      targets.forEach(t => {
+        let match = indices.find(i => {
+          const sym = String(i["Index Symbol"] || "").toUpperCase().trim();
+          const name = String(i["Index Name"] || "").toUpperCase().trim();
+          return t.matchFunc(sym) || t.matchFunc(name);
+        });
+
+        if (!match) match = { "Index Name": t.label, "Close": 0, "% Change (D)": 0 };
+
+        const close = parseFloat(match["Close"] || 0);
+        const chg = parseFloat(match["% Change (D)"] || 0);
+        const isVIX = t.label.includes("VIX");
+        const isGreen = isVIX ? chg < 0 : chg >= 0;
+
+        row.innerHTML += `
+          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider truncate max-w-[110px]">${t.label}</p>
+              <h4 class="text-base font-extrabold mt-1 font-mono-num">${isVIX ? close.toFixed(2) : '₹' + close.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h4>
+              <p class="text-[11px] font-bold mt-1 flex items-center gap-1 font-mono-num ${isGreen ? 'text-emerald-500' : 'text-rose-500'}">
+                <span>${chg >= 0 ? '▲ +' : '▼ '}${(chg * 100).toFixed(2)}%</span>
+              </p>
+            </div>
+            <div class="w-16 h-8">
+              <svg class="w-full h-full stroke-current ${isGreen ? 'text-emerald-500' : 'text-rose-500'}" viewBox="0 0 100 40" fill="none" stroke-width="2.5">
+                <path d="${isGreen ? 'M0 35 Q 25 30, 50 15 T 100 5' : 'M0 5 Q 25 10, 50 25 T 100 35'}"/>
+              </svg>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // 2. Indices Terminal Table (Centered & Full Data Scrollable)
+    function renderIndicesTable(indices) {
+      const tbody = document.getElementById("indicesTableBody");
+      const badge = document.getElementById("indicesCountBadge");
+      if (!tbody) return;
+      if (badge) badge.innerText = indices.length;
+
+      tbody.innerHTML = indices.map(i => {
+        const chg = parseFloat(i["% Change (D)"] || 0);
+        return `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2.5 text-center text-slate-700 dark:text-slate-200 font-bold truncate">${i["Index Name"]}</td>
+            <td class="py-2.5 text-center text-blue-500 font-medium">${i["Index Symbol"]}</td>
+            <td class="py-2.5 text-center font-mono-num">₹${parseFloat(i["Close"]).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+            <td class="py-2.5 text-center font-bold font-mono-num ${chg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(chg * 100).toFixed(2)}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // 3. Top Gainers & Losers Tables (Centered & Full Data Scrollable)
+    function renderGainersLosers(gainers, losers) {
+      const gBadge = document.getElementById("gainersCountBadge");
+      const lBadge = document.getElementById("losersCountBadge");
+      if (gBadge) gBadge.innerText = gainers.length;
+      if (lBadge) lBadge.innerText = losers.length;
+
+      const gTbody = document.getElementById("gainersTbody");
+      if (gTbody) {
+        gTbody.innerHTML = gainers.map(g => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2 text-center font-bold text-blue-600 dark:text-blue-400 truncate">${g["Symbol"] || g["Stock Name"]}</td>
+            <td class="py-2 text-center font-mono-num">₹${parseFloat(g["Close"]).toFixed(2)}</td>
+            <td class="py-2 text-center font-extrabold font-mono-num text-emerald-500">+${(parseFloat(g["% Change (D)"]) * 100).toFixed(2)}%</td>
+          </tr>
+        `).join("");
+      }
+
+      const lTbody = document.getElementById("losersTbody");
+      if (lTbody) {
+        lTbody.innerHTML = losers.map(l => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2 text-center font-bold text-blue-600 dark:text-blue-400 truncate">${l["Symbol"] || l["Stock Name"]}</td>
+            <td class="py-2 text-center font-mono-num">₹${parseFloat(l["Close"]).toFixed(2)}</td>
+            <td class="py-2 text-center font-extrabold font-mono-num text-rose-500">${(parseFloat(l["% Change (D)"]) * 100).toFixed(2)}%</td>
+          </tr>
+        `).join("");
+      }
+    }
+
+    // 4. Stats, Breadth Meter & Screenshot 2 Style Advancing/Declining Bar
+    function renderCountsStats(data) {
+      const lastAd = data.adIntraday && data.adIntraday.length ? data.adIntraday[data.adIntraday.length - 1] : {};
+      const adv = parseInt(lastAd["Advances"] || 0, 10);
+      const dec = parseInt(lastAd["Declines"] || 0, 10);
+      const total = parseInt(lastAd["Total"] || (adv + dec), 10);
+      const netAdv = adv - dec;
+      const adRatio = parseFloat(lastAd["A/D Ratio"] || (dec > 0 ? (adv / dec).toFixed(2) : '1.00'));
+
+      // Progress Bar Sizing (Screenshot 2 style)
+      const advPct = total > 0 ? (adv / total) * 100 : 50;
+      const decPct = total > 0 ? (dec / total) * 100 : 50;
+      const advBar = document.getElementById("advBarFill");
+      const decBar = document.getElementById("decBarFill");
+      if (advBar) advBar.style.width = `${advPct}%`;
+      if (decBar) decBar.style.width = `${decPct}%`;
+
+      // Numbers formatting (e.g. 1.47 K)
+      const formatK = num => num >= 1000 ? (num / 1000).toFixed(2) + " K" : num.toString();
+      const advLabel = document.getElementById("advCountLabel");
+      const decLabel = document.getElementById("decCountLabel");
+      const adTotal = document.getElementById("adTotalBadge");
+      if (advLabel) advLabel.innerText = formatK(adv);
+      if (decLabel) decLabel.innerText = formatK(dec);
+      if (adTotal) adTotal.innerText = `Total: ${total.toLocaleString()}`;
+
+      // Net Advances & A/D Ratio Stats
+      const netAdvEl = document.getElementById("netAdvValue");
+      const adRatioEl = document.getElementById("adRatioValue");
+      if (netAdvEl) {
+        netAdvEl.innerText = (netAdv >= 0 ? '+' : '') + netAdv.toLocaleString();
+        netAdvEl.className = `text-2xl font-black font-mono-num mt-0.5 ${netAdv >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+      }
+      if (adRatioEl) adRatioEl.innerText = adRatio.toFixed(2);
+
+      // Gauge Meter Card
+      const mTotal = document.getElementById("meterTotal");
+      if (mTotal) mTotal.innerText = total.toLocaleString();
+      const mAdv = document.getElementById("meterAdv");
+      const mDec = document.getElementById("meterDec");
+      if (mAdv) mAdv.innerText = `${adv.toLocaleString()} (${Math.round(advPct)}%)`;
+      if (mDec) mDec.innerText = `${dec.toLocaleString()} (${Math.round(decPct)}%)`;
+
+      const score = Math.round(advPct);
+      const bScore = document.getElementById("breadthScore");
+      const mBadge = document.getElementById("meterScoreBadge");
+      const bLabel = document.getElementById("breadthLabel");
+      if (bScore) bScore.innerText = score;
+      if (mBadge) mBadge.innerText = `Score: ${score}`;
+      if (bLabel) {
+        if (score >= 60) bLabel.innerText = "Bullish";
+        else if (score <= 40) bLabel.innerText = "Bearish";
+        else bLabel.innerText = "Neutral";
+      }
+
+      const adBadge = document.getElementById("adRatioBadge");
+      if (adBadge) adBadge.innerText = `A/D: ${adRatio.toFixed(2)}`;
+    }
+
+    // 5. Dual Intraday Charts (Including Screenshot 1 Combo Chart & A/D Ratio)
+    function renderCharts(glData, adData, hlData) {
+      if (typeof Chart === 'undefined') return;
+      const isDark = document.documentElement.classList.contains("dark");
+      const gridColor = isDark ? "#1e293b" : "#f1f5f9";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
+
+      // Chart 1: 4% Gainers vs Losers
+      if (glChartInstance) glChartInstance.destroy();
+      const glCanvas = document.getElementById("glLineChart");
+      if (glCanvas) {
+        glChartInstance = new Chart(glCanvas, {
+          type: 'line',
+          data: {
+            labels: glData.map(r => r["Time"]),
+            datasets: [
+              { label: '4%+ Gainers', data: glData.map(r => r["Top Gainers Count"]), borderColor: '#10b981', tension: 0.35, pointRadius: 0, borderWidth: 2 },
+              { label: '4%- Losers', data: glData.map(r => r["Top Losers Count"]), borderColor: '#ef4444', tension: 0.35, pointRadius: 0, borderWidth: 2 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } } }
+        });
+      }
+
+      // Chart 2: Advance & Decline Dual Chart + A/D Ratio Dual-Axis
+      if (adChartInstance) adChartInstance.destroy();
+      const adCanvas = document.getElementById("adDualChart");
+      if (adCanvas) {
+        adChartInstance = new Chart(adCanvas, {
+          type: 'line',
+          data: {
+            labels: adData.map(r => r["Time"]),
+            datasets: [
+              { label: 'Advances', data: adData.map(r => r["Advances"]), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yCount' },
+              { label: 'Declines', data: adData.map(r => r["Declines"]), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yCount' },
+              { label: 'A/D Ratio', data: adData.map(r => parseFloat(r["A/D Ratio"] || 0)), borderColor: '#00d4ff', borderDash: [4, 4], tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yRatio' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: textColor } },
+              yCount: { position: 'left', grid: { color: gridColor }, ticks: { color: textColor } },
+              yRatio: { position: 'right', grid: { display: false }, ticks: { color: '#00d4ff', callback: val => val.toFixed(1) } }
+            }
+          }
+        });
+      }
+
+      // Chart 3: EXACT SCREENSHOT 1 MATCH: New Highs & Lows Combo Chart (Bidirectional Bars + Orange Net % Line)
+      if (hlChartInstance) hlChartInstance.destroy();
+      const hlCanvas = document.getElementById("hlDualChart");
+      if (hlCanvas) {
+        hlChartInstance = new Chart(hlCanvas, {
+          type: 'bar',
+          data: {
+            labels: hlData.map(r => r["Time"]),
+            datasets: [
+              {
+                type: 'bar',
+                label: 'New highs',
+                data: hlData.map(r => parseFloat(r["New H"] || 0)),
+                backgroundColor: '#10b981',
+                borderRadius: 2,
+                yAxisID: 'yCount',
+                order: 2
+              },
+              {
+                type: 'bar',
+                label: 'New lows',
+                data: hlData.map(r => -Math.abs(parseFloat(r["New L"] || 0))),
+                backgroundColor: '#ef4444',
+                borderRadius: 2,
+                yAxisID: 'yCount',
+                order: 2
+              },
+              {
+                type: 'line',
+                label: 'Net highs, %',
+                data: hlData.map(r => {
+                  const h = parseFloat(r["New H"] || 0);
+                  const l = parseFloat(r["New L"] || 0);
+                  return (h + l > 0) ? ((h - l) / (h + l)) * 100 : 0;
+                }),
+                borderColor: '#f59e0b',
+                backgroundColor: '#f59e0b',
+                pointBackgroundColor: '#f59e0b',
+                pointRadius: 2.5,
+                borderWidth: 2,
+                tension: 0.25,
+                yAxisID: 'yPct',
+                order: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 8 } },
+              yCount: {
+                position: 'right',
+                grid: { color: gridColor },
+                ticks: { color: textColor, callback: val => val.toLocaleString() }
+              },
+              yPct: {
+                position: 'left',
+                grid: { display: false },
+                ticks: { color: '#f59e0b', callback: val => val.toFixed(0) + '%' }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // 6. Bottom Tables (Centered Data, Full Scrollable, Live Count Badges)
+    function renderBottomTables(data) {
+      const updateTable = (arr, tbodyId, badgeId) => {
+        const tbody = document.getElementById(tbodyId);
+        const badge = document.getElementById(badgeId);
+        if (!tbody) return;
+        const list = arr || [];
+        if (badge) badge.innerText = list.length;
+
+        tbody.innerHTML = list.map(item => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2 text-center text-slate-700 dark:text-slate-300 font-semibold truncate">${item["Stock Name"] || item["Company Name"]}</td>
+            <td class="py-2 text-center text-blue-500 font-bold">${item["Symbol"]}</td>
+            <td class="py-2 text-center font-medium font-mono-num">₹${parseFloat(item["Close"] || 0).toFixed(2)}</td>
+            <td class="py-2 text-center font-extrabold font-mono-num ${parseFloat(item["% Change (D)"] || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
+              ${(parseFloat(item["% Change (D)"] || 0) * 100).toFixed(2)}%
+            </td>
+          </tr>
+        `).join("");
+      };
+
+      updateTable(data.ipo, "ipoTbody", "ipoCountBadge");
+      updateTable(data.nearHigh, "nearHighTbody", "nearHighCountBadge");
+      updateTable(data.newHighs, "newHighsTbody", "newHighsCountBadge");
+      updateTable(data.newLows, "newLowsTbody", "newLowsCountBadge");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Global Header Search
+    function handleGlobalSearch(e) {
+      const query = e.target.value.trim().toLowerCase();
+      if (!query || !allDataStore) return;
+      if (e.key === "Enter") {
+        const combined = [
+          ...(allDataStore.gainers || []),
+          ...(allDataStore.losers || []),
+          ...(allDataStore.nearHigh || []),
+          ...(allDataStore.newHighs || []),
+          ...(allDataStore.ipo || [])
+        ];
+        const match = combined.filter(item => 
+          String(item["Stock Name"] || item["Company Name"] || "").toLowerCase().includes(query) ||
+          String(item["Symbol"] || "").toLowerCase().includes(query)
+        );
+        openModal(`Search Results: "${query}"`, match);
+      }
+    }
+
+    // ================= MODAL FULL VIEW (CENTER-ALIGNED) =================
+    let currentModalData = [];
+    let sortDirections = {};
+
+    function openModal(title, dataset, customHeaders = null) {
+      if (!dataset || !dataset.length) return;
+      currentModalData = dataset;
+      document.getElementById("modalTitle").innerText = title;
+      document.getElementById("modalRowCount").innerText = `Total Records: ${dataset.length}`;
+
+      const thead = document.getElementById("modalThead");
+      const headers = customHeaders || Object.keys(dataset[0]);
+
+      thead.innerHTML = `<tr>${headers.map(h => `
+        <th onclick="sortTableBy('${h}')" class="py-3 px-3 text-center font-bold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors select-none text-[11px] uppercase tracking-wider">
+          <div class="flex items-center justify-center gap-1.5">
+            <span>${h}</span>
+            <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-slate-400"></i>
+          </div>
+        </th>
+      `).join("")}</tr>`;
+
+      renderModalRows(dataset, headers);
+      document.getElementById("fullViewModal").classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderModalRows(data, headers) {
+      const tbody = document.getElementById("modalTbody");
+      tbody.innerHTML = data.map(row => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          ${headers.map(h => {
+            let val = row[h];
+            const lowerHeader = h.toLowerCase();
+            if (lowerHeader.includes("%") || lowerHeader.includes("change")) {
+              val = `<span class="${parseFloat(val) >= 0 ? 'text-emerald-500' : 'text-rose-500'} font-mono-num font-bold">${(parseFloat(val) * 100).toFixed(2)}%</span>`;
+            } else if (lowerHeader.includes("close") || lowerHeader.includes("price")) {
+              val = `<span class="font-mono-num font-semibold">₹${parseFloat(val).toFixed(2)}</span>`;
+            } else if (lowerHeader.includes("sector") || lowerHeader.includes("industry")) {
+              val = `<span class="capitalize text-slate-500 dark:text-slate-400 font-medium text-[11px]">${String(val || "-").toLowerCase()}</span>`;
+            } else if (lowerHeader.includes("volume") || lowerHeader.includes("market cap")) {
+              val = `<span class="font-mono-num text-slate-600 dark:text-slate-300">${val}</span>`;
+            }
+            return `<td class="py-2.5 px-3 text-center">${val !== undefined ? val : "-"}</td>`;
+          }).join("")}
+        </tr>
+      `).join("");
+    }
+
+    function sortTableBy(columnKey) {
+      sortDirections[columnKey] = !sortDirections[columnKey];
+      const isAsc = sortDirections[columnKey];
+
+      currentModalData.sort((a, b) => {
+        let valA = a[columnKey];
+        let valB = b[columnKey];
+        const numA = parseFloat(valA);
+        const numB = parseFloat(valB);
+
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return isAsc ? numA - numB : numB - numA;
+        }
+        return isAsc ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
+      });
+
+      const headers = Object.keys(currentModalData[0]);
+      renderModalRows(currentModalData, headers);
+    }
+
+    function filterModalTable() {
+      const query = document.getElementById("modalSearch").value.toLowerCase();
+      const headers = Object.keys(currentModalData[0]);
+      const filtered = currentModalData.filter(row => 
+        Object.values(row).some(v => String(v).toLowerCase().includes(query))
+      );
+      document.getElementById("modalRowCount").innerText = `Found: ${filtered.length}`;
+      renderModalRows(filtered, headers);
+    }
+
+    function closeModal() {
+      document.getElementById("fullViewModal").classList.add("hidden");
+    }
+
+    // ================= INITIALIZATION =================
+    function init() {
+      if (window.lucide) lucide.createIcons();
+      renderFromCache(); // 0ms Instant Render from Browser Storage
+      fetchTerminalData(false); // Silent Background Update from Live API
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
