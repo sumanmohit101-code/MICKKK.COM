@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Market Breadth Dashboard - Mickkk.com</title>
 
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark");}catch(e){}</script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -30,43 +33,38 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap');
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    .tagline-font { font-family: 'Montserrat', sans-serif; }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
     
-    /* ================= 4-TYPE LOGO DISPLAY RULES ================= */
-    /* 1. Full Sidebar Expanded Mode */
-    .brand-full-light { display: block; }
-    .brand-full-dark  { display: none; }
-    .brand-icon-light { display: none; }
-    .brand-icon-dark  { display: none; }
 
-    .dark .brand-full-light { display: none; }
-    .dark .brand-full-dark  { display: block; }
-    .dark .brand-icon-light { display: none; }
-    .dark .brand-icon-dark  { display: none; }
+    /* ===== Mickkk Logo (theme-aware) ===== */
+    :root { --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
+            --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; }
+    .dark { --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
+            --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; }
+    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
+    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
+               background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
+    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
+    .mk-arrow { transition: transform .25s ease; }
+    .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
+    .mk-logo:hover .mk-icon { transform: scale(1.07); }
+    .mk-icon { transition: transform .25s ease; }
 
-    /* 2. Collapsed Sidebar Icon Mode */
-    .sidebar-collapsed .brand-full-light { display: none !important; }
-    .sidebar-collapsed .brand-full-dark  { display: none !important; }
-    .sidebar-collapsed .brand-icon-light { display: flex !important; }
-    .sidebar-collapsed .brand-icon-dark  { display: none !important; }
-
-    .dark .sidebar-collapsed .brand-full-light { display: none !important; }
-    .dark .sidebar-collapsed .brand-full-dark  { display: none !important; }
-    .dark .sidebar-collapsed .brand-icon-light { display: none !important; }
-    .dark .sidebar-collapsed .brand-icon-dark  { display: flex !important; }
-
-    /* Sidebar Collapsed Icon Mode (JournalToday Match) */
+    /* Sidebar Collapsed Icon Mode (JournalToday Exact Match) */
     .sidebar-collapsed { width: 4.2rem !important; }
+    .sidebar-collapsed .brand-text,
     .sidebar-collapsed .nav-text,
     .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
     .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
     .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-    .sidebar-collapsed .brand-container { justify-content: center !important; }
+    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
 
     /* Tooltip when collapsed */
     .sidebar-collapsed .nav-item:hover::after {
@@ -104,7 +102,7 @@
     .cell-bar-wrap { position: relative; width: 100%; min-width: 48px; background: rgba(100, 116, 139, 0.15); border-radius: 2px; height: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .cell-bar-fill { position: absolute; left: 0; top: 0; height: 100%; opacity: 0.35; border-radius: 2px; }
 
-    /* Sticky Freeze Date Column */
+    /* Sticky Freeze Date Column - 100% OPAQUE */
     .sticky-date-cell {
       position: sticky !important;
       left: 0 !important;
@@ -123,61 +121,67 @@
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200">
+  <!-- Mickkk logo icon (shared symbol, light + dark aware) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <g clip-path="url(#mkClip)">
+          <!-- right half of M (fades into the arrow) -->
+          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
+          <!-- left stem + diagonal, slanted foot -->
+          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
+          <!-- gloss -->
+          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
+        </g>
+        <!-- rising bars -->
+        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
+        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
+        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
+        <!-- breakout arrow -->
+        <g class="mk-glow mk-arrow">
+          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
+          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
 
   <!-- ================= LEFT SIDEBAR ================= -->
   <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
     
-    <!-- Floating Circular Collapse Arrow on Border -->
+    <!-- Floating Circular Collapse Arrow (Exact JournalToday Placement on border) -->
     <button onclick="toggleSidebar()" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
       <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
     </button>
 
     <div>
-      <!-- Brand Logo Container: Optimized Full Width & Large Size -->
-      <div class="brand-container flex items-center justify-center px-0.5 py-1 min-h-[56px]">
-        
-        <!-- 1. FULL LOGO - LIGHT THEME (Expanded Sidebar, Bada Size) -->
-        <img src="logo-full-light.png" 
-             alt="Mickkk.com" 
-             class="brand-full-light w-full h-[52px] object-contain rounded-lg transition-all"
-             onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-full-light.png.png';}else if(this.dataset.tried==1){this.dataset.tried=2;this.src='logo-light.png';}" />
+      <!-- Brand Logo + Mickkk.com Native High-Impact Branding -->
+      <a href="index.html" title="Mickkk.com" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
 
-        <!-- 2. FULL LOGO - DARK THEME (Expanded Sidebar, Bada Size) -->
-        <img src="logo-full-dark.png" 
-             alt="Mickkk.com" 
-             class="brand-full-dark w-full h-[52px] object-contain rounded-lg transition-all"
-             onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-full-dark.png.png';}else if(this.dataset.tried==1){this.dataset.tried=2;this.src='logo-dark.png';}" />
+        <!-- Icon (only this stays visible when sidebar is collapsed) -->
+        <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
 
-        <!-- 3. ICON LOGO - LIGHT THEME (Collapsed Sidebar Mode) -->
-        <div class="brand-icon-light items-center justify-center w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 p-1 shrink-0 overflow-hidden shadow-sm">
-          <img src="logo-icon-light.png" 
-               alt="Mickkk" 
-               class="w-full h-full object-contain"
-               onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-icon-light.png.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}" />
-          <!-- High-Tech Fallback Vector Icon (Kabhi broken nahi aayega) -->
-          <svg viewBox="0 0 100 100" class="w-full h-full hidden" fill="none">
-            <path d="M15 75V25L40 50L65 25V75" stroke="#10b981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-            <polygon points="65,15 85,25 75,45" fill="#10b981"/>
-          </svg>
+        <!-- Right side: top = Mickkk.com, bottom = tagline -->
+        <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
+          <div class="flex items-baseline whitespace-nowrap">
+            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
+            <span class="mk-tag text-[6.5px] tracking-[0.2em]">Market Intelligence</span>
+          </div>
         </div>
 
-        <!-- 4. ICON LOGO - DARK THEME (Collapsed Sidebar Mode) -->
-        <div class="brand-icon-dark items-center justify-center w-10 h-10 rounded-xl bg-[#040914] border border-slate-800 p-1 shrink-0 overflow-hidden shadow-sm">
-          <img src="logo-icon-dark.png" 
-               alt="Mickkk" 
-               class="w-full h-full object-contain"
-               onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo-icon-dark.png.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}" />
-          <!-- High-Tech Fallback Vector Icon (Kabhi broken nahi aayega) -->
-          <svg viewBox="0 0 100 100" class="w-full h-full hidden" fill="none">
-            <path d="M15 75V25L40 50L65 25V75" stroke="#00f5a0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-            <polygon points="65,15 85,25 75,45" fill="#00f5a0"/>
-          </svg>
-        </div>
+      </a>
 
-      </div>
-
-      <!-- Clean Horizontal Partition Line -->
-      <div class="border-b border-slate-200 dark:border-borderDark my-3"></div>
+      <!-- Clean Horizontal Partition Line (Exact JournalToday Match) -->
+      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
 
       <!-- Navigation Links -->
       <nav class="space-y-1 text-xs font-semibold">
@@ -541,9 +545,9 @@
       <!-- ================= COMPACT SLEEK FOOTER ================= -->
       <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
         <div class="flex items-center gap-2">
-          <!-- Footer Mini Logo -->
-          <img src="logo-full-light.png" alt="Mickkk.com Logo" class="dark:hidden h-6 w-auto object-contain" onerror="this.onerror=null; this.src='logo-full-light.png.png';" />
-          <img src="logo-full-dark.png" alt="Mickkk.com Logo" class="hidden dark:block h-6 w-auto object-contain" onerror="this.onerror=null; this.src='logo-full-dark.png.png';" />
+          <!-- Footer Mini Logo Icon -->
+          <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
+          <span class="text-slate-800 dark:text-slate-200 font-extrabold tracking-tight">Mickkk<span class="text-emerald-600 dark:text-[#00f5a0] font-black">.com</span></span>
           <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence & Trading Platform</span>
         </div>
 
@@ -716,6 +720,7 @@
       const script = document.createElement("script");
       const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetData&sheet=${encodeURIComponent(SHEET_NAME)}&_ts=${new Date().getTime()}`;
       script.src = url;
+
       document.body.appendChild(script);
 
       script.onload = () => {
@@ -1017,6 +1022,7 @@
       }).join('');
     }
 
+    // 3. Render 7 Exact Institutional Charts
     function renderAllCharts() {
       if (typeof Chart === 'undefined') return;
       const labels = filteredDataset.map(r => r.date);
