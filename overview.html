@@ -92,7 +92,8 @@
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200">
-  <!-- Mickkk logo icon (shared symbol, light + dark aware) -->
+  
+  <!-- Mickkk logo icon (shared symbol) -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
@@ -102,19 +103,14 @@
       <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
       <symbol id="mick-icon" viewBox="0 0 100 100">
         <g clip-path="url(#mkClip)">
-          <!-- right half of M (fades into the arrow) -->
           <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
-          <!-- left stem + diagonal, slanted foot -->
           <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
-          <!-- gloss -->
           <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
         </g>
-        <!-- rising bars -->
         <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
         <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
         <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
-        <!-- breakout arrow -->
-        <g class="mk-glow mk-arrow">
+        <g class="mk-glow">
           <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
           <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
         </g>
@@ -154,6 +150,7 @@
 
       <!-- Navigation Links -->
       <nav class="space-y-1 text-xs font-semibold">
+        <!-- 1. Market Overview (Active Page) -->
         <a href="overview.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
         </a>
@@ -163,6 +160,7 @@
         <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="layers" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Index Terminal</span>
         </a>
+        <!-- 2. Market Breadth Dashboard Link -->
         <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="activity" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Breadth</span>
         </a>
@@ -264,10 +262,10 @@
         <!-- Rendered instantly from cache -->
       </div>
 
-      <!-- 2. INDICES TERMINAL TABLE + SCREENSHOT-STYLE MARKET BREADTH METER -->
+      <!-- 2. INDICES TERMINAL TABLE + EXACT SPEEDOMETER MARKET BREADTH METER (REPLACED) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Indices Terminal Table (8 Cols) - Center-Aligned & Full Scroll -->
+        <!-- Indices Terminal Table (8 Cols) -->
         <div class="lg:col-span-8 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-3">
@@ -293,42 +291,59 @@
           </div>
         </div>
 
-        <!-- Market Breadth Gauge Meter (4 Cols) -->
-        <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="font-extrabold text-xs uppercase tracking-wider">Market Breadth</h3>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50" id="meterScoreBadge">Score: --</span>
+        <!-- ================= EXACT MARKET BREADTH METER FROM BREADTH.HTML ================= -->
+        <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between items-center relative overflow-hidden">
+          
+          <div class="w-full flex items-center justify-between mb-1">
+            <span class="text-xs font-black uppercase text-slate-600 dark:text-slate-300 tracking-wider">MARKET BREADTH METER</span>
+            <a href="breadth.html" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5">
+              <span>View Breadth</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
           </div>
 
-          <div class="relative flex flex-col items-center justify-center my-1">
-            <div class="w-48 h-24 overflow-hidden relative">
-              <div class="w-48 h-48 rounded-full border-[14px] border-slate-200 dark:border-slate-800 border-b-transparent border-l-rose-500 border-t-amber-400 border-r-emerald-500 rotate-[-45deg]"></div>
-            </div>
-            <div class="absolute bottom-1 text-center">
-              <div class="text-2xl font-black font-mono-num" id="breadthScore">--</div>
-              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" id="breadthLabel">Calculating...</p>
-            </div>
+          <!-- Speedometer Dial with Dynamic Needle -->
+          <div class="relative w-64 h-32 my-1 flex items-center justify-center">
+            <svg viewBox="0 0 240 135" class="w-full h-full">
+              <!-- Symmetrical Color Arcs -->
+              <path d="M 45 115 A 75 75 0 0 1 83 55" fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>
+              <path d="M 83 55 A 75 75 0 0 1 157 55" fill="none" stroke="#f59e0b" stroke-width="16"/>
+              <path d="M 157 55 A 75 75 0 0 1 195 115" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round"/>
+              
+              <!-- Clean Numbers on OUTSIDE with Equal Radial Spacing -->
+              <text x="18" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-3</text>
+              <text x="50" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-2</text>
+              <text x="82" y="30" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-1</text>
+              <text x="120" y="20" font-size="12" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">0</text>
+              <text x="158" y="30" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+1</text>
+              <text x="190" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+2</text>
+              <text x="222" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+3</text>
+
+              <!-- Center Needle Pivot -->
+              <circle cx="120" cy="115" r="7" class="fill-slate-800 dark:fill-slate-100"/>
+
+              <!-- Dynamic Needle Group -->
+              <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 1s ease-out;">
+                <polygon points="118.5,115 121.5,115 120,40" class="fill-[#0f172a] dark:fill-[#ffffff]"/>
+              </g>
+            </svg>
           </div>
 
-          <div class="space-y-1.5 text-xs border-t border-slate-100 dark:border-borderDark pt-3 font-semibold">
-            <div class="flex justify-between text-slate-500">
-              <span>Total Stocks:</span> <span class="font-mono-num text-slate-800 dark:text-slate-200" id="meterTotal">-</span>
-            </div>
-            <div class="flex justify-between text-emerald-600">
-              <span>Advances:</span> <span class="font-mono-num" id="meterAdv">-</span>
-            </div>
-            <div class="flex justify-between text-rose-600">
-              <span>Declines:</span> <span class="font-mono-num" id="meterDec">-</span>
-            </div>
+          <!-- Bottom Digital Score & Status -->
+          <div class="text-center w-full pt-1.5 border-t border-slate-100 dark:border-borderDark">
+            <div class="text-2xl font-black font-mono-num leading-none" id="meterScoreVal">--</div>
+            <p class="text-[11px] font-black tracking-wider uppercase text-emerald-500 mt-1" id="meterScoreStatus">--</p>
+            <p class="text-[9.5px] text-slate-400 font-medium font-mono-num mt-0.5">(≥ +3 Bullish | ≤ -3 Bearish)</p>
           </div>
+
         </div>
 
       </div>
 
-      <!-- 3. TOP GAINERS & LOSERS + STYLISH ADVANCES/DECLINES (SCREENSHOT 2 MATCH) -->
+      <!-- 3. TOP GAINERS & LOSERS + STYLISH ADVANCES/DECLINES BAR WIDGET -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Top Gainers Table (4 Cols) - Center-Aligned & Full Scroll -->
+        <!-- Top Gainers Table (4 Cols) -->
         <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -352,7 +367,7 @@
           </div>
         </div>
 
-        <!-- Top Losers Table (4 Cols) - Center-Aligned & Full Scroll -->
+        <!-- Top Losers Table (4 Cols) -->
         <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -376,9 +391,8 @@
           </div>
         </div>
 
-        <!-- Exact Screenshot 2 Style: Advancing and Declining Card (4 Cols) -->
+        <!-- Advancing and Declining Bar Card (4 Cols) -->
         <div class="lg:col-span-4 flex flex-col justify-between gap-4">
-          
           <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between h-full">
             <div>
               <div class="flex items-center justify-between mb-3">
@@ -386,13 +400,13 @@
                 <span class="text-[10px] font-bold text-slate-400 font-mono-num" id="adTotalBadge">Total: 0</span>
               </div>
 
-              <!-- Top Bar Labels -->
+              <!-- Labels above bar -->
               <div class="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 <span>Advancing</span>
                 <span>Declining</span>
               </div>
 
-              <!-- Split Ratio Bar (Exact Screenshot 2 Match) -->
+              <!-- Horizontal Split Ratio Progress Bar -->
               <div class="w-full flex h-3.5 rounded-full overflow-hidden my-1.5 bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-800">
                 <div id="advBarFill" class="bg-[#10b981] h-full rounded-l-full transition-all duration-500" style="width: 50%;"></div>
                 <div id="decBarFill" class="bg-[#ef4444] h-full rounded-r-full transition-all duration-500" style="width: 50%;"></div>
@@ -405,7 +419,7 @@
               </div>
             </div>
 
-            <!-- Bottom Stats Grid: Net advances + A/D ratio (Up/down volume removed) -->
+            <!-- Stats Grid: Net advances + A/D ratio -->
             <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-100 dark:border-borderDark">
               <div>
                 <p class="text-[11px] font-semibold text-slate-400">Net advances</p>
@@ -417,12 +431,11 @@
               </div>
             </div>
           </div>
-
         </div>
 
       </div>
 
-      <!-- 4. THREE INTRADAY CHARTS (INCL. SCREENSHOT 1 NEW HIGHS & LOWS COMBO CHART) -->
+      <!-- 4. THREE INTRADAY DUAL CHARTS -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Chart 1: Intraday 4% Top Gainers & Losers -->
@@ -437,9 +450,7 @@
               <span class="text-rose-500">● Lose</span>
             </div>
           </div>
-          <div class="h-60">
-            <canvas id="glLineChart"></canvas>
-          </div>
+          <div class="h-60"><canvas id="glLineChart"></canvas></div>
         </div>
 
         <!-- Chart 2: Advance & Decline Dual Chart with A/D Ratio -->
@@ -451,12 +462,10 @@
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-cyan-500 font-mono-num" id="adRatioBadge">A/D: 0.00</span>
           </div>
-          <div class="h-60">
-            <canvas id="adDualChart"></canvas>
-          </div>
+          <div class="h-60"><canvas id="adDualChart"></canvas></div>
         </div>
 
-        <!-- Chart 3: EXACT SCREENSHOT 1 MATCH: New Highs and Lows Bidirectional Combo Chart -->
+        <!-- Chart 3: New Highs and Lows Bidirectional Combo Chart -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div>
@@ -469,17 +478,15 @@
               <span class="text-[#f59e0b]">● Net %</span>
             </div>
           </div>
-          <div class="h-60">
-            <canvas id="hlDualChart"></canvas>
-          </div>
+          <div class="h-60"><canvas id="hlDualChart"></canvas></div>
         </div>
 
       </div>
 
-      <!-- 5. FIVE BOTTOM TABLES (INCLUDING IPO SCANS, CENTER-ALIGNED & FULL SCROLL) -->
+      <!-- 5. FOUR BOTTOM TABLES -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- Table 1: IPO Momentum & Scans Table -->
+        <!-- Table 1: IPO Scans & Momentum -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -580,14 +587,14 @@
       <!-- ================= COMPACT & SLEEK FOOTER ================= -->
       <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
         <div class="flex items-center gap-2">
-          <!-- Footer Mini Logo Icon -->
           <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
           <span class="text-slate-800 dark:text-slate-200 font-extrabold tracking-tight">Mickkk<span class="text-emerald-600 dark:text-[#00f5a0] font-black">.com</span></span>
           <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence & Trading Platform</span>
         </div>
 
         <div class="flex items-center gap-5 text-[11px]">
-          <a href="index.html" class="hover:text-emerald-500 transition-colors">Market Overview</a>
+          <a href="index.html" class="hover:text-emerald-500 transition-colors">Home</a>
+          <a href="breadth.html" class="hover:text-emerald-500 transition-colors">Market Breadth</a>
           <a href="#" class="hover:text-emerald-500 transition-colors">Features</a>
           <a href="#" class="hover:text-emerald-500 transition-colors">Pricing</a>
           <a href="#" class="hover:text-emerald-500 transition-colors">About</a>
@@ -641,6 +648,11 @@
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGXkNmnhPB8mzbpw2Zc2EowqVcHGu-ATOPHjsJ6a0escQkpxFXVPz5zynSjg1EIttYgA/exec";
     const CACHE_KEY = "mickkk_market_overview_cache_v2";
+
+    // Google Sheet GViz details for Live Breadth Meter
+    const BREADTH_SPREADSHEET_ID = "1N5LGJUqsTMIKicd9G_hBGIV_sGS2MSjqEziILduitJ8";
+    const BREADTH_SHEET_NAME = "Market Breadth Signals";
+    const BREADTH_CACHE_KEY = "mbi_market_data_cache_v1";
 
     let allDataStore = {};
     let glChartInstance = null;
@@ -735,6 +747,15 @@
             renderBottomTables(data);
           }
         }
+
+        // Also instant paint Breadth Speedometer from breadth cache
+        const breadthCached = localStorage.getItem(BREADTH_CACHE_KEY);
+        if (breadthCached) {
+          const bData = JSON.parse(breadthCached);
+          if (Array.isArray(bData) && bData.length > 0) {
+            updateBreadthSpeedometer(bData[bData.length - 1]);
+          }
+        }
       } catch (e) {
         console.warn("Cache read error:", e);
       }
@@ -765,10 +786,60 @@
       } catch (err) {
         console.error("Fetch Error:", err);
       } finally {
-        if (isManual && spin) spin.classList.remove("animate-spin");
+        if (isManual) spin.classList.remove("animate-spin");
         countdownSeconds = 300;
+        loadLiveBreadthMeter(); // Also fetch fresh MBI meter score from sheet
       }
     }
+
+    // ================= SPEEDOMETER BREADTH METER SYNC =================
+    function updateBreadthSpeedometer(latestRow) {
+      if (!latestRow) return;
+      const score = typeof latestRow.signalMBI !== 'undefined' ? latestRow.signalMBI : (latestRow[27] || 0);
+      const label = latestRow.signalLabel || latestRow[35] || (score >= 3 ? 'Bullish' : (score <= -3 ? 'Bearish' : 'Neutral'));
+
+      const scoreFormatted = score > 0 ? `+${score}` : score;
+      const valEl = document.getElementById('meterScoreVal');
+      const statusEl = document.getElementById('meterScoreStatus');
+      const needle = document.getElementById('meterNeedleGroup');
+
+      if (valEl) valEl.innerText = scoreFormatted;
+      if (statusEl) {
+        statusEl.innerText = label;
+        statusEl.className = `text-[11px] font-black tracking-wider uppercase mt-1 ${score >= 3 ? 'text-emerald-500' : (score <= -3 ? 'text-rose-500' : 'text-amber-500')}`;
+      }
+
+      const clampedScore = Math.max(-3, Math.min(3, score));
+      const angle = (clampedScore / 3) * 75;
+      if (needle) needle.style.transform = `rotate(${angle}deg)`;
+    }
+
+    function loadLiveBreadthMeter() {
+      const script = document.createElement("script");
+      const url = `https://docs.google.com/spreadsheets/d/${BREADTH_SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleBreadthMeterGViz&sheet=${encodeURIComponent(BREADTH_SHEET_NAME)}&_ts=${Date.now()}`;
+      script.src = url;
+      document.body.appendChild(script);
+
+      script.onload = () => script.remove();
+      script.onerror = () => script.remove();
+    }
+
+    window.handleBreadthMeterGViz = function(gviz) {
+      if (!gviz || !gviz.table || !gviz.table.rows) return;
+      const rows = gviz.table.rows;
+      if (!rows.length) return;
+
+      const lastRow = rows[rows.length - 1].c;
+      const v = (idx) => (lastRow && lastRow[idx] && lastRow[idx].v !== null && !isNaN(lastRow[idx].v)) ? Number(lastRow[idx].v) : 0;
+      const s = (idx) => (lastRow && lastRow[idx] && lastRow[idx].v !== null) ? String(lastRow[idx].f || lastRow[idx].v).trim() : '-';
+
+      const rowObj = {
+        signalMBI: v(27),
+        signalLabel: s(35) === '-' ? (v(27) >= 3 ? 'Bullish' : (v(27) <= -3 ? 'Bearish' : 'Neutral')) : s(35)
+      };
+
+      updateBreadthSpeedometer(rowObj);
+    };
 
     // 1. Sparkline Cards
     function renderSparklineCards(indices) {
@@ -817,7 +888,7 @@
       });
     }
 
-    // 2. Indices Terminal Table (Centered & Full Data Scrollable)
+    // 2. Indices Terminal Table
     function renderIndicesTable(indices) {
       const tbody = document.getElementById("indicesTableBody");
       const badge = document.getElementById("indicesCountBadge");
@@ -837,7 +908,7 @@
       }).join("");
     }
 
-    // 3. Top Gainers & Losers Tables (Centered & Full Data Scrollable)
+    // 3. Top Gainers & Losers Tables
     function renderGainersLosers(gainers, losers) {
       const gBadge = document.getElementById("gainersCountBadge");
       const lBadge = document.getElementById("losersCountBadge");
@@ -876,7 +947,6 @@
       const netAdv = adv - dec;
       const adRatio = parseFloat(lastAd["A/D Ratio"] || (dec > 0 ? (adv / dec).toFixed(2) : '1.00'));
 
-      // Progress Bar Sizing (Screenshot 2 style)
       const advPct = total > 0 ? (adv / total) * 100 : 50;
       const decPct = total > 0 ? (dec / total) * 100 : 50;
       const advBar = document.getElementById("advBarFill");
@@ -884,7 +954,6 @@
       if (advBar) advBar.style.width = `${advPct}%`;
       if (decBar) decBar.style.width = `${decPct}%`;
 
-      // Numbers formatting (e.g. 1.47 K)
       const formatK = num => num >= 1000 ? (num / 1000).toFixed(2) + " K" : num.toString();
       const advLabel = document.getElementById("advCountLabel");
       const decLabel = document.getElementById("decCountLabel");
@@ -893,7 +962,6 @@
       if (decLabel) decLabel.innerText = formatK(dec);
       if (adTotal) adTotal.innerText = `Total: ${total.toLocaleString()}`;
 
-      // Net Advances & A/D Ratio Stats
       const netAdvEl = document.getElementById("netAdvValue");
       const adRatioEl = document.getElementById("adRatioValue");
       if (netAdvEl) {
@@ -902,31 +970,11 @@
       }
       if (adRatioEl) adRatioEl.innerText = adRatio.toFixed(2);
 
-      // Gauge Meter Card
-      const mTotal = document.getElementById("meterTotal");
-      if (mTotal) mTotal.innerText = total.toLocaleString();
-      const mAdv = document.getElementById("meterAdv");
-      const mDec = document.getElementById("meterDec");
-      if (mAdv) mAdv.innerText = `${adv.toLocaleString()} (${Math.round(advPct)}%)`;
-      if (mDec) mDec.innerText = `${dec.toLocaleString()} (${Math.round(decPct)}%)`;
-
-      const score = Math.round(advPct);
-      const bScore = document.getElementById("breadthScore");
-      const mBadge = document.getElementById("meterScoreBadge");
-      const bLabel = document.getElementById("breadthLabel");
-      if (bScore) bScore.innerText = score;
-      if (mBadge) mBadge.innerText = `Score: ${score}`;
-      if (bLabel) {
-        if (score >= 60) bLabel.innerText = "Bullish";
-        else if (score <= 40) bLabel.innerText = "Bearish";
-        else bLabel.innerText = "Neutral";
-      }
-
       const adBadge = document.getElementById("adRatioBadge");
       if (adBadge) adBadge.innerText = `A/D: ${adRatio.toFixed(2)}`;
     }
 
-    // 5. Dual Intraday Charts (Including Screenshot 1 Combo Chart & A/D Ratio)
+    // 5. Dual Intraday Charts
     function renderCharts(glData, adData, hlData) {
       if (typeof Chart === 'undefined') return;
       const isDark = document.documentElement.classList.contains("dark");
@@ -950,7 +998,7 @@
         });
       }
 
-      // Chart 2: Advance & Decline Dual Chart + A/D Ratio Dual-Axis
+      // Chart 2: Advance & Decline Dual Chart with A/D Ratio
       if (adChartInstance) adChartInstance.destroy();
       const adCanvas = document.getElementById("adDualChart");
       if (adCanvas) {
@@ -978,7 +1026,7 @@
         });
       }
 
-      // Chart 3: EXACT SCREENSHOT 1 MATCH: New Highs & Lows Combo Chart (Bidirectional Bars + Orange Net % Line)
+      // Chart 3: New Highs & Lows Combo Chart
       if (hlChartInstance) hlChartInstance.destroy();
       const hlCanvas = document.getElementById("hlDualChart");
       if (hlCanvas) {
@@ -1028,9 +1076,7 @@
             responsive: true,
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
-            plugins: {
-              legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 8 } },
               yCount: {
@@ -1049,7 +1095,7 @@
       }
     }
 
-    // 6. Bottom Tables (Centered Data, Full Scrollable, Live Count Badges)
+    // 6. Bottom Tables
     function renderBottomTables(data) {
       const updateTable = (arr, tbodyId, badgeId) => {
         const tbody = document.getElementById(tbodyId);
@@ -1097,7 +1143,7 @@
       }
     }
 
-    // ================= MODAL FULL VIEW (CENTER-ALIGNED) =================
+    // ================= MODAL FULL VIEW =================
     let currentModalData = [];
     let sortDirections = {};
 
