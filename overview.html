@@ -3,10 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Overview - Mickkk.com</title>
+  <title>Market Overview Terminal — Mickkk.com</title>
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
-  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark");}catch(e){}</script>
+
+  <!-- Instant Theme Execution (Prevents Flash of Light Mode) -->
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Preconnect & Resource Hints for Ultra-Fast CDN Delivery -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://unpkg.com">
+
+  <!-- Non-Blocking Google Fonts Loading -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Montserrat:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,9 +54,9 @@
 
   <!-- Chart.js & Lucide Icons -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap');
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
     .tagline-font { font-family: 'Montserrat', sans-serif; }
@@ -42,21 +65,24 @@
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
 
     /* ===== Mickkk Logo (theme-aware) ===== */
-    :root { --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
-            --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; }
-    .dark { --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
-            --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; }
+    :root { 
+      --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
+      --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; 
+    }
+    .dark { 
+      --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
+      --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; 
+    }
     .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
     .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
                background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
     .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
-    .mk-arrow { transition: transform .25s ease; }
     .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
     .mk-logo:hover .mk-icon { transform: scale(1.07); }
     .mk-icon { transition: transform .25s ease; }
 
-    /* Sidebar Collapsed Icon Mode (JournalToday Exact Match) */
+    /* Sidebar Collapsed Icon Mode */
     .sidebar-collapsed { width: 4.2rem !important; }
     .sidebar-collapsed .brand-text,
     .sidebar-collapsed .nav-text,
@@ -82,7 +108,7 @@
       border: 1px solid #1e293b;
     }
 
-    /* Floating Arrow Button overlapping the right edge border */
+    /* Floating Arrow Button */
     .collapse-float-btn {
       position: absolute;
       right: -12px;
@@ -91,7 +117,7 @@
     }
   </style>
 </head>
-<body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200">
+<body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
   
   <!-- Mickkk logo icon (shared symbol) -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -121,18 +147,15 @@
   <!-- ================= LEFT SIDEBAR ================= -->
   <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
     
-    <!-- Floating Circular Collapse Arrow on Border -->
-    <button onclick="toggleSidebar()" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
+    <!-- Floating Circular Collapse Arrow -->
+    <button onclick="toggleSidebar()" aria-label="Toggle Navigation Sidebar" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
       <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
     </button>
 
     <div>
-      <!-- Brand Logo + Mickkk.com Native High-Impact Branding -->
-      <a href="index.html" title="Mickkk.com" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
-        <!-- Icon -->
+      <!-- Brand Logo Lockup -->
+      <a href="index.html" title="Mickkk.com Home" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
         <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
-
-        <!-- Right side: top = Mickkk.com, bottom = Trade Smarter tagline -->
         <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
           <div class="flex items-baseline whitespace-nowrap">
             <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
@@ -145,7 +168,6 @@
         </div>
       </a>
 
-      <!-- Clean Horizontal Partition Line -->
       <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
 
       <!-- Navigation Links -->
@@ -154,15 +176,15 @@
         <a href="overview.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
         </a>
+        <!-- 2. Market Breadth -->
+        <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
+        </a>
         <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="scan" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Stock Screener</span>
         </a>
         <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="layers" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Index Terminal</span>
-        </a>
-        <!-- 2. Market Breadth Dashboard Link -->
-        <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="activity" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Breadth</span>
+          <i data-lucide="layers" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Index Terminal</span>
         </a>
         <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
@@ -200,11 +222,11 @@
             </div>
           </div>
           <div class="flex items-center gap-1 text-slate-400">
-            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer">
+            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
               <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
               <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
             </button>
-            <a href="#" class="p-1 hover:text-slate-800 dark:hover:text-white">
+            <a href="#" class="p-1 hover:text-slate-800 dark:hover:text-white" title="Logout">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </a>
           </div>
@@ -212,11 +234,11 @@
       </div>
 
       <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer">
+        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
           <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
           <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
         </button>
-        <button class="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white">
+        <button class="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white" title="Logout">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
@@ -259,10 +281,10 @@
 
       <!-- 1. SPARKLINE CARDS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="sparkCardsRow">
-        <!-- Rendered instantly from cache -->
+        <!-- Rendered instantly from SWR cache -->
       </div>
 
-      <!-- 2. INDICES TERMINAL TABLE + EXACT SPEEDOMETER MARKET BREADTH METER -->
+      <!-- 2. INDICES TERMINAL TABLE + SPEEDOMETER MARKET BREADTH METER -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Indices Terminal Table (8 Cols) -->
@@ -291,7 +313,7 @@
           </div>
         </div>
 
-        <!-- ================= EXACT SPEEDOMETER METER (NO-DELAY REALTIME SYNC) ================= -->
+        <!-- Speedometer Market Breadth Meter (4 Cols) -->
         <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between items-center relative overflow-hidden">
           
           <div class="w-full flex items-center justify-between mb-1">
@@ -310,7 +332,7 @@
               <path d="M 83 55 A 75 75 0 0 1 157 55" fill="none" stroke="#f59e0b" stroke-width="16"/>
               <path d="M 157 55 A 75 75 0 0 1 195 115" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round"/>
               
-              <!-- Clean Numbers on OUTSIDE with Equal Radial Spacing -->
+              <!-- Clean Numbers with Radial Spacing -->
               <text x="18" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-3</text>
               <text x="50" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-2</text>
               <text x="82" y="30" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-1</text>
@@ -323,7 +345,7 @@
               <circle cx="120" cy="115" r="7" class="fill-slate-800 dark:fill-slate-100"/>
 
               <!-- Dynamic Needle Group -->
-              <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 0.6s ease-out;">
+              <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
                 <polygon points="118.5,115 121.5,115 120,40" class="fill-[#0f172a] dark:fill-[#ffffff]"/>
               </g>
             </svg>
@@ -340,7 +362,7 @@
 
       </div>
 
-      <!-- 3. TOP GAINERS & LOSERS + ENRICHED ADVANCES/DECLINES (NO EMPTY SPACE) -->
+      <!-- 3. TOP GAINERS & LOSERS + ENRICHED ADVANCES/DECLINES -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Top Gainers Table (4 Cols) -->
@@ -391,7 +413,7 @@
           </div>
         </div>
 
-        <!-- Enriched Advancing/Declining + Live Highs/Lows Breadth Box (4 Cols) -->
+        <!-- Enriched Advancing/Declining Box (4 Cols) -->
         <div class="lg:col-span-4 flex flex-col justify-between gap-4">
           <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between h-full">
             
@@ -433,7 +455,7 @@
               </div>
             </div>
 
-            <!-- Bottom Stats: Intraday New Highs / Lows Counters (Fills Empty Space Perfectly) -->
+            <!-- Bottom Stats: Intraday New Highs / Lows Counters -->
             <div class="pt-3 border-t border-slate-100 dark:border-borderDark">
               <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
                 <span>Intraday High/Low Track</span>
@@ -460,7 +482,7 @@
 
       </div>
 
-      <!-- 4. THREE INTRADAY CHARTS (ALL-LINE CHARTS + A/D RATIO) -->
+      <!-- 4. THREE INTRADAY CHARTS -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Chart 1: Intraday 4% Top Gainers & Losers -->
@@ -490,7 +512,7 @@
           <div class="h-60"><canvas id="adDualChart"></canvas></div>
         </div>
 
-        <!-- Chart 3: New Highs & Lows Triple-Line Chart (Highs Line + Lows Line + Net % Line) -->
+        <!-- Chart 3: New Highs & Lows Triple-Line Chart -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div>
@@ -609,7 +631,7 @@
 
       </div>
 
-      <!-- ================= COMPACT & SLEEK FOOTER ================= -->
+      <!-- ================= COMPACT SLEEK FOOTER ================= -->
       <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
         <div class="flex items-center gap-2">
           <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
@@ -619,17 +641,16 @@
 
         <div class="flex items-center gap-5 text-[11px]">
           <a href="index.html" class="hover:text-emerald-500 transition-colors">Home</a>
+          <a href="overview.html" class="hover:text-emerald-500 transition-colors text-emerald-500">Market Overview</a>
           <a href="breadth.html" class="hover:text-emerald-500 transition-colors">Market Breadth</a>
-          <a href="#" class="hover:text-emerald-500 transition-colors">Features</a>
-          <a href="#" class="hover:text-emerald-500 transition-colors">Pricing</a>
-          <a href="#" class="hover:text-emerald-500 transition-colors">About</a>
-          <a href="#" class="hover:text-emerald-500 transition-colors">Contact</a>
+          <a href="#features" class="hover:text-emerald-500 transition-colors">Features</a>
+          <a href="#contact" class="hover:text-emerald-500 transition-colors">Contact</a>
         </div>
 
         <div class="flex items-center gap-3 text-slate-400 text-[11px]">
-          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
-          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
-          <a href="#" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="youtube" class="w-3.5 h-3.5"></i></a>
+          <a href="#" aria-label="Twitter" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
+          <a href="#" aria-label="LinkedIn" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
+          <a href="#" aria-label="YouTube" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="youtube" class="w-3.5 h-3.5"></i></a>
           <span class="ml-1">© 2026 Mickkk.com.</span>
         </div>
       </footer>
@@ -647,7 +668,7 @@
           <h3 id="modalTitle" class="font-extrabold text-base">Full Data View</h3>
           <p class="text-xs text-slate-400 mt-0.5">Click any column header to sort A-Z / 0-9</p>
         </div>
-        <button onclick="closeModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 cursor-pointer">
+        <button onclick="closeModal()" aria-label="Close Modal" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -669,7 +690,7 @@
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT & STALE-WHILE-REVALIDATE CACHING ENGINE ================= -->
+  <!-- ================= HIGH-PERFORMANCE JAVASCRIPT ENGINE ================= -->
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGXkNmnhPB8mzbpw2Zc2EowqVcHGu-ATOPHjsJ6a0escQkpxFXVPz5zynSjg1EIttYgA/exec";
     const CACHE_KEY = "mickkk_market_overview_cache_v2";
@@ -684,14 +705,16 @@
     let adChartInstance = null;
     let hlChartInstance = null;
 
-    // Sidebar Toggle
+    // Sidebar Toggle with State Persistence
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
       const mainContent = document.getElementById("mainContent");
       const arrow = document.getElementById("collapseArrow");
 
       sidebar.classList.toggle("sidebar-collapsed");
-      if (sidebar.classList.contains("sidebar-collapsed")) {
+      const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
+
+      if (isCollapsed) {
         mainContent.classList.remove("ml-60");
         mainContent.classList.add("ml-[4.2rem]");
         if (arrow) arrow.setAttribute("data-lucide", "chevron-right");
@@ -700,12 +723,35 @@
         mainContent.classList.add("ml-60");
         if (arrow) arrow.setAttribute("data-lucide", "chevron-left");
       }
+      try {
+        localStorage.setItem("mickkk_sidebar_collapsed", isCollapsed ? "true" : "false");
+      } catch (e) {}
+
       if (window.lucide) lucide.createIcons();
     }
 
-    // Theme Switcher
+    function initSidebarState() {
+      try {
+        if (localStorage.getItem("mickkk_sidebar_collapsed") === "true") {
+          toggleSidebar();
+        }
+      } catch (e) {}
+    }
+
+    // Theme Switcher Logic
     function toggleTheme() {
       const isDark = document.documentElement.classList.toggle("dark");
+      syncThemeIcons(isDark);
+      try {
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      } catch (e) {}
+
+      if (allDataStore.indices) {
+        renderCharts(allDataStore.glIntraday || [], allDataStore.adIntraday || [], allDataStore.hlIntraday || []);
+      }
+    }
+
+    function syncThemeIcons(isDark) {
       const sunIconSide = document.getElementById("sunIconSide");
       const moonIconSide = document.getElementById("moonIconSide");
       const sunIconMini = document.getElementById("sunIconMini");
@@ -715,23 +761,6 @@
       if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
       if (sunIconMini) sunIconMini.classList.toggle("hidden", isDark);
       if (moonIconMini) moonIconMini.classList.toggle("hidden", !isDark);
-
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-      if (allDataStore.indices) {
-        renderCharts(allDataStore.glIntraday || [], allDataStore.adIntraday || [], allDataStore.hlIntraday || []);
-      }
-    }
-
-    if (localStorage.getItem("theme") === "dark") {
-      document.documentElement.classList.add("dark");
-      const sunIconSide = document.getElementById("sunIconSide");
-      const moonIconSide = document.getElementById("moonIconSide");
-      const sunIconMini = document.getElementById("sunIconMini");
-      const moonIconMini = document.getElementById("moonIconMini");
-      if (sunIconSide) sunIconSide.classList.add("hidden");
-      if (moonIconSide) moonIconSide.classList.remove("hidden");
-      if (sunIconMini) sunIconMini.classList.add("hidden");
-      if (moonIconMini) moonIconMini.classList.remove("hidden");
     }
 
     // Live Clock & 5-Min Timer
@@ -756,7 +785,7 @@
     setInterval(updateClockAndTimer, 1000);
     updateClockAndTimer();
 
-    // ================= 🚀 INSTANT LOCALSTORAGE CACHE PAINT =================
+    // ================= 🚀 INSTANT LOCALSTORAGE SWR PAINT =================
     function renderFromCache() {
       try {
         const cached = localStorage.getItem(CACHE_KEY);
@@ -773,7 +802,6 @@
           }
         }
 
-        // Instant paint Breadth Speedometer from cache
         const breadthCached = localStorage.getItem(BREADTH_CACHE_KEY);
         if (breadthCached) {
           const bData = JSON.parse(breadthCached);
@@ -807,17 +835,20 @@
           renderCountsStats(data);
           renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
           renderBottomTables(data);
+
+          // Check if URL search query was passed from index.html
+          checkUrlSearchParam();
         }
       } catch (err) {
         console.error("Fetch Error:", err);
       } finally {
-        if (isManual) spin.classList.remove("animate-spin");
+        if (isManual && spin) spin.classList.remove("animate-spin");
         countdownSeconds = 300;
-        loadLiveBreadthMeter(); // Sync exact Signal-MBI in background
+        loadLiveBreadthMeter();
       }
     }
 
-    // ================= SPEEDOMETER BREADTH METER SYNC (ZERO DELAY) =================
+    // ================= SPEEDOMETER BREADTH METER SYNC =================
     function updateBreadthSpeedometer(latestRow) {
       if (!latestRow) return;
       const score = typeof latestRow.signalMBI !== 'undefined' ? latestRow.signalMBI : (latestRow[27] || 0);
@@ -843,10 +874,10 @@
       const script = document.createElement("script");
       const url = `https://docs.google.com/spreadsheets/d/${BREADTH_SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleBreadthMeterGViz&sheet=${encodeURIComponent(BREADTH_SHEET_NAME)}&_ts=${Date.now()}`;
       script.src = url;
-      document.body.appendChild(script);
 
       script.onload = () => script.remove();
       script.onerror = () => script.remove();
+      document.body.appendChild(script);
     }
 
     window.handleBreadthMeterGViz = function(gviz) {
@@ -870,7 +901,6 @@
     function renderSparklineCards(indices) {
       const row = document.getElementById("sparkCardsRow");
       if (!indices.length || !row) return;
-      row.innerHTML = "";
 
       const targets = [
         { label: "NIFTY 50", matchFunc: (name) => name === "NIFTY" || name === "NIFTY 50" },
@@ -880,7 +910,7 @@
         { label: "INDIA VIX", matchFunc: (name) => name.includes("VIX") }
       ];
 
-      targets.forEach(t => {
+      row.innerHTML = targets.map(t => {
         let match = indices.find(i => {
           const sym = String(i["Index Symbol"] || "").toUpperCase().trim();
           const name = String(i["Index Name"] || "").toUpperCase().trim();
@@ -894,7 +924,7 @@
         const isVIX = t.label.includes("VIX");
         const isGreen = isVIX ? chg < 0 : chg >= 0;
 
-        row.innerHTML += `
+        return `
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex items-center justify-between">
             <div>
               <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider truncate max-w-[110px]">${t.label}</p>
@@ -910,7 +940,7 @@
             </div>
           </div>
         `;
-      });
+      }).join("");
     }
 
     // 2. Indices Terminal Table
@@ -963,7 +993,7 @@
       }
     }
 
-    // 4. Stats, Breadth Meter & Screenshot 2 Style Advancing/Declining Bar
+    // 4. Stats, Breadth Meter & Advance/Decline Sync
     function renderCountsStats(data) {
       const lastAd = data.adIntraday && data.adIntraday.length ? data.adIntraday[data.adIntraday.length - 1] : {};
       const adv = parseInt(lastAd["Advances"] || 0, 10);
@@ -998,7 +1028,6 @@
       const adBadge = document.getElementById("adRatioBadge");
       if (adBadge) adBadge.innerText = `A/D: ${adRatio.toFixed(2)}`;
 
-      // Live Highs/Lows count sync in Advancing/Declining Box
       const lastHl = data.hlIntraday && data.hlIntraday.length ? data.hlIntraday[data.hlIntraday.length - 1] : {};
       const newH = parseInt(lastHl["New H"] || 0, 10);
       const newL = parseInt(lastHl["New L"] || 0, 10);
@@ -1017,8 +1046,6 @@
       }
       if (hlTimeEl && lastHl["Time"]) hlTimeEl.innerText = lastHl["Time"];
 
-      // 🎯 INSTANT BREADTH METER SYNC (Zero Wait Time):
-      // Calculate immediate score so needle moves at the exact same millisecond
       if (total > 0) {
         let instantScore = 0;
         let instantLabel = 'Neutral';
@@ -1034,7 +1061,18 @@
       }
     }
 
-    // 5. Dual Intraday Charts (Chart 3 converted to Line Chart)
+    // ================= ZERO MEMORY LEAK CHART ENGINE =================
+    function updateOrCreateChart(instance, canvasId, config) {
+      if (instance) {
+        instance.data = config.data;
+        instance.options = config.options;
+        instance.update('none'); // Update without animation (0% CPU impact)
+        return instance;
+      }
+      const canvas = document.getElementById(canvasId);
+      return canvas ? new Chart(canvas, config) : null;
+    }
+
     function renderCharts(glData, adData, hlData) {
       if (typeof Chart === 'undefined') return;
       const isDark = document.documentElement.classList.contains("dark");
@@ -1042,119 +1080,107 @@
       const textColor = isDark ? "#94a3b8" : "#64748b";
 
       // Chart 1: 4% Gainers vs Losers
-      if (glChartInstance) glChartInstance.destroy();
-      const glCanvas = document.getElementById("glLineChart");
-      if (glCanvas) {
-        glChartInstance = new Chart(glCanvas, {
-          type: 'line',
-          data: {
-            labels: glData.map(r => r["Time"]),
-            datasets: [
-              { label: '4%+ Gainers', data: glData.map(r => r["Top Gainers Count"]), borderColor: '#10b981', tension: 0.35, pointRadius: 0, borderWidth: 2 },
-              { label: '4%- Losers', data: glData.map(r => r["Top Losers Count"]), borderColor: '#ef4444', tension: 0.35, pointRadius: 0, borderWidth: 2 }
-            ]
-          },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } } }
-        });
-      }
+      glChartInstance = updateOrCreateChart(glChartInstance, "glLineChart", {
+        type: 'line',
+        data: {
+          labels: glData.map(r => r["Time"]),
+          datasets: [
+            { label: '4%+ Gainers', data: glData.map(r => r["Top Gainers Count"]), borderColor: '#10b981', tension: 0.35, pointRadius: 0, borderWidth: 2 },
+            { label: '4%- Losers', data: glData.map(r => r["Top Losers Count"]), borderColor: '#ef4444', tension: 0.35, pointRadius: 0, borderWidth: 2 }
+          ]
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { legend: { display: false } }, 
+          scales: { 
+            x: { grid: { color: gridColor }, ticks: { color: textColor } }, 
+            y: { grid: { color: gridColor }, ticks: { color: textColor } } 
+          } 
+        }
+      });
 
       // Chart 2: Advance & Decline Dual Chart with A/D Ratio
-      if (adChartInstance) adChartInstance.destroy();
-      const adCanvas = document.getElementById("adDualChart");
-      if (adCanvas) {
-        adChartInstance = new Chart(adCanvas, {
-          type: 'line',
-          data: {
-            labels: adData.map(r => r["Time"]),
-            datasets: [
-              { label: 'Advances', data: adData.map(r => r["Advances"]), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yCount' },
-              { label: 'Declines', data: adData.map(r => r["Declines"]), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yCount' },
-              { label: 'A/D Ratio', data: adData.map(r => parseFloat(r["A/D Ratio"] || 0)), borderColor: '#00d4ff', borderDash: [4, 4], tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yRatio' }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: gridColor }, ticks: { color: textColor } },
-              yCount: { position: 'left', grid: { color: gridColor }, ticks: { color: textColor } },
-              yRatio: { position: 'right', grid: { display: false }, ticks: { color: '#00d4ff', callback: val => val.toFixed(1) } }
-            }
+      adChartInstance = updateOrCreateChart(adChartInstance, "adDualChart", {
+        type: 'line',
+        data: {
+          labels: adData.map(r => r["Time"]),
+          datasets: [
+            { label: 'Advances', data: adData.map(r => r["Advances"]), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yCount' },
+            { label: 'Declines', data: adData.map(r => r["Declines"]), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yCount' },
+            { label: 'A/D Ratio', data: adData.map(r => parseFloat(r["A/D Ratio"] || 0)), borderColor: '#00d4ff', borderDash: [4, 4], tension: 0.35, pointRadius: 0, borderWidth: 2, yAxisID: 'yRatio' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+            yCount: { position: 'left', grid: { color: gridColor }, ticks: { color: textColor } },
+            yRatio: { position: 'right', grid: { display: false }, ticks: { color: '#00d4ff', callback: val => val.toFixed(1) } }
           }
-        });
-      }
+        }
+      });
 
-      // Chart 3: NEW HIGHS & LOWS AS CLEAN LINE CHARTS (+ Net % Line)
-      if (hlChartInstance) hlChartInstance.destroy();
-      const hlCanvas = document.getElementById("hlDualChart");
-      if (hlCanvas) {
-        hlChartInstance = new Chart(hlCanvas, {
-          type: 'line',
-          data: {
-            labels: hlData.map(r => r["Time"]),
-            datasets: [
-              {
-                label: 'New highs',
-                data: hlData.map(r => parseFloat(r["New H"] || 0)),
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                borderWidth: 2,
-                tension: 0.35,
-                pointRadius: 0,
-                yAxisID: 'yCount',
-                order: 2
-              },
-              {
-                label: 'New lows',
-                data: hlData.map(r => parseFloat(r["New L"] || 0)),
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                borderWidth: 2,
-                tension: 0.35,
-                pointRadius: 0,
-                yAxisID: 'yCount',
-                order: 3
-              },
-              {
-                label: 'Net highs, %',
-                data: hlData.map(r => {
-                  const h = parseFloat(r["New H"] || 0);
-                  const l = parseFloat(r["New L"] || 0);
-                  return (h + l > 0) ? ((h - l) / (h + l)) * 100 : 0;
-                }),
-                borderColor: '#f59e0b',
-                backgroundColor: '#f59e0b',
-                borderWidth: 2,
-                tension: 0.3,
-                pointRadius: 0,
-                yAxisID: 'yPct',
-                order: 1
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8 } },
-              yCount: {
-                position: 'left',
-                grid: { color: gridColor },
-                ticks: { color: textColor }
-              },
-              yPct: {
-                position: 'right',
-                grid: { display: false },
-                ticks: { color: '#f59e0b', callback: val => val.toFixed(0) + '%' }
-              }
+      // Chart 3: New Highs & Lows Triple-Line Chart
+      hlChartInstance = updateOrCreateChart(hlChartInstance, "hlDualChart", {
+        type: 'line',
+        data: {
+          labels: hlData.map(r => r["Time"]),
+          datasets: [
+            {
+              label: 'New highs',
+              data: hlData.map(r => parseFloat(r["New H"] || 0)),
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.05)',
+              borderWidth: 2,
+              tension: 0.35,
+              pointRadius: 0,
+              yAxisID: 'yCount',
+              order: 2
+            },
+            {
+              label: 'New lows',
+              data: hlData.map(r => parseFloat(r["New L"] || 0)),
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.05)',
+              borderWidth: 2,
+              tension: 0.35,
+              pointRadius: 0,
+              yAxisID: 'yCount',
+              order: 3
+            },
+            {
+              label: 'Net highs, %',
+              data: hlData.map(r => {
+                const h = parseFloat(r["New H"] || 0);
+                const l = parseFloat(r["New L"] || 0);
+                return (h + l > 0) ? ((h - l) / (h + l)) * 100 : 0;
+              }),
+              borderColor: '#f59e0b',
+              backgroundColor: '#f59e0b',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 0,
+              yAxisID: 'yPct',
+              order: 1
             }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8 } },
+            yCount: { position: 'left', grid: { color: gridColor }, ticks: { color: textColor } },
+            yPct: { position: 'right', grid: { display: false }, ticks: { color: '#f59e0b', callback: val => val.toFixed(0) + '%' } }
           }
-        });
-      }
+        }
+      });
     }
 
     // 6. Bottom Tables
@@ -1190,19 +1216,34 @@
       const query = e.target.value.trim().toLowerCase();
       if (!query || !allDataStore) return;
       if (e.key === "Enter") {
-        const combined = [
-          ...(allDataStore.gainers || []),
-          ...(allDataStore.losers || []),
-          ...(allDataStore.nearHigh || []),
-          ...(allDataStore.newHighs || []),
-          ...(allDataStore.ipo || [])
-        ];
-        const match = combined.filter(item => 
-          String(item["Stock Name"] || item["Company Name"] || "").toLowerCase().includes(query) ||
-          String(item["Symbol"] || "").toLowerCase().includes(query)
-        );
-        openModal(`Search Results: "${query}"`, match);
+        executeSearchQuery(query);
       }
+    }
+
+    function checkUrlSearchParam() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const q = urlParams.get('q');
+      if (q && q.trim()) {
+        const query = q.trim().toLowerCase();
+        const input = document.getElementById("globalSearch");
+        if (input) input.value = q.trim();
+        executeSearchQuery(query);
+      }
+    }
+
+    function executeSearchQuery(query) {
+      const combined = [
+        ...(allDataStore.gainers || []),
+        ...(allDataStore.losers || []),
+        ...(allDataStore.nearHigh || []),
+        ...(allDataStore.newHighs || []),
+        ...(allDataStore.ipo || [])
+      ];
+      const match = combined.filter(item => 
+        String(item["Stock Name"] || item["Company Name"] || "").toLowerCase().includes(query) ||
+        String(item["Symbol"] || "").toLowerCase().includes(query)
+      );
+      openModal(`Search Results for "${query}"`, match);
     }
 
     // ================= MODAL FULL VIEW =================
@@ -1291,9 +1332,11 @@
 
     // ================= INITIALIZATION =================
     function init() {
+      initSidebarState();
+      syncThemeIcons(document.documentElement.classList.contains("dark"));
       if (window.lucide) lucide.createIcons();
-      renderFromCache(); // 0ms Instant Render from Browser Storage
-      fetchTerminalData(false); // Silent Background Update from Live API
+      renderFromCache(); // 0ms Instant SWR Paint
+      fetchTerminalData(false); // Background Live Sync
     }
 
     if (document.readyState === 'loading') {
