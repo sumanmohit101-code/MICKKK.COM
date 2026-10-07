@@ -262,7 +262,7 @@
         <!-- Rendered instantly from cache -->
       </div>
 
-      <!-- 2. INDICES TERMINAL TABLE + EXACT SPEEDOMETER MARKET BREADTH METER (REPLACED) -->
+      <!-- 2. INDICES TERMINAL TABLE + EXACT SPEEDOMETER MARKET BREADTH METER -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Indices Terminal Table (8 Cols) -->
@@ -291,7 +291,7 @@
           </div>
         </div>
 
-        <!-- ================= EXACT MARKET BREADTH METER FROM BREADTH.HTML ================= -->
+        <!-- ================= EXACT SPEEDOMETER METER (NO-DELAY REALTIME SYNC) ================= -->
         <div class="lg:col-span-4 bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between items-center relative overflow-hidden">
           
           <div class="w-full flex items-center justify-between mb-1">
@@ -323,7 +323,7 @@
               <circle cx="120" cy="115" r="7" class="fill-slate-800 dark:fill-slate-100"/>
 
               <!-- Dynamic Needle Group -->
-              <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 1s ease-out;">
+              <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 0.6s ease-out;">
                 <polygon points="118.5,115 121.5,115 120,40" class="fill-[#0f172a] dark:fill-[#ffffff]"/>
               </g>
             </svg>
@@ -340,7 +340,7 @@
 
       </div>
 
-      <!-- 3. TOP GAINERS & LOSERS + STYLISH ADVANCES/DECLINES BAR WIDGET -->
+      <!-- 3. TOP GAINERS & LOSERS + ENRICHED ADVANCES/DECLINES (NO EMPTY SPACE) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Top Gainers Table (4 Cols) -->
@@ -391,11 +391,13 @@
           </div>
         </div>
 
-        <!-- Advancing and Declining Bar Card (4 Cols) -->
+        <!-- Enriched Advancing/Declining + Live Highs/Lows Breadth Box (4 Cols) -->
         <div class="lg:col-span-4 flex flex-col justify-between gap-4">
           <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between h-full">
+            
+            <!-- Top: Split Bar -->
             <div>
-              <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center justify-between mb-2">
                 <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">Advancing and declining</h3>
                 <span class="text-[10px] font-bold text-slate-400 font-mono-num" id="adTotalBadge">Total: 0</span>
               </div>
@@ -407,7 +409,7 @@
               </div>
 
               <!-- Horizontal Split Ratio Progress Bar -->
-              <div class="w-full flex h-3.5 rounded-full overflow-hidden my-1.5 bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-800">
+              <div class="w-full flex h-3.5 rounded-full overflow-hidden my-1 bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-800">
                 <div id="advBarFill" class="bg-[#10b981] h-full rounded-l-full transition-all duration-500" style="width: 50%;"></div>
                 <div id="decBarFill" class="bg-[#ef4444] h-full rounded-r-full transition-all duration-500" style="width: 50%;"></div>
               </div>
@@ -419,8 +421,8 @@
               </div>
             </div>
 
-            <!-- Stats Grid: Net advances + A/D ratio -->
-            <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-100 dark:border-borderDark">
+            <!-- Middle Stats: Net advances + A/D ratio -->
+            <div class="grid grid-cols-2 gap-4 my-2.5 pt-3 border-t border-slate-100 dark:border-borderDark">
               <div>
                 <p class="text-[11px] font-semibold text-slate-400">Net advances</p>
                 <p id="netAdvValue" class="text-2xl font-black font-mono-num text-emerald-500 mt-0.5">0</p>
@@ -430,12 +432,35 @@
                 <p id="adRatioValue" class="text-2xl font-black font-mono-num text-slate-800 dark:text-slate-100 mt-0.5">0.00</p>
               </div>
             </div>
+
+            <!-- Bottom Stats: Intraday New Highs / Lows Counters (Fills Empty Space Perfectly) -->
+            <div class="pt-3 border-t border-slate-100 dark:border-borderDark">
+              <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                <span>Intraday High/Low Track</span>
+                <span class="text-slate-400 font-mono-num" id="hlTimeLabel">Live</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-slate-50 dark:bg-[#070e1c] p-2 rounded-lg border border-slate-100 dark:border-slate-800/80">
+                  <p class="text-[9px] font-extrabold uppercase text-slate-400">New Highs</p>
+                  <p id="cardNewHighCount" class="text-base font-black font-mono-num text-emerald-500 mt-0.5">0</p>
+                </div>
+                <div class="bg-slate-50 dark:bg-[#070e1c] p-2 rounded-lg border border-slate-100 dark:border-slate-800/80">
+                  <p class="text-[9px] font-extrabold uppercase text-slate-400">New Lows</p>
+                  <p id="cardNewLowCount" class="text-base font-black font-mono-num text-rose-500 mt-0.5">0</p>
+                </div>
+                <div class="bg-slate-50 dark:bg-[#070e1c] p-2 rounded-lg border border-slate-100 dark:border-slate-800/80">
+                  <p class="text-[9px] font-extrabold uppercase text-slate-400">Net (H-L)</p>
+                  <p id="cardNetHlCount" class="text-base font-black font-mono-num text-amber-500 mt-0.5">0</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
       </div>
 
-      <!-- 4. THREE INTRADAY DUAL CHARTS -->
+      <!-- 4. THREE INTRADAY CHARTS (ALL-LINE CHARTS + A/D RATIO) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Chart 1: Intraday 4% Top Gainers & Losers -->
@@ -465,12 +490,12 @@
           <div class="h-60"><canvas id="adDualChart"></canvas></div>
         </div>
 
-        <!-- Chart 3: New Highs and Lows Bidirectional Combo Chart -->
+        <!-- Chart 3: New Highs & Lows Triple-Line Chart (Highs Line + Lows Line + Net % Line) -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h3 class="font-extrabold text-xs uppercase tracking-tight">New highs and lows</h3>
-              <p class="text-[11px] text-slate-400">Bidirectional Bars & Net % Curve</p>
+              <p class="text-[11px] text-slate-400">Highs &amp; Lows Lines + Net % Curve</p>
             </div>
             <div class="flex items-center gap-2 text-[9.5px] font-bold">
               <span class="text-[#10b981]">● Highs</span>
@@ -748,7 +773,7 @@
           }
         }
 
-        // Also instant paint Breadth Speedometer from breadth cache
+        // Instant paint Breadth Speedometer from cache
         const breadthCached = localStorage.getItem(BREADTH_CACHE_KEY);
         if (breadthCached) {
           const bData = JSON.parse(breadthCached);
@@ -761,7 +786,7 @@
       }
     }
 
-    // Data Fetcher (Silent Background Fetch & Auto-Update Cache)
+    // Data Fetcher
     async function fetchTerminalData(isManual = false) {
       const spin = document.getElementById("manualSpinIcon");
       if (isManual && spin) spin.classList.add("animate-spin");
@@ -788,11 +813,11 @@
       } finally {
         if (isManual) spin.classList.remove("animate-spin");
         countdownSeconds = 300;
-        loadLiveBreadthMeter(); // Also fetch fresh MBI meter score from sheet
+        loadLiveBreadthMeter(); // Sync exact Signal-MBI in background
       }
     }
 
-    // ================= SPEEDOMETER BREADTH METER SYNC =================
+    // ================= SPEEDOMETER BREADTH METER SYNC (ZERO DELAY) =================
     function updateBreadthSpeedometer(latestRow) {
       if (!latestRow) return;
       const score = typeof latestRow.signalMBI !== 'undefined' ? latestRow.signalMBI : (latestRow[27] || 0);
@@ -972,9 +997,44 @@
 
       const adBadge = document.getElementById("adRatioBadge");
       if (adBadge) adBadge.innerText = `A/D: ${adRatio.toFixed(2)}`;
+
+      // Live Highs/Lows count sync in Advancing/Declining Box
+      const lastHl = data.hlIntraday && data.hlIntraday.length ? data.hlIntraday[data.hlIntraday.length - 1] : {};
+      const newH = parseInt(lastHl["New H"] || 0, 10);
+      const newL = parseInt(lastHl["New L"] || 0, 10);
+      const netHl = newH - newL;
+
+      const cardHighEl = document.getElementById("cardNewHighCount");
+      const cardLowEl = document.getElementById("cardNewLowCount");
+      const cardNetHlEl = document.getElementById("cardNetHlCount");
+      const hlTimeEl = document.getElementById("hlTimeLabel");
+
+      if (cardHighEl) cardHighEl.innerText = newH.toLocaleString();
+      if (cardLowEl) cardLowEl.innerText = newL.toLocaleString();
+      if (cardNetHlEl) {
+        cardNetHlEl.innerText = (netHl >= 0 ? '+' : '') + netHl.toLocaleString();
+        cardNetHlEl.className = `text-base font-black font-mono-num mt-0.5 ${netHl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+      }
+      if (hlTimeEl && lastHl["Time"]) hlTimeEl.innerText = lastHl["Time"];
+
+      // 🎯 INSTANT BREADTH METER SYNC (Zero Wait Time):
+      // Calculate immediate score so needle moves at the exact same millisecond
+      if (total > 0) {
+        let instantScore = 0;
+        let instantLabel = 'Neutral';
+        if (advPct >= 72) { instantScore = 3; instantLabel = 'Bullish'; }
+        else if (advPct >= 62) { instantScore = 2; instantLabel = 'Bullish'; }
+        else if (advPct >= 53) { instantScore = 1; instantLabel = 'Mild Bullish'; }
+        else if (advPct >= 47) { instantScore = 0; instantLabel = 'Neutral'; }
+        else if (advPct >= 38) { instantScore = -1; instantLabel = 'Mild Bearish'; }
+        else if (advPct >= 28) { instantScore = -2; instantLabel = 'Bearish'; }
+        else { instantScore = -3; instantLabel = 'Bearish'; }
+
+        updateBreadthSpeedometer({ signalMBI: instantScore, signalLabel: instantLabel });
+      }
     }
 
-    // 5. Dual Intraday Charts
+    // 5. Dual Intraday Charts (Chart 3 converted to Line Chart)
     function renderCharts(glData, adData, hlData) {
       if (typeof Chart === 'undefined') return;
       const isDark = document.documentElement.classList.contains("dark");
@@ -1026,35 +1086,38 @@
         });
       }
 
-      // Chart 3: New Highs & Lows Combo Chart
+      // Chart 3: NEW HIGHS & LOWS AS CLEAN LINE CHARTS (+ Net % Line)
       if (hlChartInstance) hlChartInstance.destroy();
       const hlCanvas = document.getElementById("hlDualChart");
       if (hlCanvas) {
         hlChartInstance = new Chart(hlCanvas, {
-          type: 'bar',
+          type: 'line',
           data: {
             labels: hlData.map(r => r["Time"]),
             datasets: [
               {
-                type: 'bar',
                 label: 'New highs',
                 data: hlData.map(r => parseFloat(r["New H"] || 0)),
-                backgroundColor: '#10b981',
-                borderRadius: 2,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                borderWidth: 2,
+                tension: 0.35,
+                pointRadius: 0,
                 yAxisID: 'yCount',
                 order: 2
               },
               {
-                type: 'bar',
                 label: 'New lows',
-                data: hlData.map(r => -Math.abs(parseFloat(r["New L"] || 0))),
-                backgroundColor: '#ef4444',
-                borderRadius: 2,
+                data: hlData.map(r => parseFloat(r["New L"] || 0)),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                borderWidth: 2,
+                tension: 0.35,
+                pointRadius: 0,
                 yAxisID: 'yCount',
-                order: 2
+                order: 3
               },
               {
-                type: 'line',
                 label: 'Net highs, %',
                 data: hlData.map(r => {
                   const h = parseFloat(r["New H"] || 0);
@@ -1063,10 +1126,9 @@
                 }),
                 borderColor: '#f59e0b',
                 backgroundColor: '#f59e0b',
-                pointBackgroundColor: '#f59e0b',
-                pointRadius: 2.5,
                 borderWidth: 2,
-                tension: 0.25,
+                tension: 0.3,
+                pointRadius: 0,
                 yAxisID: 'yPct',
                 order: 1
               }
@@ -1078,14 +1140,14 @@
             interaction: { mode: 'index', intersect: false },
             plugins: { legend: { display: false } },
             scales: {
-              x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 8 } },
+              x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8 } },
               yCount: {
-                position: 'right',
+                position: 'left',
                 grid: { color: gridColor },
-                ticks: { color: textColor, callback: val => val.toLocaleString() }
+                ticks: { color: textColor }
               },
               yPct: {
-                position: 'left',
+                position: 'right',
                 grid: { display: false },
                 ticks: { color: '#f59e0b', callback: val => val.toFixed(0) + '%' }
               }
@@ -1199,6 +1261,7 @@
       currentModalData.sort((a, b) => {
         let valA = a[columnKey];
         let valB = b[columnKey];
+
         const numA = parseFloat(valA);
         const numB = parseFloat(valB);
 
