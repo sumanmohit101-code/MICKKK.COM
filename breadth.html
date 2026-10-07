@@ -233,50 +233,58 @@
       </nav>
     </div>
 
-    <!-- BOTTOM PANEL -->
-<div>
-  <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
-    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-      <!-- User profile / Click to login -->
-      <div onclick="handleLogin()" class="flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
-        <div class="auth-user-avatar w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-          G
+    <!-- ================= BOTTOM PANEL ================= -->
+    <div>
+      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+          
+          <div class="flex items-center gap-2 min-w-0">
+            <div id="sideUserAvatar" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
+              G
+            </div>
+            <div class="min-w-0">
+              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Guest Trader</div>
+              <div id="sideUserEmail" class="text-[9px] text-slate-400 truncate">Sign in to sync</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 text-slate-400">
+            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
+              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
+              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+            </button>
+
+            <!-- Sign in button for Guest -->
+            <button onclick="handleLogin()" id="sideLoginBtn" class="p-1 text-emerald-500 hover:text-emerald-400 font-bold text-[10px] cursor-pointer" title="Login with Google">
+              <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            </button>
+
+            <!-- Logout button for Logged In -->
+            <button onclick="handleLogout()" id="sideLogoutBtn" style="display: none;" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
         </div>
-        <div class="min-w-0">
-          <div class="auth-user-name text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Guest User</div>
-          <div class="auth-user-email text-[9px] text-slate-400 truncate">Click to Login</div>
-        </div>
+        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
       </div>
-      <!-- Actions -->
-      <div class="flex items-center gap-1 text-slate-400">
-        <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-          <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
-          <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+
+      <!-- Collapsed Bottom -->
+      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
+          <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
+          <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
         </button>
-        <!-- Dynamic Login/Logout Button -->
-        <button onclick="handleLogin()" class="auth-login-btn p-1 text-emerald-500 hover:text-emerald-400 font-bold text-[10px] cursor-pointer" title="Login with Google">
-          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+        <button onclick="handleLogin()" id="sideMiniLoginBtn" class="p-1 text-emerald-500 hover:text-emerald-400 cursor-pointer" title="Login">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
         </button>
-        <button onclick="handleLogout()" class="auth-logout-btn hidden p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
-          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        <button onclick="handleLogout()" id="sideMiniLogoutBtn" style="display: none;" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-    <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-      <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
-      <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
-    </button>
-    <button onclick="handleLogin()" class="auth-login-btn p-1 text-emerald-500 hover:text-emerald-400 cursor-pointer" title="Login">
-      <i data-lucide="log-in" class="w-4 h-4"></i>
-    </button>
-    <button onclick="handleLogout()" class="auth-logout-btn hidden p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
-      <i data-lucide="log-out" class="w-4 h-4"></i>
-    </button>
-  </div>
-</div>
   <!-- ================= RIGHT CONTENT AREA ================= -->
   <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
     <main class="p-5 md:p-7 space-y-5 w-full">
