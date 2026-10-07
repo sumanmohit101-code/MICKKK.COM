@@ -10,7 +10,7 @@ import {
 
 // Firebase configuration for Mickkk-Terminal
 const firebaseConfig = {
-  apiKey: "AIzaSy_YOUR_API_KEY_HERE", // <-- Yahan apni Config wali apiKey dalein
+  apiKey: "AIzaSyBpa5zxymgAvV0k-gZvM9e2hefLnogG4As", // <-- Yahan apni Config wali apiKey dalein
   authDomain: "mickkk-terminal.firebaseapp.com",
   projectId: "mickkk-terminal",
   storageBucket: "mickkk-terminal.appspot.com",
