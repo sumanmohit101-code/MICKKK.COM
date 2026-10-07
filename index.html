@@ -152,7 +152,8 @@
         </button>
 
         <!-- Login -->
-        <a href="#" class="text-xs font-extrabold px-3 py-2 text-slate-700 dark:text-slate-200 hover:text-emerald-500 transition-colors hidden sm:block">Login</a>
+        <button onclick="handleLogin()" class="auth-login-btn text-xs font-extrabold px-3 py-2 text-slate-700 dark:text-slate-200 hover:text-emerald-500 transition-colors hidden sm:block cursor-pointer">Login</button>
+<button onclick="handleLogout()" class="auth-logout-btn hidden text-xs font-extrabold px-3 py-2 text-rose-500 hover:text-rose-600 transition-colors sm:block cursor-pointer">Logout</button>
 
         <!-- Primary CTA: Go to Dashboard -->
         <a href="overview.html" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 transition-all">
@@ -668,5 +669,12 @@
     });
   </script>
 
+  <script type="module">
+  import { loginWithGoogle, logoutUser, initAuthListener } from './auth.js';
+  window.handleLogin = loginWithGoogle;
+  window.handleLogout = logoutUser;
+  initAuthListener();
+</script>
+  
 </body>
 </html>
