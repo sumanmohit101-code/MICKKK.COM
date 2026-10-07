@@ -210,50 +210,57 @@
       </nav>
     </div>
 
-   <!-- BOTTOM PANEL -->
-<div>
-  <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
-    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-      <!-- User profile / Click to login -->
-      <div onclick="handleLogin()" class="flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
-        <div class="auth-user-avatar w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-          G
+    <!-- ================= BOTTOM PANEL ================= -->
+    <div>
+      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+          
+          <div class="flex items-center gap-2 min-w-0">
+            <div id="sideUserAvatar" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
+              G
+            </div>
+            <div class="min-w-0">
+              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Guest Trader</div>
+              <div id="sideUserEmail" class="text-[9px] text-slate-400 truncate">Sign in to sync</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 text-slate-400">
+            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
+              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
+              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+            </button>
+
+            <!-- Sign in button for Guest -->
+            <button onclick="handleLogin()" id="sideLoginBtn" class="p-1 text-emerald-500 hover:text-emerald-400 font-bold text-[10px] cursor-pointer" title="Login with Google">
+              <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            </button>
+
+            <!-- Logout button for Logged In -->
+            <button onclick="handleLogout()" id="sideLogoutBtn" style="display: none;" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
         </div>
-        <div class="min-w-0">
-          <div class="auth-user-name text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Guest User</div>
-          <div class="auth-user-email text-[9px] text-slate-400 truncate">Click to Login</div>
-        </div>
+        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
       </div>
-      <!-- Actions -->
-      <div class="flex items-center gap-1 text-slate-400">
-        <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-          <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
-          <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+
+      <!-- Collapsed Bottom -->
+      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
+          <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
+          <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
         </button>
-        <!-- Dynamic Login/Logout Button -->
-        <button onclick="handleLogin()" class="auth-login-btn p-1 text-emerald-500 hover:text-emerald-400 font-bold text-[10px] cursor-pointer" title="Login with Google">
-          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+        <button onclick="handleLogin()" id="sideMiniLoginBtn" class="p-1 text-emerald-500 hover:text-emerald-400 cursor-pointer" title="Login">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
         </button>
-        <button onclick="handleLogout()" class="auth-logout-btn hidden p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
-          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        <button onclick="handleLogout()" id="sideMiniLogoutBtn" style="display: none;" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
-  </div>
-
-  <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-    <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-      <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
-      <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
-    </button>
-    <button onclick="handleLogin()" class="auth-login-btn p-1 text-emerald-500 hover:text-emerald-400 cursor-pointer" title="Login">
-      <i data-lucide="log-in" class="w-4 h-4"></i>
-    </button>
-    <button onclick="handleLogout()" class="auth-logout-btn hidden p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
-      <i data-lucide="log-out" class="w-4 h-4"></i>
-    </button>
-  </div>
-</div>
+  </aside>
 
   <!-- ================= RIGHT CONTENT AREA ================= -->
   <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
@@ -646,21 +653,16 @@
         <div class="flex items-center gap-2">
           <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
           <span class="text-slate-800 dark:text-slate-200 font-extrabold tracking-tight">Mickkk<span class="text-emerald-600 dark:text-[#00f5a0] font-black">.com</span></span>
-          <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence & Trading Platform</span>
+          <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence &amp; Trading Platform</span>
         </div>
 
         <div class="flex items-center gap-5 text-[11px]">
           <a href="index.html" class="hover:text-emerald-500 transition-colors">Home</a>
           <a href="overview.html" class="hover:text-emerald-500 transition-colors text-emerald-500">Market Overview</a>
           <a href="breadth.html" class="hover:text-emerald-500 transition-colors">Market Breadth</a>
-          <a href="#features" class="hover:text-emerald-500 transition-colors">Features</a>
-          <a href="#contact" class="hover:text-emerald-500 transition-colors">Contact</a>
         </div>
 
         <div class="flex items-center gap-3 text-slate-400 text-[11px]">
-          <a href="#" aria-label="Twitter" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
-          <a href="#" aria-label="LinkedIn" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
-          <a href="#" aria-label="YouTube" class="hover:text-slate-800 dark:hover:text-white"><i data-lucide="youtube" class="w-3.5 h-3.5"></i></a>
           <span class="ml-1">© 2026 Mickkk.com.</span>
         </div>
       </footer>
@@ -846,7 +848,6 @@
           renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
           renderBottomTables(data);
 
-          // Check if URL search query was passed from index.html
           checkUrlSearchParam();
         }
       } catch (err) {
@@ -1076,7 +1077,7 @@
       if (instance) {
         instance.data = config.data;
         instance.options = config.options;
-        instance.update('none'); // Update without animation (0% CPU impact)
+        instance.update('none');
         return instance;
       }
       const canvas = document.getElementById(canvasId);
@@ -1356,13 +1357,69 @@
     }
   </script>
 
-    <script type="module">
-  import { loginWithGoogle, logoutUser, initAuthListener } from './auth.js';
-  window.handleLogin = loginWithGoogle;
-  window.handleLogout = logoutUser;
-  initAuthListener((user) => {
-    console.log("Logged in user UID:", user.uid);
-  });
-</script>
+  <!-- Central Authentication Wiring -->
+  <script type="module">
+    import { loginWithGoogle, logoutUser, initAuthListener } from './auth.js';
+
+    window.handleLogin = async () => {
+      await loginWithGoogle();
+    };
+
+    window.handleLogout = async () => {
+      await logoutUser();
+    };
+
+    initAuthListener(
+      (user) => {
+        // Logged in UI
+        const nameEl = document.getElementById('sideUserName');
+        const emailEl = document.getElementById('sideUserEmail');
+        const avatarEl = document.getElementById('sideUserAvatar');
+        const loginBtn = document.getElementById('sideLoginBtn');
+        const logoutBtn = document.getElementById('sideLogoutBtn');
+        const miniLoginBtn = document.getElementById('sideMiniLoginBtn');
+        const miniLogoutBtn = document.getElementById('sideMiniLogoutBtn');
+
+        if (nameEl) nameEl.innerText = user.displayName || 'Trader';
+        if (emailEl) emailEl.innerText = user.email || '';
+        if (avatarEl) {
+          if (user.photoURL) {
+            avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
+          } else {
+            avatarEl.innerText = (user.displayName || 'U')[0].toUpperCase();
+          }
+        }
+
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'block';
+        if (miniLoginBtn) miniLoginBtn.style.display = 'none';
+        if (miniLogoutBtn) miniLogoutBtn.style.display = 'block';
+
+        if (window.lucide) lucide.createIcons();
+      },
+      () => {
+        // Guest UI
+        const nameEl = document.getElementById('sideUserName');
+        const emailEl = document.getElementById('sideUserEmail');
+        const avatarEl = document.getElementById('sideUserAvatar');
+        const loginBtn = document.getElementById('sideLoginBtn');
+        const logoutBtn = document.getElementById('sideLogoutBtn');
+        const miniLoginBtn = document.getElementById('sideMiniLoginBtn');
+        const miniLogoutBtn = document.getElementById('sideMiniLogoutBtn');
+
+        if (nameEl) nameEl.innerText = 'Guest Trader';
+        if (emailEl) emailEl.innerText = 'Sign in to sync';
+        if (avatarEl) avatarEl.innerText = 'G';
+
+        if (loginBtn) loginBtn.style.display = 'block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (miniLoginBtn) miniLoginBtn.style.display = 'block';
+        if (miniLogoutBtn) miniLogoutBtn.style.display = 'none';
+
+        if (window.lucide) lucide.createIcons();
+      }
+    );
+  </script>
+
 </body>
 </html>
