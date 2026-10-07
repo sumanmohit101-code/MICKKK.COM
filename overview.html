@@ -1355,5 +1355,14 @@
       init();
     }
   </script>
+
+    <script type="module">
+  import { loginWithGoogle, logoutUser, initAuthListener } from './auth.js';
+  window.handleLogin = loginWithGoogle;
+  window.handleLogout = logoutUser;
+  initAuthListener((user) => {
+    console.log("Logged in user UID:", user.uid);
+  });
+</script>
 </body>
 </html>
