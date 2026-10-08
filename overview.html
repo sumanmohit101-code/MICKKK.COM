@@ -217,11 +217,11 @@
           
           <div class="flex items-center gap-2 min-w-0">
             <div id="sideUserAvatar" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
-              G
+              M
             </div>
             <div class="min-w-0">
-              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Guest Trader</div>
-              <div id="sideUserEmail" class="text-[9px] text-slate-400 truncate">Sign in to sync</div>
+              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Mohit Suman</div>
+              <div id="sideUserEmail" class="text-[9px] text-slate-400 truncate">sumanmohit101@...</div>
             </div>
           </div>
 
@@ -231,13 +231,8 @@
               <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
             </button>
 
-            <!-- Sign in button for Guest -->
-            <button onclick="handleLogin()" id="sideLoginBtn" class="p-1 text-emerald-500 hover:text-emerald-400 font-bold text-[10px] cursor-pointer" title="Login with Google">
-              <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
-            </button>
-
-            <!-- Logout button for Logged In -->
-            <button onclick="handleLogout()" id="sideLogoutBtn" style="display: none;" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
+            <!-- Logout button for Logged In User -->
+            <button onclick="handleLogout()" id="sideLogoutBtn" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -252,10 +247,7 @@
           <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
           <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
         </button>
-        <button onclick="handleLogin()" id="sideMiniLoginBtn" class="p-1 text-emerald-500 hover:text-emerald-400 cursor-pointer" title="Login">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-        </button>
-        <button onclick="handleLogout()" id="sideMiniLogoutBtn" style="display: none;" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
+        <button onclick="handleLogout()" id="sideMiniLogoutBtn" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
@@ -460,13 +452,13 @@
               </div>
             </div>
 
-            <!-- Middle Stats: Net advances + A/D ratio -->
+            <!-- Middle Stats: Net advances (Left) + A/D ratio (Right-Aligned Flush) -->
             <div class="grid grid-cols-2 gap-4 my-2.5 pt-3 border-t border-slate-100 dark:border-borderDark">
               <div>
                 <p class="text-[11px] font-semibold text-slate-400">Net advances</p>
                 <p id="netAdvValue" class="text-2xl font-black font-mono-num text-emerald-500 mt-0.5">0</p>
               </div>
-              <div>
+              <div class="text-right">
                 <p class="text-[11px] font-semibold text-slate-400">A/D ratio</p>
                 <p id="adRatioValue" class="text-2xl font-black font-mono-num text-slate-800 dark:text-slate-100 mt-0.5">0.00</p>
               </div>
@@ -660,6 +652,7 @@
           <a href="index.html" class="hover:text-emerald-500 transition-colors">Home</a>
           <a href="overview.html" class="hover:text-emerald-500 transition-colors text-emerald-500">Market Overview</a>
           <a href="breadth.html" class="hover:text-emerald-500 transition-colors">Market Breadth</a>
+          <a href="index.html#pricing" class="hover:text-emerald-500 transition-colors">Pricing</a>
         </div>
 
         <div class="flex items-center gap-3 text-slate-400 text-[11px]">
@@ -707,7 +700,6 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGXkNmnhPB8mzbpw2Zc2EowqVcHGu-ATOPHjsJ6a0escQkpxFXVPz5zynSjg1EIttYgA/exec";
     const CACHE_KEY = "mickkk_market_overview_cache_v2";
 
-    // Google Sheet GViz details for Live Breadth Meter
     const BREADTH_SPREADSHEET_ID = "1N5LGJUqsTMIKicd9G_hBGIV_sGS2MSjqEziILduitJ8";
     const BREADTH_SHEET_NAME = "Market Breadth Signals";
     const BREADTH_CACHE_KEY = "mbi_market_data_cache_v1";
@@ -1357,28 +1349,22 @@
     }
   </script>
 
-  <!-- Central Authentication Wiring -->
+  <!-- Central Authentication & Route Guard Wiring -->
   <script type="module">
-    import { loginWithGoogle, logoutUser, initAuthListener } from './auth.js';
+    import { logoutUser, initAuthListener, requireAuth } from './auth.js';
 
-    window.handleLogin = async () => {
-      await loginWithGoogle();
-    };
+    // Route Guard: Ensures user is logged in to view overview terminal
+    requireAuth();
 
     window.handleLogout = async () => {
       await logoutUser();
     };
 
     initAuthListener(
-      (user) => {
-        // Logged in UI
+      (user, role) => {
         const nameEl = document.getElementById('sideUserName');
         const emailEl = document.getElementById('sideUserEmail');
         const avatarEl = document.getElementById('sideUserAvatar');
-        const loginBtn = document.getElementById('sideLoginBtn');
-        const logoutBtn = document.getElementById('sideLogoutBtn');
-        const miniLoginBtn = document.getElementById('sideMiniLoginBtn');
-        const miniLogoutBtn = document.getElementById('sideMiniLogoutBtn');
 
         if (nameEl) nameEl.innerText = user.displayName || 'Trader';
         if (emailEl) emailEl.innerText = user.email || '';
@@ -1389,34 +1375,10 @@
             avatarEl.innerText = (user.displayName || 'U')[0].toUpperCase();
           }
         }
-
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'block';
-        if (miniLoginBtn) miniLoginBtn.style.display = 'none';
-        if (miniLogoutBtn) miniLogoutBtn.style.display = 'block';
-
         if (window.lucide) lucide.createIcons();
       },
       () => {
-        // Guest UI
-        const nameEl = document.getElementById('sideUserName');
-        const emailEl = document.getElementById('sideUserEmail');
-        const avatarEl = document.getElementById('sideUserAvatar');
-        const loginBtn = document.getElementById('sideLoginBtn');
-        const logoutBtn = document.getElementById('sideLogoutBtn');
-        const miniLoginBtn = document.getElementById('sideMiniLoginBtn');
-        const miniLogoutBtn = document.getElementById('sideMiniLogoutBtn');
-
-        if (nameEl) nameEl.innerText = 'Guest Trader';
-        if (emailEl) emailEl.innerText = 'Sign in to sync';
-        if (avatarEl) avatarEl.innerText = 'G';
-
-        if (loginBtn) loginBtn.style.display = 'block';
-        if (logoutBtn) logoutBtn.style.display = 'none';
-        if (miniLoginBtn) miniLoginBtn.style.display = 'block';
-        if (miniLogoutBtn) miniLogoutBtn.style.display = 'none';
-
-        if (window.lucide) lucide.createIcons();
+        // If not logged in, requireAuth will redirect to index.html
       }
     );
   </script>
