@@ -190,7 +190,13 @@
         <div class="p-5 border-b border-slate-200 dark:border-borderDark flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h3 class="text-sm font-black text-slate-800 dark:text-white">Referral Management</h3>
-            <p class="text-xs text-slate-400 mt-1">Review signup attribution, verify eligible referrals, and award Pro days with a saved reward status.</p>
+            <p class="text-xs text-slate-400 mt-1">Verify referrals, record the referred user’s purchased plan duration, and award the matching Pro-day bonus. Prices are not set yet.</p>
+          </div>
+          <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3"><p class="text-[10px] text-slate-500">1 Month / 30D</p><p class="text-sm font-black text-emerald-500">+7 Pro days</p></div>
+            <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3"><p class="text-[10px] text-slate-500">3 Months / 90D</p><p class="text-sm font-black text-emerald-500">+15 Pro days</p></div>
+            <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3"><p class="text-[10px] text-slate-500">6 Months / 180D</p><p class="text-sm font-black text-emerald-500">+30 Pro days</p></div>
+            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3"><p class="text-[10px] text-slate-500">1 Year / 365D</p><p class="text-sm font-black text-emerald-500">+60 Pro days</p></div>
           </div>
           <div class="flex flex-wrap gap-2">
             <select id="referralStatusFilter" onchange="filterReferralRows()" class="px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
@@ -721,7 +727,7 @@
           <td class="p-3 font-semibold">${escapeHtml(rewardText)}</td>
           <td class="p-3 text-right whitespace-nowrap">
             ${canVerify ? `<button onclick="setReferralStatus('${rid}','verified')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold mr-1">Verify</button><button onclick="setReferralStatus('${rid}','rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 text-rose-500 font-bold">Reject</button>` : ""}
-            ${canReward ? `<button onclick="awardReferralRecord('${rid}',7)" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 font-bold mr-1">+7D</button><button onclick="awardReferralRecord('${rid}',15)" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold">+15D</button>` : ""}
+            ${canReward ? `<div class="flex flex-wrap justify-end gap-1"><button title="Friend bought 1 Month plan: +7 Pro days" onclick="awardReferralRecord('${rid}',30)" class="px-2 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 font-bold">1M → +7D</button><button title="Friend bought 3 Months plan: +15 Pro days" onclick="awardReferralRecord('${rid}',90)" class="px-2 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 font-bold">3M → +15D</button><button title="Friend bought 6 Months plan: +30 Pro days" onclick="awardReferralRecord('${rid}',180)" class="px-2 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold">6M → +30D</button><button title="Friend bought 1 Year plan: +60 Pro days" onclick="awardReferralRecord('${rid}',365)" class="px-2 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold">1Y → +60D</button></div>` : ""}
             ${r.rewardStatus === "awarded" ? '<span class="text-[10px] text-emerald-500 font-bold">Rewarded ✓</span>' : ""}
           </td>
         </tr>`;
@@ -751,14 +757,17 @@
       }
     };
 
-    window.awardReferralRecord = async (referralId, days) => {
-      if (![7, 15].includes(Number(days))) return;
+    window.awardReferralRecord = async (referralId, referredPlanDays) => {
+      const rewardByPlanDays = { 30: 7, 90: 15, 180: 30, 365: 60 };
+      const days = rewardByPlanDays[Number(referredPlanDays)];
+      if (!days) return;
       const record = allReferralRecords.find(r => r.id === referralId);
       if (!record || record.status !== "verified" || record.rewardStatus === "awarded") {
         showToast("Only verified, not-yet-rewarded referrals can receive a bonus.", "warning");
         return;
       }
-      if (!confirm(`Award +${days} Pro days to ${record.referrerEmail || record.referrerUid}?`)) return;
+      const planLabel = ({30:"1 Month (30 days)",90:"3 Months (90 days)",180:"6 Months (180 days)",365:"1 Year (365 days)"})[Number(referredPlanDays)];
+      if (!confirm(`Confirm the referred user's paid plan is ${planLabel}? Then award +${days} Pro days to ${record.referrerEmail || record.referrerUid}.`)) return;
       try {
         const userRef = doc(db, "users", record.referrerUid);
         const referralRef = doc(db, "referrals", referralId);
@@ -785,14 +794,16 @@
             status: "rewarded",
             rewardStatus: "awarded",
             rewardDays: Number(days),
+            referredPlanDays: Number(referredPlanDays),
+            referredPlanLabel: planLabel,
             rewardedAt: serverTimestamp(),
             rewardedBy: auth.currentUser?.uid || null,
             updatedAt: serverTimestamp()
           });
         });
         logSessionActivity("Referral reward awarded", { email: record.referrerEmail || record.referrerUid }, `+${days} Pro days; referred ${record.referredEmail || record.referredUid}`);
-        await writeAuditEvent("referral_reward_awarded", { docId: record.referrerUid, email: record.referrerEmail }, `Awarded +${days} days`, { referralId, days, referredUid: record.referredUid });
-        showToast(`+${days} Pro days awarded.`);
+        await writeAuditEvent("referral_reward_awarded", { docId: record.referrerUid, email: record.referrerEmail }, `Awarded +${days} days for ${planLabel}`, { referralId, days, referredPlanDays, referredUid: record.referredUid });
+        showToast(`+${days} Pro days awarded for ${planLabel}.`);
         await window.fetchAllUsers();
         await window.fetchReferrals();
       } catch (err) {
