@@ -361,6 +361,16 @@
           <p class="text-sm sm:text-base leading-relaxed text-slate-500 dark:text-slate-400 max-w-xl">
             Invite your trading friends to Mickkk.com. Share your personal referral link, keep track of sign-ups and see eligible Pro rewards from your account.
           </p>
+          <div class="mt-5 rounded-2xl border border-emerald-500/20 bg-white/80 dark:bg-[#0b1325]/80 p-4 sm:p-5 max-w-xl">
+            <div class="flex items-center justify-between gap-3 mb-3"><h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Referral bonus rewards</h3><span class="text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-300">Pro days</span></div>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between gap-3"><span>Friend buys 1 Month plan</span><strong class="text-emerald-600 dark:text-[#00f5a0]">+7 days</strong></div>
+              <div class="flex justify-between gap-3"><span>Friend buys 3 Months plan</span><strong class="text-emerald-600 dark:text-[#00f5a0]">+15 days</strong></div>
+              <div class="flex justify-between gap-3"><span>Friend buys 6 Months plan</span><strong class="text-emerald-600 dark:text-[#00f5a0]">+30 days</strong></div>
+              <div class="flex justify-between gap-3"><span>Friend buys 1 Year plan</span><strong class="text-emerald-600 dark:text-[#00f5a0]">+60 days</strong></div>
+            </div>
+            <p class="text-[10px] leading-relaxed text-slate-400 mt-3">Bonus is added after the paid plan and referral are verified by the Mickkk team. One reward per eligible referred account.</p>
+          </div>
           <div class="flex flex-wrap gap-3 pt-1">
             <a href="referrals.html" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-extrabold shadow-lg shadow-emerald-500/25 transition-all">
               Get Your Referral Link <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
@@ -428,7 +438,7 @@
       <div class="text-center max-w-2xl mx-auto mb-14">
         <span class="text-[11px] font-black tracking-wider uppercase text-emerald-500">TRANSPARENT PLANS</span>
         <h2 class="text-3xl font-black text-slate-900 dark:text-white mt-1">Simple Pricing for Serious Traders</h2>
-        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Start free with basic access or upgrade to Pro for institutional market breadth data and unlimited history.</p>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Start with a 7-day free Pro trial. Paid plans are duration-based (30, 90, 180 or 365 days); prices have not been finalized yet and will be announced before paid checkout opens.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
@@ -487,10 +497,20 @@
               <span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Full Access</span>
             </div>
             <div class="mt-4 flex items-baseline gap-1">
-              <span class="text-4xl font-black font-mono-num text-emerald-600 dark:text-[#00f5a0]">₹299</span>
-              <span class="text-xs text-slate-400 font-semibold">/ month</span>
+              <span class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-[#00f5a0]">Pricing soon</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Complete institutional edge with macro breadth signals, full history &amp; alerts.</p>
+            <div class="mt-5 rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4 flex items-center justify-between gap-3">
+              <div><p class="text-xs font-extrabold text-slate-900 dark:text-white">7-Day Free Pro Trial</p><p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Try Pro before choosing a paid duration.</p></div>
+              <span class="shrink-0 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-600 dark:text-[#00f5a0]">7 DAYS · FREE</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-3">Paid plan prices are not set yet. Durations below show the planned subscription lengths, not prices.</p>
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3"><p class="text-xs font-extrabold">1 Month</p><p class="text-[10px] text-slate-400 mt-1">30 days · Price soon</p></div>
+              <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3"><p class="text-xs font-extrabold">3 Months</p><p class="text-[10px] text-slate-400 mt-1">90 days · Price soon</p></div>
+              <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3"><p class="text-xs font-extrabold">6 Months</p><p class="text-[10px] text-slate-400 mt-1">180 days · Price soon</p></div>
+              <div class="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-3"><p class="text-xs font-extrabold">1 Year</p><p class="text-[10px] text-slate-400 mt-1">365 days · Price soon</p></div>
+            </div>
 
             <div class="space-y-3 mt-6 pt-6 border-t border-slate-100 dark:border-borderDark text-xs font-bold text-slate-700 dark:text-slate-200">
               <div class="flex items-center gap-2.5">
@@ -643,21 +663,21 @@
           localStorage.removeItem("mickkk_pending_referral");
           return;
         }
-        const refQuery = query(collection(db, "users"), where("referralCode", "==", code));
-        const refSnap = await getDocs(refQuery);
-        if (refSnap.empty) return;
-        const referrerDoc = refSnap.docs[0];
-        if (referrerDoc.id === user.uid) {
+        const codeSnap = await getDoc(doc(db, "referralCodes", code));
+        if (!codeSnap.exists()) return;
+        const referrerUid = codeSnap.data().uid;
+        if (!referrerUid || referrerUid === user.uid) {
           localStorage.removeItem("mickkk_pending_referral");
           return;
         }
-        const referrerData = referrerDoc.data() || {};
-        const referralId = `${referrerDoc.id}_${user.uid}`;
+        const referrerSnap = await getDoc(doc(db, "users", referrerUid));
+        const referrerData = referrerSnap.exists() ? referrerSnap.data() : {};
+        const referralId = `${referrerUid}_${user.uid}`;
         const referralRef = doc(db, "referrals", referralId);
         const existingReferral = await getDoc(referralRef);
         if (!existingReferral.exists()) {
           await setDoc(referralRef, {
-            referrerUid: referrerDoc.id,
+            referrerUid,
             referrerEmail: referrerData.email || "",
             referredUid: user.uid,
             referredEmail: user.email || "",
@@ -671,7 +691,7 @@
           email: user.email || ownData.email || "",
           name: user.displayName || ownData.name || "",
           photoURL: user.photoURL || ownData.photoURL || "",
-          referredBy: referrerDoc.id,
+          referredBy: referrerUid,
           referralCodeUsed: code,
           referralStatus: "pending",
           updatedAt: serverTimestamp()
