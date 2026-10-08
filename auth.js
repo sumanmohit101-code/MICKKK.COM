@@ -1,5 +1,4 @@
 // auth.js — Master Authentication & Role Controller for Mickkk.com
-// Keep this file beside index.html, referrals.html and the protected pages.
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import {
   getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged
@@ -8,8 +7,6 @@ import {
   getFirestore, doc, getDoc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-// IMPORTANT: Replace apiKey with the real Firebase Web API key from Firebase Console.
-// Web API keys are identifiers, not service-account secrets; never put service-account JSON here.
 const firebaseConfig = {
   apiKey: "AIzaSyBpa5zxymgAvV0k-gZvM9e2hefLnogG4As",
   authDomain: "mickkk-terminal.firebaseapp.com",
@@ -19,16 +16,24 @@ const firebaseConfig = {
   appId: "1:708877453716:web:5d371d47ec10b014126781"
 };
 
-// Avoid app-already-initialized errors if another module imports the same controller.
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// Create the minimum profile only for a new account. Existing plan/referral fields are preserved.
+// Clean Unique Referral Code Generator
+function makeReferralCode(user) {
+  const base = (user.email || user.uid).split("@")[0].replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toLowerCase();
+  const suffix = user.uid.slice(-4).toLowerCase();
+  return (base || "trader") + suffix;
+}
+
+// User Profile & Referral Code Auto-Sync
 async function syncUserProfile(user) {
   const userRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userRef);
+  const data = userSnap.exists() ? userSnap.data() : null;
+
   const profile = {
     uid: user.uid,
     name: user.displayName || "Trader",
@@ -36,10 +41,45 @@ async function syncUserProfile(user) {
     photoURL: user.photoURL || "",
     updatedAt: serverTimestamp()
   };
-  if (!userSnap.exists()) {
-    await setDoc(userRef, { ...profile, role: "free", createdAt: serverTimestamp() });
+
+  if (!data) {
+    // Naya User: Generate code & create Free account
+    const refCode = makeReferralCode(user);
+    await setDoc(userRef, {
+      ...profile,
+      role: "free",
+      referralCode: refCode,
+      referralCount: 0,
+      createdAt: serverTimestamp()
+    });
+
+    // Public lookup mapping me bhi register karein
+    try {
+      await setDoc(doc(db, "referralCodes", refCode), {
+        uid: user.uid,
+        email: user.email || "",
+        createdAt: serverTimestamp()
+      });
+    } catch (e) {
+      console.warn("Could not register referral code mapping:", e);
+    }
   } else {
-    // Do not overwrite role, planExpires, referralCode, or referral attribution on login.
+    // Existing User: Agar pehle se referral code missing ho, toh bana dein
+    if (!data.referralCode) {
+      const refCode = makeReferralCode(user);
+      profile.referralCode = refCode;
+      profile.referralCount = Number(data.referralCount || 0);
+
+      try {
+        await setDoc(doc(db, "referralCodes", refCode), {
+          uid: user.uid,
+          email: user.email || "",
+          createdAt: serverTimestamp()
+        });
+      } catch (e) {
+        console.warn("Could not register referral code mapping:", e);
+      }
+    }
     await setDoc(userRef, profile, { merge: true });
   }
 }
@@ -64,8 +104,7 @@ export async function getUserRole(uid) {
     if (userSnap.exists()) {
       const data = userSnap.data();
       const expiry = Number(data.planExpires || 0);
-      // Expired Pro is treated as Free immediately in the UI. Persisted downgrade should
-      // be handled by a trusted backend/scheduled function, not by an ordinary client.
+      // Agar Pro plan ki date nikal gayi ho toh turant Free treat karein
       if (data.role === "pro" && expiry && expiry <= Date.now()) return "free";
       return data.role || "free";
     }
@@ -96,7 +135,6 @@ export function initAuthListener(onUserLogged, onUserLoggedOut) {
         if (onUserLogged) await onUserLogged(user, role);
       } catch (e) {
         console.error("Auth profile/listener error:", e);
-        // Keep the signed-in state visible; page-level data errors should be shown separately.
         updateUIForUser(user);
       }
     } else {
