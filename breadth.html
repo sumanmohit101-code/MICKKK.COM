@@ -22,16 +22,13 @@
     })();
   </script>
 
-  <!-- Preconnect & Resource Hints for Edge CDN Delivery -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://unpkg.com">
 
-  <!-- Non-Blocking Google Fonts Loading -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Montserrat:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -52,7 +49,6 @@
     }
   </script>
 
-  <!-- Chart.js & Lucide Icons -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
 
@@ -64,7 +60,6 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
 
-    /* ===== Mickkk Logo ===== */
     :root { 
       --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
       --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; 
@@ -89,7 +84,8 @@
     .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
     .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
 
-    .sidebar-collapsed .nav-item:hover::after {
+    .sidebar-collapsed .nav-item:hover::after,
+    .sidebar-collapsed .side-collapsed-user:hover::after {
       content: attr(data-title);
       position: absolute;
       left: 4.2rem;
@@ -107,14 +103,12 @@
 
     .collapse-float-btn { position: absolute; right: -12px; top: 22px; z-index: 60; }
 
-    /* Bi-Directional Divergent Bars */
     .bi-bar-container { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 90px; }
     .bi-bar-track { position: relative; flex: 1; height: 11px; background: rgba(100, 116, 139, 0.2); border-radius: 2px; overflow: hidden; }
     .bi-bar-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1.5px; background: #64748b; z-index: 3; }
     .bi-bar-fill-pos { position: absolute; left: 50%; top: 1px; bottom: 1px; background: #10b981; border-radius: 0 2px 2px 0; }
     .bi-bar-fill-neg { position: absolute; right: 50%; top: 1px; bottom: 1px; background: #ef4444; border-radius: 2px 0 0 2px; }
 
-    /* Compact Cell Bars */
     .cell-bar-wrap { position: relative; width: 100%; min-width: 48px; background: rgba(100, 116, 139, 0.15); border-radius: 2px; height: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .cell-bar-fill { position: absolute; left: 0; top: 0; height: 100%; opacity: 0.35; border-radius: 2px; }
 
@@ -128,12 +122,18 @@
 
     .date-bullish { background-color: #ecfdf5 !important; color: #059669 !important; border-left: 3.5px solid #10b981 !important; }
     .dark .date-bullish { background-color: #064e3b !important; color: #34d399 !important; border-left: 3.5px solid #10b981 !important; }
-
     .date-bearish { background-color: #fff1f2 !important; color: #e11d48 !important; border-left: 3.5px solid #ef4444 !important; }
     .dark .date-bearish { background-color: #4c0519 !important; color: #fb7185 !important; border-left: 3.5px solid #ef4444 !important; }
-
     .date-neutral { background-color: #f8fafc !important; color: #64748b !important; border-left: 3.5px solid #94a3b8 !important; }
     .dark .date-neutral { background-color: #0f172a !important; color: #94a3b8 !important; border-left: 3.5px solid #64748b !important; }
+
+    /* Free Model Blur Rows (6th row onward) */
+    .row-locked-blur {
+      filter: blur(4.5px);
+      user-select: none;
+      pointer-events: none;
+      opacity: 0.45;
+    }
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
@@ -227,6 +227,7 @@
 
     <!-- ================= BOTTOM PANEL ================= -->
     <div>
+      <!-- Expanded Mode -->
       <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
           
@@ -234,9 +235,12 @@
             <div id="sideUserAvatar" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
               M
             </div>
-            <div class="min-w-0">
+            <div class="min-w-0 flex flex-col justify-center">
               <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Trader</div>
-              <div id="sideUserRole" class="text-[9px] font-extrabold text-amber-500 uppercase tracking-wider truncate">Free Tier</div>
+              <div class="flex items-center gap-1.5">
+                <span id="sidePlanBadge" class="text-[9px] font-bold text-amber-500 truncate">Free Plan</span>
+                <button onclick="openProModal()" id="sideUpgradeLink" class="text-[9px] font-extrabold text-emerald-500 hover:underline cursor-pointer">Upgrade</button>
+              </div>
             </div>
           </div>
 
@@ -245,9 +249,7 @@
               <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
               <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
             </button>
-
-            <!-- Logout button -->
-            <button onclick="handleLogout()" id="sideLogoutBtn" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
+            <button onclick="handleLogout()" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -256,8 +258,16 @@
         <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
       </div>
 
-      <!-- Collapsed Bottom -->
-      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+      <!-- Collapsed Mode -->
+      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+        <!-- Collapsed Avatar with Plan Tooltip -->
+        <div id="sideCollapsedUserWrap" data-title="Plan: Free" class="side-collapsed-user relative cursor-pointer" onclick="openProModal()">
+          <div id="sideUserAvatarMini" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
+            M
+          </div>
+          <span id="sidePlanDotMini" class="w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1"></span>
+        </div>
+
         <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
           <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
           <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
@@ -278,7 +288,7 @@
         <div>
           <div class="flex items-center gap-2.5">
             <h1 class="text-xl font-extrabold tracking-tight">Market Breadth Dashboard</h1>
-            <span id="tierBadge" class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">FREE MEMBER</span>
+            <span id="tierBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">Starter • Free Plan</span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">Track market participation, trend strength and overall market sentiment.</p>
         </div>
@@ -307,7 +317,6 @@
       <!-- ================= 1. TOP STATS + MBI METER (FREE FOR EVERYONE) ================= -->
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
         
-        <!-- Left Container: Grid of 2 balanced rows -->
         <div class="xl:col-span-9 grid grid-rows-2 gap-3.5 h-full">
           
           <!-- Top Row: 6 Cards -->
@@ -416,7 +425,7 @@
         <!-- Timeframe Selector -->
         <div class="flex items-center gap-2">
           <span class="text-slate-400 text-[11px] font-bold">TIMEFRAME:</span>
-          <!-- 30D (Active for Free) -->
+          <!-- 30D (Default Free) -->
           <button id="btn-30d" onclick="handleTimeframeSelect(30, this)" class="chart-time-btn active px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-500 cursor-pointer">30D</button>
           
           <!-- Locked for Free -->
@@ -448,15 +457,16 @@
             </button>
           </div>
 
+          <!-- COMPARE: 100% Locked for Free -->
           <div class="flex items-center gap-1.5">
             <span class="text-slate-400 text-[11px] font-bold">COMPARE:</span>
             <select id="compare-index-select" class="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 outline-none font-bold text-xs cursor-pointer" onchange="handleCompareIndexChange()">
               <option value="none">None</option>
-              <option value="nifty50">Nifty 50</option>
-              <option value="nifty500">Nifty 500</option>
-              <option value="cnxSmall">CNX Smallcap</option>
-              <option value="midSmall">MidSmall 400</option>
-              <option value="all">⚡ All 4 Indices (Pro 🔒)</option>
+              <option value="nifty50">🔒 Nifty 50 (Pro)</option>
+              <option value="nifty500">🔒 Nifty 500 (Pro)</option>
+              <option value="cnxSmall">🔒 CNX Smallcap (Pro)</option>
+              <option value="midSmall">🔒 MidSmall 400 (Pro)</option>
+              <option value="all">🔒 All 4 Indices (Pro)</option>
             </select>
           </div>
         </div>
@@ -500,8 +510,8 @@
         </div>
       </div>
 
-      <!-- ================= 3. BREADTH DATA TABLE + PRO LOCK OVERLAY ================= -->
-      <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm relative">
+      <!-- ================= 3. BREADTH DATA TABLE + 5-ROW VISIBLE + 6TH ROW BLUR ================= -->
+      <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 text-xs font-semibold">
           <div class="flex items-center gap-2">
             <i data-lucide="table" class="w-4 h-4 text-emerald-500"></i>
@@ -524,7 +534,7 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto max-h-[540px] custom-scroll relative border border-slate-100 dark:border-borderDark rounded-lg">
+        <div class="overflow-x-auto max-h-[560px] custom-scroll relative border border-slate-100 dark:border-borderDark rounded-lg">
           <table class="w-full text-xs text-left border-collapse" id="mbi-table">
             <thead class="text-slate-500 dark:text-slate-400 border-b-2 border-slate-200 dark:border-borderDark text-[10px] sticky top-0 bg-slate-50 dark:bg-cardDark z-30 shadow-sm uppercase tracking-wider text-center">
               <tr id="table-headers"></tr>
@@ -532,21 +542,19 @@
             <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
           </table>
 
-          <!-- Free User 5-Row Blur & Lock Overlay -->
-          <div id="tableLockOverlay" style="display: none;" class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/95 dark:to-transparent flex flex-col items-center justify-center p-4 z-40">
-            <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-5 rounded-2xl border border-slate-200 dark:border-borderDark shadow-2xl flex flex-col sm:flex-row items-center gap-4 max-w-lg text-center sm:text-left">
-              <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                <i data-lucide="lock" class="w-6 h-6"></i>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-extrabold text-sm text-slate-800 dark:text-white">Full Historical Breadth Locked</h4>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Free plan includes the latest 5 sessions. Upgrade to Pro for 1-Year historical data, unlimited scans &amp; CSV export.</p>
-              </div>
-              <button onclick="openWhatsAppTrialModal()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 transition-all cursor-pointer shrink-0">
-                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                <span>Claim 7-Day Pro</span>
-              </button>
+          <!-- Free User Lock Floating Badge (Positions directly over blurred rows) -->
+          <div id="tableLockOverlay" style="display: none;" class="sticky bottom-4 left-1/2 -translate-x-1/2 max-w-xl w-[94%] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl border-2 border-amber-500/40 shadow-2xl flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left z-30">
+            <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+              <i data-lucide="lock" class="w-6 h-6"></i>
             </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-extrabold text-sm text-slate-800 dark:text-white">Full Historical Breadth Locked</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">Pehle 5 din ka data free hai. 6th day se aage 1-Year historical data, live intraday scans aur CSV download ke liye Pro plan upgrade karein.</p>
+            </div>
+            <button onclick="openWhatsAppTrialModal()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 transition-all cursor-pointer shrink-0">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+              <span>Claim 7-Day Pro</span>
+            </button>
           </div>
 
         </div>
@@ -584,7 +592,7 @@
         </div>
       </div>
 
-      <!-- ================= COMPACT SLEEK FOOTER ================= -->
+      <!-- ================= FOOTER ================= -->
       <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
         <div class="flex items-center gap-2">
           <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
@@ -624,8 +632,9 @@
         </p>
 
         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-borderDark text-left space-y-2 text-xs font-bold">
-          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>1-Year Full Breadth History</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>1-Year Full Historical Breadth</span></div>
           <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>All Timeframes (90D, 180D, 1Y, All)</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>All-4 Indices Relative Strength Compare</span></div>
           <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>1-Click Daily CSV Reports</span></div>
           <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>VIP WhatsApp Breadth Alerts</span></div>
         </div>
@@ -653,7 +662,6 @@
     let autoRefreshTimer = null;
     let refreshCountdown = 300;
     
-    // User Role Tracker ('free' vs 'pro')
     let userRole = 'free'; 
     let userEmailGlobal = '';
 
@@ -774,41 +782,73 @@
     // Role-based Access Handler
     function applyRoleRestrictions() {
       const tierBadge = document.getElementById('tierBadge');
-      const sideUserRole = document.getElementById('sideUserRole');
+      const sidePlanBadge = document.getElementById('sidePlanBadge');
+      const sideUpgradeLink = document.getElementById('sideUpgradeLink');
+      const sideCollapsedUserWrap = document.getElementById('sideCollapsedUserWrap');
+      const sidePlanDotMini = document.getElementById('sidePlanDotMini');
       const tableOverlay = document.getElementById('tableLockOverlay');
       const tableIndicator = document.getElementById('tableRowIndicator');
       const lockIcons = document.querySelectorAll('.pro-lock-icon');
+      const compSelect = document.getElementById('compare-index-select');
 
       if (userRole === 'pro') {
+        // PRO UNLOCKED
         if (tierBadge) {
           tierBadge.innerText = 'PRO INSTITUTIONAL ⚡';
           tierBadge.className = 'text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
         }
-        if (sideUserRole) {
-          sideUserRole.innerText = 'Pro Member ⚡';
-          sideUserRole.className = 'text-[9px] font-extrabold text-emerald-500 uppercase tracking-wider truncate';
+        if (sidePlanBadge) {
+          sidePlanBadge.innerText = 'Pro Plan ⚡';
+          sidePlanBadge.className = 'text-[9px] font-bold text-emerald-500 uppercase tracking-wider truncate';
+        }
+        if (sideUpgradeLink) sideUpgradeLink.style.display = 'none';
+        if (sideCollapsedUserWrap) sideCollapsedUserWrap.setAttribute('data-title', 'Plan: Pro Institutional ⚡');
+        if (sidePlanDotMini) {
+          sidePlanDotMini.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1';
         }
         if (tableOverlay) tableOverlay.style.display = 'none';
         if (tableIndicator) tableIndicator.innerText = 'Full History Unlocked';
         lockIcons.forEach(ic => ic.style.display = 'none');
+        
+        // Unlock compare dropdown labels
+        if (compSelect) {
+          compSelect.options[1].text = "Nifty 50";
+          compSelect.options[2].text = "Nifty 500";
+          compSelect.options[3].text = "CNX Smallcap";
+          compSelect.options[4].text = "MidSmall 400";
+          compSelect.options[5].text = "⚡ All 4 Indices";
+        }
         setPresetDays(90);
       } else {
+        // FREE TIER
         if (tierBadge) {
-          tierBadge.innerText = 'FREE MEMBER 🔒';
-          tierBadge.className = 'text-[10px] font-black px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
+          tierBadge.innerText = 'Starter • Free Plan';
+          tierBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
         }
-        if (sideUserRole) {
-          sideUserRole.innerText = 'Free Tier';
-          sideUserRole.className = 'text-[9px] font-extrabold text-amber-500 uppercase tracking-wider truncate';
+        if (sidePlanBadge) {
+          sidePlanBadge.innerText = 'Free Plan';
+          sidePlanBadge.className = 'text-[9px] font-bold text-amber-500 truncate';
+        }
+        if (sideUpgradeLink) sideUpgradeLink.style.display = 'inline';
+        if (sideCollapsedUserWrap) sideCollapsedUserWrap.setAttribute('data-title', 'Plan: Free (Upgrade to Pro)');
+        if (sidePlanDotMini) {
+          sidePlanDotMini.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1';
         }
         if (tableOverlay) tableOverlay.style.display = 'flex';
         if (tableIndicator) tableIndicator.innerText = 'Latest 5 Days (Free)';
         lockIcons.forEach(ic => ic.style.display = 'inline');
+        
+        if (compSelect) {
+          compSelect.options[1].text = "🔒 Nifty 50 (Pro)";
+          compSelect.options[2].text = "🔒 Nifty 500 (Pro)";
+          compSelect.options[3].text = "🔒 CNX Smallcap (Pro)";
+          compSelect.options[4].text = "🔒 MidSmall 400 (Pro)";
+          compSelect.options[5].text = "🔒 All 4 Indices (Pro)";
+        }
         setPresetDays(30); // Default 30 Days for Free
       }
     }
 
-    // Free vs Pro Interactive Handlers
     function handleTimeframeSelect(days, el) {
       if (userRole !== 'pro' && (days === 90 || days === 180 || days === 365 || days === 'ALL')) {
         openProModal();
@@ -825,9 +865,10 @@
       toggleXAxisDates();
     }
 
+    // COMPARE Dropdown 100% Lock for Free
     function handleCompareIndexChange() {
       const compSelect = document.getElementById('compare-index-select');
-      if (userRole !== 'pro' && compSelect.value === 'all') {
+      if (userRole !== 'pro' && compSelect.value !== 'none') {
         compSelect.value = 'none';
         openProModal();
         return;
@@ -863,7 +904,7 @@
     }
 
     function openWhatsAppTrialModal() {
-      // ⚠️ Apna WhatsApp number yahan dalein
+      // ⚠️ Yahan apna WhatsApp number daalein
       const myWhatsAppNumber = "917086054184";
       const emailText = userEmailGlobal ? ` for my registered email: ${userEmailGlobal}` : "";
       const msg = encodeURIComponent(`Hi Mickkk Team! Please activate my 7-day Pro Free Trial${emailText}.`);
@@ -1081,6 +1122,7 @@
       if (needle) needle.style.transform = `rotate(${angle}deg)`;
     }
 
+    // Table Rendering: 5 Rows Crystal Clear, 6th Row Onward Blurred
     function renderBreadthTable() {
       const headerRow = document.getElementById('table-headers');
       const tableBody = document.getElementById('table-body');
@@ -1104,12 +1146,11 @@
 
       let displayRows = [...filteredDataset].reverse();
       
-      // Free User Lock: Show only latest 5 rows
-      if (userRole !== 'pro') {
-        displayRows = displayRows.slice(0, 5);
-      }
-      
-      const rowToHTML = (r) => {
+      const rowToHTML = (r, index) => {
+        const isFree = (userRole !== 'pro');
+        // First 5 rows (index 0, 1, 2, 3, 4) are crystal clear. 6th row (index >= 5) gets blurred!
+        const blurClass = (isFree && index >= 5) ? 'row-locked-blur' : '';
+
         const nbVal = r.netBreadth;
         const nbPct = Math.min((Math.abs(nbVal) / 40) * 50, 50);
         const nhnlVal = r.netNHNL;
@@ -1117,7 +1158,7 @@
         const dateStyle = r.signalMBI >= 3 ? 'date-bullish' : (r.signalMBI <= -3 ? 'date-bearish' : 'date-neutral');
 
         let html = `
-          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 ${blurClass}">
             <td class="sticky-date-cell py-1.5 px-2 font-mono-num font-bold border-r-2 border-slate-300 dark:border-slate-700 whitespace-nowrap text-center ${dateStyle}">${r.date}</td>
             <td class="font-mono-num px-2 text-center border-r border-slate-100 dark:border-borderDark ${r.nifty50 >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(r.nifty50 * 100).toFixed(2)}%</td>
             <td class="font-mono-num px-2 text-center border-r border-slate-100 dark:border-borderDark ${r.nifty500 >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${(r.nifty500 * 100).toFixed(2)}%</td>
@@ -1174,7 +1215,9 @@
         return html;
       };
 
-      tableBody.innerHTML = displayRows.map(rowToHTML).join('');
+      // In Free mode, render 5 crystal clear rows + 6 blurred teaser rows
+      const rowsToRender = (userRole === 'pro') ? displayRows : displayRows.slice(0, 11);
+      tableBody.innerHTML = rowsToRender.map((row, idx) => rowToHTML(row, idx)).join('');
     }
 
     function updateOrCreateBreadthChart(canvasId, config) {
@@ -1198,7 +1241,7 @@
       const textColor = isDark ? "#94a3b8" : "#64748b";
 
       const compSelect = document.getElementById('compare-index-select');
-      const compareIndex = compSelect ? compSelect.value : 'none';
+      const compareIndex = (userRole === 'pro') ? (compSelect ? compSelect.value : 'none') : 'none';
       const indexDatasets = getCompareIndexDatasets(compareIndex);
       const hasIndexComp = indexDatasets.length > 0;
 
@@ -1433,7 +1476,7 @@
   <script type="module">
     import { logoutUser, initAuthListener, requireAuth } from './auth.js';
 
-    // Route Guard: Redirects guests to index.html
+    // Route Guard
     requireAuth();
 
     window.handleLogout = async () => {
@@ -1447,6 +1490,7 @@
 
         const nameEl = document.getElementById('sideUserName');
         const avatarEl = document.getElementById('sideUserAvatar');
+        const avatarElMini = document.getElementById('sideUserAvatarMini');
 
         if (nameEl) nameEl.innerText = user.displayName || 'Trader';
         if (avatarEl) {
@@ -1454,6 +1498,13 @@
             avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
           } else {
             avatarEl.innerText = (user.displayName || 'U')[0].toUpperCase();
+          }
+        }
+        if (avatarElMini) {
+          if (user.photoURL) {
+            avatarElMini.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
+          } else {
+            avatarElMini.innerText = (user.displayName || 'U')[0].toUpperCase();
           }
         }
 
@@ -1465,6 +1516,6 @@
       }
     );
   </script>
-            
+
 </body>
 </html>
