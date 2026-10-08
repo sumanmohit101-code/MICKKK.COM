@@ -7,7 +7,7 @@
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
 
-  <!-- Instant Theme Execution (Prevents Flash of Light Mode) -->
+  <!-- Instant Theme Execution -->
   <script>
     (function() {
       try {
@@ -64,7 +64,7 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
 
-    /* ===== Mickkk Logo (theme-aware) ===== */
+    /* ===== Mickkk Logo ===== */
     :root { 
       --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
       --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; 
@@ -82,7 +82,7 @@
     .mk-logo:hover .mk-icon { transform: scale(1.07); }
     .mk-icon { transition: transform .25s ease; }
 
-    /* Sidebar Collapsed Icon Mode */
+    /* Sidebar Collapsed Mode */
     .sidebar-collapsed { width: 4.2rem !important; }
     .sidebar-collapsed .brand-text,
     .sidebar-collapsed .nav-text,
@@ -91,7 +91,6 @@
     .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
     .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
 
-    /* Tooltip when collapsed */
     .sidebar-collapsed .nav-item:hover::after {
       content: attr(data-title);
       position: absolute;
@@ -108,13 +107,7 @@
       border: 1px solid #1e293b;
     }
 
-    /* Floating Arrow Button */
-    .collapse-float-btn {
-      position: absolute;
-      right: -12px;
-      top: 22px;
-      z-index: 60;
-    }
+    .collapse-float-btn { position: absolute; right: -12px; top: 22px; z-index: 60; }
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
@@ -147,13 +140,11 @@
   <!-- ================= LEFT SIDEBAR ================= -->
   <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
     
-    <!-- Floating Circular Collapse Arrow -->
     <button onclick="toggleSidebar()" aria-label="Toggle Navigation Sidebar" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
       <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
     </button>
 
     <div>
-      <!-- Brand Logo Lockup -->
       <a href="index.html" title="Mickkk.com Home" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
         <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
         <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
@@ -172,11 +163,9 @@
 
       <!-- Navigation Links -->
       <nav class="space-y-1 text-xs font-semibold">
-        <!-- 1. Market Overview (Active Page) -->
         <a href="overview.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
         </a>
-        <!-- 2. Market Breadth -->
         <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
         </a>
@@ -220,8 +209,11 @@
               M
             </div>
             <div class="min-w-0">
-              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Mohit Suman</div>
-              <div id="sideUserEmail" class="text-[9px] text-slate-400 truncate">sumanmohit101@...</div>
+              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Trader</div>
+              <div class="flex items-center gap-1.5">
+                <span id="sideUserRole" class="text-[9px] font-extrabold text-amber-500 uppercase tracking-wider truncate">Free Tier</span>
+                <button onclick="openWhatsAppTrialModal()" id="sideUpgradeLink" class="text-[9px] font-black text-emerald-500 hover:underline cursor-pointer">Upgrade</button>
+              </div>
             </div>
           </div>
 
@@ -231,7 +223,7 @@
               <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
             </button>
 
-            <!-- Logout button for Logged In User -->
+            <!-- Logout button -->
             <button onclick="handleLogout()" id="sideLogoutBtn" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
@@ -258,16 +250,16 @@
   <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
     <main class="p-5 md:p-7 space-y-6 w-full">
 
-      <!-- Header Title Banner + Top Toolbar with Search, Auto-Refresh, Clock -->
+      <!-- Header Title Banner + Top Toolbar with Search, Auto-Refresh, Clock & Pro Trial Hook -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-borderDark">
         <div>
           <h1 class="text-xl font-extrabold tracking-tight">Market Overview</h1>
           <p class="text-xs text-slate-400 mt-0.5">Real-time market data, insights and powerful tools for smarter trading decisions.</p>
         </div>
 
-        <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex items-center gap-2.5 flex-wrap">
           <!-- Search Bar -->
-          <div class="relative w-64 hidden sm:block">
+          <div class="relative w-56 hidden sm:block">
             <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
             <input type="text" id="globalSearch" onkeyup="handleGlobalSearch(event)" placeholder="Search stocks, indices..." class="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark focus:border-emerald-500 focus:outline-none transition-all">
           </div>
@@ -279,19 +271,23 @@
           </div>
 
           <!-- Live Clock -->
-          <span class="text-xs font-bold text-slate-500 hidden lg:block font-mono-num" id="headerClock">--:-- IST</span>
+          <span class="text-xs font-bold text-slate-500 hidden xl:block font-mono-num" id="headerClock">--:-- IST</span>
 
           <!-- Manual Refresh Button -->
-          <button onclick="fetchTerminalData(true)" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-sm cursor-pointer">
-            <i data-lucide="refresh-cw" id="manualSpinIcon" class="w-3.5 h-3.5"></i> Refresh Now
+          <button onclick="fetchTerminalData(true)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-sm cursor-pointer">
+            <i data-lucide="refresh-cw" id="manualSpinIcon" class="w-3.5 h-3.5"></i> <span>Refresh</span>
+          </button>
+
+          <!-- Claim Pro Trial WhatsApp Button (Visible for Free users) -->
+          <button onclick="openWhatsAppTrialModal()" id="overviewProTrialBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-[#00f5a0] border border-emerald-500/20 text-xs font-extrabold transition-all cursor-pointer shadow-sm">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-emerald-500"></i>
+            <span>Claim 7-Day Pro</span>
           </button>
         </div>
       </div>
 
       <!-- 1. SPARKLINE CARDS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="sparkCardsRow">
-        <!-- Rendered instantly from SWR cache -->
-      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="sparkCardsRow"></div>
 
       <!-- 2. INDICES TERMINAL TABLE + SPEEDOMETER MARKET BREADTH METER -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -333,15 +329,13 @@
             </a>
           </div>
 
-          <!-- Speedometer Dial with Dynamic Needle -->
+          <!-- Speedometer Dial -->
           <div class="relative w-64 h-32 my-1 flex items-center justify-center">
             <svg viewBox="0 0 240 135" class="w-full h-full">
-              <!-- Symmetrical Color Arcs -->
               <path d="M 45 115 A 75 75 0 0 1 83 55" fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>
               <path d="M 83 55 A 75 75 0 0 1 157 55" fill="none" stroke="#f59e0b" stroke-width="16"/>
               <path d="M 157 55 A 75 75 0 0 1 195 115" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round"/>
               
-              <!-- Clean Numbers with Radial Spacing -->
               <text x="18" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-3</text>
               <text x="50" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-2</text>
               <text x="82" y="30" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">-1</text>
@@ -350,17 +344,14 @@
               <text x="190" y="58" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+2</text>
               <text x="222" y="120" font-size="11" font-weight="800" text-anchor="middle" class="fill-slate-800 dark:fill-slate-100">+3</text>
 
-              <!-- Center Needle Pivot -->
               <circle cx="120" cy="115" r="7" class="fill-slate-800 dark:fill-slate-100"/>
 
-              <!-- Dynamic Needle Group -->
               <g id="meterNeedleGroup" style="transform-origin: 120px 115px; transform: rotate(0deg); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
                 <polygon points="118.5,115 121.5,115 120,40" class="fill-[#0f172a] dark:fill-[#ffffff]"/>
               </g>
             </svg>
           </div>
 
-          <!-- Bottom Digital Score & Status -->
           <div class="text-center w-full pt-1.5 border-t border-slate-100 dark:border-borderDark">
             <div class="text-2xl font-black font-mono-num leading-none" id="meterScoreVal">--</div>
             <p class="text-[11px] font-black tracking-wider uppercase text-emerald-500 mt-1" id="meterScoreStatus">--</p>
@@ -422,37 +413,34 @@
           </div>
         </div>
 
-        <!-- Enriched Advancing/Declining Box (4 Cols) -->
+        <!-- Advancing & Declining Box (4 Cols) -->
         <div class="lg:col-span-4 flex flex-col justify-between gap-4">
           <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm flex flex-col justify-between h-full">
             
-            <!-- Top: Split Bar -->
+            <!-- Split Bar -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">Advancing and declining</h3>
                 <span class="text-[10px] font-bold text-slate-400 font-mono-num" id="adTotalBadge">Total: 0</span>
               </div>
 
-              <!-- Labels above bar -->
               <div class="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 <span>Advancing</span>
                 <span>Declining</span>
               </div>
 
-              <!-- Horizontal Split Ratio Progress Bar -->
               <div class="w-full flex h-3.5 rounded-full overflow-hidden my-1 bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-800">
                 <div id="advBarFill" class="bg-[#10b981] h-full rounded-l-full transition-all duration-500" style="width: 50%;"></div>
                 <div id="decBarFill" class="bg-[#ef4444] h-full rounded-r-full transition-all duration-500" style="width: 50%;"></div>
               </div>
 
-              <!-- Counts at Ends of Bar -->
               <div class="flex justify-between items-center text-xs font-bold font-mono-num text-slate-700 dark:text-slate-300 mt-1">
                 <span id="advCountLabel">0</span>
                 <span id="decCountLabel">0</span>
               </div>
             </div>
 
-            <!-- Middle Stats: Net advances (Left) + A/D ratio (Right-Aligned Flush) -->
+            <!-- Net advances (Left) + A/D ratio (Right-Aligned Flush) -->
             <div class="grid grid-cols-2 gap-4 my-2.5 pt-3 border-t border-slate-100 dark:border-borderDark">
               <div>
                 <p class="text-[11px] font-semibold text-slate-400">Net advances</p>
@@ -464,7 +452,7 @@
               </div>
             </div>
 
-            <!-- Bottom Stats: Intraday New Highs / Lows Counters -->
+            <!-- Intraday New Highs / Lows Counters -->
             <div class="pt-3 border-t border-slate-100 dark:border-borderDark">
               <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
                 <span>Intraday High/Low Track</span>
@@ -494,11 +482,10 @@
       <!-- 4. THREE INTRADAY CHARTS -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Chart 1: Intraday 4% Top Gainers & Losers -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="font-extrabold text-xs uppercase tracking-tight">Intraday 4% Gainers & Losers</h3>
+              <h3 class="font-extrabold text-xs uppercase tracking-tight">Intraday 4% Gainers &amp; Losers</h3>
               <p class="text-[11px] text-slate-400">Momentum Counts (09:15 - 15:35 IST)</p>
             </div>
             <div class="flex items-center gap-2 text-[10px] font-bold">
@@ -509,11 +496,10 @@
           <div class="h-60"><canvas id="glLineChart"></canvas></div>
         </div>
 
-        <!-- Chart 2: Advance & Decline Dual Chart with A/D Ratio -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="font-extrabold text-xs uppercase tracking-tight">Advance, Decline & A/D Ratio</h3>
+              <h3 class="font-extrabold text-xs uppercase tracking-tight">Advance, Decline &amp; A/D Ratio</h3>
               <p class="text-[11px] text-slate-400">Intraday Dual Breadth + Ratio Curve</p>
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-cyan-500 font-mono-num" id="adRatioBadge">A/D: 0.00</span>
@@ -521,7 +507,6 @@
           <div class="h-60"><canvas id="adDualChart"></canvas></div>
         </div>
 
-        <!-- Chart 3: New Highs & Lows Triple-Line Chart -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div>
@@ -542,11 +527,10 @@
       <!-- 5. FOUR BOTTOM TABLES -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- Table 1: IPO Scans & Momentum -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
-              <h3 class="font-extrabold text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400">IPO Scans & Momentum</h3>
+              <h3 class="font-extrabold text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400">IPO Scans &amp; Momentum</h3>
               <span id="ipoCountBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-600 font-mono-num">0</span>
             </div>
             <button onclick="openModal('IPO Scans & Momentum', allDataStore.ipo)" class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">View All</button>
@@ -566,7 +550,6 @@
           </div>
         </div>
 
-        <!-- Table 2: Near 52 week high -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -590,7 +573,6 @@
           </div>
         </div>
 
-        <!-- Table 3: New Highs -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -614,7 +596,6 @@
           </div>
         </div>
 
-        <!-- Table 4: New Lows -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -640,7 +621,7 @@
 
       </div>
 
-      <!-- ================= COMPACT SLEEK FOOTER ================= -->
+      <!-- ================= COMPACT FOOTER ================= -->
       <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
         <div class="flex items-center gap-2">
           <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
@@ -667,7 +648,6 @@
   <div id="fullViewModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-6xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
       
-      <!-- Modal Header -->
       <div class="px-6 py-3.5 border-b border-slate-200 dark:border-borderDark flex items-center justify-between shrink-0 bg-white dark:bg-cardDark">
         <div>
           <h3 id="modalTitle" class="font-extrabold text-base">Full Data View</h3>
@@ -678,13 +658,11 @@
         </button>
       </div>
 
-      <!-- Modal Filter Search Bar -->
       <div class="px-6 py-2.5 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-borderDark flex items-center justify-between shrink-0">
         <input type="text" id="modalSearch" onkeyup="filterModalTable()" placeholder="Type to filter stocks..." class="text-xs px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark w-72 focus:outline-none">
         <span id="modalRowCount" class="text-xs font-bold text-slate-400 font-mono-num">Total: 0</span>
       </div>
 
-      <!-- Modal Table Body -->
       <div class="flex-1 overflow-y-auto custom-scroll relative">
         <table class="w-full text-xs text-center" id="modalTable">
           <thead id="modalThead" class="text-slate-600 dark:text-slate-300 border-b-2 border-slate-200 dark:border-borderDark sticky top-0 bg-slate-100 dark:bg-slate-900 z-30 shadow-sm"></thead>
@@ -709,7 +687,10 @@
     let adChartInstance = null;
     let hlChartInstance = null;
 
-    // Sidebar Toggle with State Persistence
+    let userRole = 'free';
+    let userEmailGlobal = '';
+
+    // Sidebar Toggle
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
       const mainContent = document.getElementById("mainContent");
@@ -789,6 +770,15 @@
     setInterval(updateClockAndTimer, 1000);
     updateClockAndTimer();
 
+    // WhatsApp Pro Trial Trigger
+    function openWhatsAppTrialModal() {
+      // ⚠️ Yahan apna WhatsApp number dalein
+      const myWhatsAppNumber = "917086054184";
+      const emailText = userEmailGlobal ? ` for my registered email: ${userEmailGlobal}` : "";
+      const msg = encodeURIComponent(`Hi Mickkk Team! Please activate my 7-day Pro Free Trial${emailText}.`);
+      window.open(`https://wa.me/${myWhatsAppNumber}?text=${msg}`, '_blank');
+    }
+
     // ================= 🚀 INSTANT LOCALSTORAGE SWR PAINT =================
     function renderFromCache() {
       try {
@@ -851,7 +841,7 @@
       }
     }
 
-    // ================= SPEEDOMETER BREADTH METER SYNC =================
+    // Speedometer Sync
     function updateBreadthSpeedometer(latestRow) {
       if (!latestRow) return;
       const score = typeof latestRow.signalMBI !== 'undefined' ? latestRow.signalMBI : (latestRow[27] || 0);
@@ -1064,7 +1054,7 @@
       }
     }
 
-    // ================= ZERO MEMORY LEAK CHART ENGINE =================
+    // Charts Engine
     function updateOrCreateChart(instance, canvasId, config) {
       if (instance) {
         instance.data = config.data;
@@ -1082,7 +1072,6 @@
       const gridColor = isDark ? "#1e293b" : "#f1f5f9";
       const textColor = isDark ? "#94a3b8" : "#64748b";
 
-      // Chart 1: 4% Gainers vs Losers
       glChartInstance = updateOrCreateChart(glChartInstance, "glLineChart", {
         type: 'line',
         data: {
@@ -1103,7 +1092,6 @@
         }
       });
 
-      // Chart 2: Advance & Decline Dual Chart with A/D Ratio
       adChartInstance = updateOrCreateChart(adChartInstance, "adDualChart", {
         type: 'line',
         data: {
@@ -1127,7 +1115,6 @@
         }
       });
 
-      // Chart 3: New Highs & Lows Triple-Line Chart
       hlChartInstance = updateOrCreateChart(hlChartInstance, "hlDualChart", {
         type: 'line',
         data: {
@@ -1214,7 +1201,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Global Header Search
+    // Search
     function handleGlobalSearch(e) {
       const query = e.target.value.trim().toLowerCase();
       if (!query || !allDataStore) return;
@@ -1249,7 +1236,7 @@
       openModal(`Search Results for "${query}"`, match);
     }
 
-    // ================= MODAL FULL VIEW =================
+    // Modal
     let currentModalData = [];
     let sortDirections = {};
 
@@ -1305,10 +1292,8 @@
       currentModalData.sort((a, b) => {
         let valA = a[columnKey];
         let valB = b[columnKey];
-
         const numA = parseFloat(valA);
         const numB = parseFloat(valB);
-
         if (!isNaN(numA) && !isNaN(numB)) {
           return isAsc ? numA - numB : numB - numA;
         }
@@ -1333,13 +1318,12 @@
       document.getElementById("fullViewModal").classList.add("hidden");
     }
 
-    // ================= INITIALIZATION =================
     function init() {
       initSidebarState();
       syncThemeIcons(document.documentElement.classList.contains("dark"));
       if (window.lucide) lucide.createIcons();
-      renderFromCache(); // 0ms Instant SWR Paint
-      fetchTerminalData(false); // Background Live Sync
+      renderFromCache();
+      fetchTerminalData(false);
     }
 
     if (document.readyState === 'loading') {
@@ -1353,7 +1337,7 @@
   <script type="module">
     import { logoutUser, initAuthListener, requireAuth } from './auth.js';
 
-    // Route Guard: Ensures user is logged in to view overview terminal
+    // Route Guard
     requireAuth();
 
     window.handleLogout = async () => {
@@ -1362,12 +1346,16 @@
 
     initAuthListener(
       (user, role) => {
+        userRole = role || 'free';
+        userEmailGlobal = user.email || '';
+
         const nameEl = document.getElementById('sideUserName');
-        const emailEl = document.getElementById('sideUserEmail');
         const avatarEl = document.getElementById('sideUserAvatar');
+        const roleEl = document.getElementById('sideUserRole');
+        const upgradeLink = document.getElementById('sideUpgradeLink');
+        const proBtn = document.getElementById('overviewProTrialBtn');
 
         if (nameEl) nameEl.innerText = user.displayName || 'Trader';
-        if (emailEl) emailEl.innerText = user.email || '';
         if (avatarEl) {
           if (user.photoURL) {
             avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
@@ -1375,10 +1363,27 @@
             avatarEl.innerText = (user.displayName || 'U')[0].toUpperCase();
           }
         }
+
+        if (userRole === 'pro') {
+          if (roleEl) {
+            roleEl.innerText = 'Pro Member ⚡';
+            roleEl.className = 'text-[9px] font-extrabold text-emerald-500 uppercase tracking-wider truncate';
+          }
+          if (upgradeLink) upgradeLink.style.display = 'none';
+          if (proBtn) proBtn.style.display = 'none';
+        } else {
+          if (roleEl) {
+            roleEl.innerText = 'Free Tier';
+            roleEl.className = 'text-[9px] font-extrabold text-amber-500 uppercase tracking-wider truncate';
+          }
+          if (upgradeLink) upgradeLink.style.display = 'inline';
+          if (proBtn) proBtn.style.display = 'flex';
+        }
+
         if (window.lucide) lucide.createIcons();
       },
       () => {
-        // If not logged in, requireAuth will redirect to index.html
+        // If logged out, requireAuth will redirect
       }
     );
   </script>
