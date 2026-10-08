@@ -66,6 +66,10 @@
     <a href="index.html" class="mt-6 px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-colors">Return to Home</a>
   </div>
 
+  <!-- Toast feedback -->
+  <div id="adminToast" role="status" aria-live="polite"
+       class="fixed bottom-5 right-5 z-[100] hidden max-w-sm rounded-xl px-4 py-3 text-sm font-semibold shadow-xl"></div>
+
   <!-- ================= MAIN ADMIN PORTAL ================= -->
   <div id="adminApp" style="display: none;" class="min-h-screen flex flex-col">
     
@@ -142,7 +146,17 @@
           <p class="text-xs text-slate-400 mt-0.5">Search by Gmail ID, upgrade to 1M/3M/6M/1Y Pro plans or extend referral bonus days.</p>
         </div>
 
-        <div class="flex items-center gap-2 w-full md:w-auto">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+          <select id="userStatusFilter" onchange="filterUsersTable()"
+            class="px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark focus:outline-none focus:border-emerald-500">
+            <option value="all">All users</option>
+            <option value="pro">Pro active</option>
+            <option value="free">Free / expired</option>
+            <option value="expiring">Expires in 7 days</option>
+          </select>
+          <button onclick="exportUsersCsv()" class="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">
+            Export CSV
+          </button>
           <div class="relative flex-1 md:w-72">
             <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
             <input type="text" id="userSearchInput" onkeyup="filterUsersTable()" placeholder="Search by Gmail or Name..." class="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark focus:outline-none focus:border-emerald-500">
@@ -171,6 +185,19 @@
         </div>
       </div>
 
+      <section class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-borderDark flex items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-white">Recent Admin Activity</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Plan changes and referral rewards recorded during this session.</p>
+          </div>
+          <button onclick="clearSessionActivity()" class="text-xs font-bold text-slate-500 hover:text-rose-500">Clear view</button>
+        </div>
+        <div id="activityLog" class="divide-y divide-slate-100 dark:divide-borderDark">
+          <p class="p-4 text-xs text-slate-400">No actions yet in this session.</p>
+        </div>
+      </section>
+
     </main>
 
   </div>
@@ -187,6 +214,15 @@
         <button onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-700 cursor-pointer">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-borderDark p-3">
+        <label class="flex items-start gap-2 text-xs cursor-pointer">
+          <input id="extendExistingPlan" type="checkbox" checked class="mt-0.5 accent-emerald-500">
+          <span><strong class="block text-slate-800 dark:text-slate-100">Extend current active plan</strong>
+            <span class="text-slate-500">If the user already has active Pro, add days to its expiry instead of replacing it.</span>
+          </span>
+        </label>
       </div>
 
       <!-- Select Plan Duration -->
@@ -242,251 +278,402 @@
   <script type="module">
     import { auth, db } from './auth.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-    import { 
-      collection, 
-      getDocs, 
-      doc, 
-      updateDoc, 
-      query, 
-      orderBy 
+    import {
+      collection, getDocs, doc, updateDoc, query, orderBy,
+      addDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    // 🔒 FOUNDER EMAIL WHITELIST (Sirf aap access kar sakte hain)
+    // UI whitelist is a convenience guard, NOT the security boundary.
+    // Firestore Rules / trusted backend must independently enforce founder permissions.
     const FOUNDER_EMAILS = ["sumanmohit101@gmail.com"];
-
     let allUsersCache = [];
     let activeModalUser = null;
+    let sessionActivity = [];
 
-    // 1. Guard check: Only Mohit allowed
+    const $ = (id) => document.getElementById(id);
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    function showToast(message, type = "success") {
+      const el = $("adminToast");
+      if (!el) return;
+      el.textContent = message;
+      el.className = "fixed bottom-5 right-5 z-[100] max-w-sm rounded-xl px-4 py-3 text-sm font-semibold shadow-xl";
+      if (type === "error") el.classList.add("bg-rose-600", "text-white");
+      else if (type === "warning") el.classList.add("bg-amber-500", "text-slate-950");
+      else el.classList.add("bg-emerald-600", "text-white");
+      el.classList.remove("hidden");
+      clearTimeout(window.__adminToastTimer);
+      window.__adminToastTimer = setTimeout(() => el.classList.add("hidden"), 3800);
+    }
+
+    function logSessionActivity(action, target, details = "") {
+      const item = {
+        time: new Date().toLocaleString("en-IN"),
+        action,
+        target: target?.email || target?.name || target?.docId || "Unknown user",
+        details
+      };
+      sessionActivity.unshift(item);
+      sessionActivity = sessionActivity.slice(0, 30);
+      renderActivityLog();
+    }
+
+    function renderActivityLog() {
+      const container = $("activityLog");
+      if (!container) return;
+      if (!sessionActivity.length) {
+        container.innerHTML = '<p class="p-4 text-xs text-slate-400">No actions yet in this session.</p>';
+        return;
+      }
+      container.innerHTML = sessionActivity.map(item => `
+        <div class="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-800 dark:text-slate-100">${escapeHtml(item.action)} <span class="font-medium text-slate-500">— ${escapeHtml(item.target)}</span></p>
+            <p class="text-[11px] text-slate-500">${escapeHtml(item.details)}</p>
+          </div>
+          <time class="text-[10px] text-slate-400 shrink-0">${escapeHtml(item.time)}</time>
+        </div>`).join("");
+    }
+
+    window.clearSessionActivity = () => {
+      sessionActivity = [];
+      renderActivityLog();
+    };
+
+    // Record a durable audit event when Firestore rules allow admin-only writes.
+    // Session activity still appears if the optional audit write is not configured.
+    async function writeAuditEvent(action, target, details = "", extra = {}) {
+      try {
+        const admin = auth.currentUser;
+        if (!admin) return;
+        await addDoc(collection(db, "adminAuditLogs"), {
+          action,
+          targetUserId: target?.docId || null,
+          targetEmail: target?.email || null,
+          details,
+          extra,
+          adminUid: admin.uid,
+          adminEmail: admin.email || null,
+          createdAt: serverTimestamp()
+        });
+      } catch (err) {
+        console.warn("Durable audit log was not saved. Configure adminAuditLogs Firestore rules/backend.", err);
+      }
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html?auth=admin_required";
         return;
       }
 
-      if (!FOUNDER_EMAILS.includes(user.email.toLowerCase())) {
-        document.getElementById('barrierMessage').innerText = "Access Denied: You are not authorized to view the Founder Terminal.";
-        setTimeout(() => {
-          window.location.href = "overview.html";
-        }, 1500);
+      const email = (user.email || "").toLowerCase();
+      if (!FOUNDER_EMAILS.includes(email) || user.emailVerified === false) {
+        $("barrierMessage").innerText = "Access Denied: verified Founder account required.";
+        setTimeout(() => { window.location.href = "overview.html"; }, 1500);
         return;
       }
 
-      // Clearance Granted
-      document.getElementById('adminBarrier').style.display = 'none';
-      document.getElementById('adminApp').style.display = 'flex';
+      $("adminBarrier").style.display = "none";
+      $("adminApp").style.display = "flex";
 
-      const avatarEl = document.getElementById('adminAvatar');
+      const avatarEl = $("adminAvatar");
       if (avatarEl && user.photoURL) {
-        avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover"/>`;
+        const img = document.createElement("img");
+        img.src = user.photoURL;
+        img.alt = "Founder avatar";
+        img.referrerPolicy = "no-referrer";
+        img.className = "w-full h-full object-cover";
+        avatarEl.replaceChildren(img);
       }
-
-      fetchAllUsers();
+      await window.fetchAllUsers();
     });
 
-    // 2. Fetch all registered users from Firestore
     window.fetchAllUsers = async () => {
-      const icon = document.getElementById('refreshIcon');
-      if (icon) icon.classList.add('animate-spin');
+      const icon = $("refreshIcon");
+      if (icon) icon.classList.add("animate-spin");
+      const button = icon?.closest("button");
+      if (button) button.disabled = true;
 
       try {
         const usersRef = collection(db, "users");
-        const q = query(usersRef, orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
-
+        const snapshot = await getDocs(query(usersRef, orderBy("createdAt", "desc")));
+        const now = Date.now();
         allUsersCache = [];
-        let proCount = 0;
-        let freeCount = 0;
-        let referralTotal = 0;
 
-        snapshot.forEach(docSnap => {
-          const u = docSnap.data();
-          u.docId = docSnap.id;
+        let proCount = 0, freeCount = 0, referralTotal = 0;
+        const expiryUpdates = [];
 
-          // Auto-check expiry
-          const now = Date.now();
-          if (u.role === 'pro' && u.planExpires && u.planExpires < now) {
-            u.role = 'free'; // Expired
-            // Background update
-            updateDoc(doc(db, "users", u.docId), { role: "free" });
+        snapshot.forEach((docSnap) => {
+          const raw = docSnap.data() || {};
+          const u = { ...raw, docId: docSnap.id };
+          const expiry = Number(u.planExpires || 0);
+
+          // Treat expired Pro as Free in the UI immediately. Persist downgrade separately.
+          if (String(u.role || "free").toLowerCase() === "pro" && expiry > 0 && expiry <= now) {
+            u.role = "free";
+            expiryUpdates.push(
+              updateDoc(doc(db, "users", u.docId), {
+                role: "free",
+                planExpiredAt: now,
+                updatedAt: serverTimestamp()
+              }).catch(err => console.error("Could not persist expired plan downgrade:", u.docId, err))
+            );
           }
 
-          if (u.role === 'pro') proCount++;
+          if (u.role === "pro" && expiry > now) proCount++;
           else freeCount++;
-
-          if (u.referralCount) referralTotal += u.referralCount;
-
+          referralTotal += Math.max(0, Number(u.referralCount || 0));
           allUsersCache.push(u);
         });
 
-        // Update Stats
-        document.getElementById('statTotalUsers').innerText = allUsersCache.length;
-        document.getElementById('statProUsers').innerText = proCount;
-        document.getElementById('statFreeUsers').innerText = freeCount;
-        document.getElementById('statTotalReferrals').innerText = referralTotal;
-
-        renderUsersTable(allUsersCache);
+        await Promise.allSettled(expiryUpdates);
+        $("statTotalUsers").innerText = allUsersCache.length;
+        $("statProUsers").innerText = proCount;
+        $("statFreeUsers").innerText = freeCount;
+        $("statTotalReferrals").innerText = referralTotal;
+        filterUsersTable();
       } catch (e) {
         console.error("Error fetching users:", e);
+        showToast("Could not load users. Check connection and Firestore permissions.", "error");
       } finally {
-        if (icon) icon.classList.remove('animate-spin');
+        if (icon) icon.classList.remove("animate-spin");
+        if (button) button.disabled = false;
+        if (window.lucide) window.lucide.createIcons();
       }
     };
 
-    // 3. Render Users Table
+    function isProActive(u) {
+      return u.role === "pro" && Number(u.planExpires || 0) > Date.now();
+    }
+
     function renderUsersTable(users) {
-      const tbody = document.getElementById('usersTableBody');
+      const tbody = $("usersTableBody");
       if (!tbody) return;
 
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No users match your search/filter.</td></tr>';
+        return;
+      }
+
       tbody.innerHTML = users.map(u => {
-        const isPro = u.role === 'pro';
+        const isPro = isProActive(u);
         const expiryFormatted = formatExpiry(u.planExpires);
-        const refCount = u.referralCount || 0;
-        const refCode = u.referralCode || u.email.split('@')[0];
+        const refCount = Math.max(0, Number(u.referralCount || 0));
+        const refCode = u.referralCode || (u.email || "").split("@")[0] || "—";
+        const displayName = u.name || u.displayName || "Trader";
+        const initial = escapeHtml(displayName.trim().charAt(0).toUpperCase() || "U");
+        const photo = typeof u.photoURL === "string" && /^https:\/\/[^"'<>]+$/i.test(u.photoURL) ? u.photoURL : "";
+        const userId = escapeHtml(u.docId);
 
         return `
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-            <!-- User -->
             <td class="py-3 px-4">
               <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-                  ${u.photoURL ? `<img src="${u.photoURL}" class="w-full h-full object-cover"/>` : (u.name || 'U')[0].toUpperCase()}
+                  ${photo ? `<img src="${escapeHtml(photo)}" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover"/>` : initial}
                 </div>
                 <div class="min-w-0">
-                  <p class="font-bold text-slate-800 dark:text-slate-100 truncate">${u.name || 'Trader'}</p>
-                  <p class="text-[10px] text-slate-400 font-mono-num truncate">${u.email}</p>
+                  <p class="font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(displayName)}</p>
+                  <p class="text-[10px] text-slate-400 font-mono-num truncate">${escapeHtml(u.email || "No email")}</p>
                 </div>
               </div>
             </td>
-
-            <!-- Role Badge -->
             <td class="py-3 px-4">
               <span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${isPro ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}">
-                ${isPro ? 'PRO ACTIVE ⚡' : 'FREE TIER'}
+                ${isPro ? "PRO ACTIVE ⚡" : (u.role === "pro" ? "EXPIRED" : "FREE TIER")}
               </span>
             </td>
-
-            <!-- Expiry -->
             <td class="py-3 px-4 font-mono-num text-[11px]">
-              ${isPro ? `<span class="text-emerald-500 font-bold">${expiryFormatted}</span>` : `<span class="text-slate-400">-</span>`}
+              ${isPro ? `<span class="text-emerald-500 font-bold">${escapeHtml(expiryFormatted)}</span>` : (u.planExpires ? `<span class="text-rose-500">${escapeHtml(expiryFormatted)}</span>` : '<span class="text-slate-400">—</span>')}
             </td>
-
-            <!-- Referral Code -->
-            <td class="py-3 px-4 text-center font-mono-num font-bold text-blue-500 text-[11px]">
-              ${refCode}
-            </td>
-
-            <!-- Referrals Count + Award Button -->
+            <td class="py-3 px-4 text-center font-mono-num font-bold text-blue-500 text-[11px]">${escapeHtml(refCode)}</td>
             <td class="py-3 px-4 text-center">
               <div class="inline-flex items-center gap-1.5">
                 <span class="font-mono-num font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px]">${refCount}</span>
-                ${refCount > 0 ? `<button onclick="awardReferralDays('${u.docId}', 7)" title="Award +7 Days Pro for referrals" class="p-1 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-500 text-[10px] font-bold cursor-pointer">+7D</button>` : ''}
+                ${refCount > 0 ? `<button onclick="awardReferralDays('${userId}', 7)" title="Award +7 Pro days" class="p-1 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-500 text-[10px] font-bold">+7D</button><button onclick="awardReferralDays('${userId}', 15)" title="Award +15 Pro days" class="p-1 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-500 text-[10px] font-bold">+15D</button>` : ""}
               </div>
             </td>
-
-            <!-- Actions -->
             <td class="py-3 px-4 text-right">
-              <button onclick="openUpgradeModal('${u.docId}')" class="px-3 py-1.5 rounded-xl ${isPro ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200' : 'bg-emerald-500 hover:bg-emerald-600 text-white'} text-[11px] font-bold transition-all cursor-pointer shadow-sm">
-                ${isPro ? 'Manage Plan' : 'Make Pro ⚡'}
+              <button onclick="openUpgradeModal('${userId}')" class="px-3 py-1.5 rounded-xl ${isPro ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200' : 'bg-emerald-500 hover:bg-emerald-600 text-white'} text-[11px] font-bold transition-all shadow-sm">
+                ${isPro ? "Manage Plan" : "Make Pro ⚡"}
               </button>
             </td>
-          </tr>
-        `;
-      }).join('');
+          </tr>`;
+      }).join("");
 
-      if (window.lucide) lucide.createIcons();
+      if (window.lucide) window.lucide.createIcons();
     }
 
     function formatExpiry(timestamp) {
-      if (!timestamp) return 'Lifetime / Unknown';
-      const diffDays = Math.ceil((timestamp - Date.now()) / (1000 * 60 * 60 * 24));
-      const dateStr = new Date(timestamp).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' });
+      const value = Number(timestamp || 0);
+      if (!value) return "Not set";
+      const diffDays = Math.ceil((value - Date.now()) / DAY_MS);
+      const dateStr = new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+      if (diffDays < 0) return `${dateStr} (expired ${Math.abs(diffDays)}d ago)`;
       return `${dateStr} (${diffDays}d left)`;
     }
 
-    // 4. Modal Triggers
     window.openUpgradeModal = (docId) => {
       activeModalUser = allUsersCache.find(u => u.docId === docId);
       if (!activeModalUser) return;
-
-      document.getElementById('modalTargetUserEmail').innerText = `${activeModalUser.name || 'User'} (${activeModalUser.email})`;
-      document.getElementById('upgradeModal').classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
+      $("modalTargetUserEmail").innerText = `${activeModalUser.name || activeModalUser.displayName || "User"} (${activeModalUser.email || "No email"})`;
+      $("extendExistingPlan").checked = true;
+      $("customDaysInput").value = "";
+      $("upgradeModal").classList.remove("hidden");
+      if (window.lucide) window.lucide.createIcons();
     };
 
     window.closeUpgradeModal = () => {
-      document.getElementById('upgradeModal').classList.add('hidden');
+      $("upgradeModal").classList.add("hidden");
       activeModalUser = null;
     };
 
-    // 5. Assign Pro Duration
-    window.selectPlanDays = async (days) => {
+    async function applyPlanDays(days) {
       if (!activeModalUser) return;
-      const newExpiry = Date.now() + (days * 24 * 60 * 60 * 1000);
-      
-      await updateDoc(doc(db, "users", activeModalUser.docId), {
-        role: "pro",
-        planExpires: newExpiry,
-        planDaysAdded: days
-      });
-
-      alert(`✅ Success: ${activeModalUser.name || activeModalUser.email} is now PRO for ${days} Days!`);
-      closeUpgradeModal();
-      fetchAllUsers();
-    };
-
-    window.applyCustomDays = async () => {
-      const days = parseInt(document.getElementById('customDaysInput').value, 10);
-      if (isNaN(days) || days <= 0) {
-        alert("Please enter valid days number.");
+      if (!Number.isInteger(days) || days <= 0 || days > 3650) {
+        showToast("Enter a plan duration between 1 and 3650 days.", "error");
         return;
       }
-      window.selectPlanDays(days);
+
+      const target = { ...activeModalUser };
+      const now = Date.now();
+      const oldExpiry = Number(target.planExpires || 0);
+      const extend = $("extendExistingPlan").checked;
+      const base = extend && target.role === "pro" && oldExpiry > now ? oldExpiry : now;
+      const newExpiry = base + days * DAY_MS;
+
+      try {
+        await updateDoc(doc(db, "users", target.docId), {
+          role: "pro",
+          planExpires: newExpiry,
+          planDaysAdded: days,
+          planUpdatedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        logSessionActivity("Plan assigned", target, `+${days} days; expiry ${new Date(newExpiry).toLocaleDateString("en-IN")}`);
+        await writeAuditEvent("plan_assigned", target, `Assigned ${days} Pro days`, { days, oldExpiry, newExpiry });
+        showToast(`${target.name || target.email} is now Pro for ${days} days.`);
+        window.closeUpgradeModal();
+        await window.fetchAllUsers();
+      } catch (e) {
+        console.error("Plan update failed:", e);
+        showToast("Plan was not saved. Check Firestore rules/connection and retry.", "error");
+      }
+    }
+
+    window.selectPlanDays = async (days) => applyPlanDays(Number(days));
+
+    window.applyCustomDays = async () => {
+      const days = Number.parseInt($("customDaysInput").value, 10);
+      await applyPlanDays(days);
     };
 
     window.revokeToFree = async () => {
       if (!activeModalUser) return;
-      if (!confirm(`Are you sure you want to downgrade ${activeModalUser.email} back to Free Tier?`)) return;
+      const target = { ...activeModalUser };
+      if (!confirm(`Downgrade ${target.email} to Free? This removes active Pro access.`)) return;
 
-      await updateDoc(doc(db, "users", activeModalUser.docId), {
-        role: "free",
-        planExpires: null
-      });
-
-      alert(`User downgraded to Free Tier.`);
-      closeUpgradeModal();
-      fetchAllUsers();
+      try {
+        await updateDoc(doc(db, "users", target.docId), {
+          role: "free",
+          planExpires: null,
+          planUpdatedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        logSessionActivity("Plan revoked", target, "Downgraded to Free");
+        await writeAuditEvent("plan_revoked", target, "Downgraded to Free");
+        showToast(`${target.email} downgraded to Free.`);
+        window.closeUpgradeModal();
+        await window.fetchAllUsers();
+      } catch (e) {
+        console.error("Plan revoke failed:", e);
+        showToast("Could not revoke plan. Check Firestore permissions and retry.", "error");
+      }
     };
 
-    // 6. Referral Award (+7 Days)
     window.awardReferralDays = async (docId, bonusDays) => {
       const target = allUsersCache.find(u => u.docId === docId);
       if (!target) return;
-
-      const currentExpiry = (target.planExpires && target.planExpires > Date.now()) ? target.planExpires : Date.now();
-      const newExpiry = currentExpiry + (bonusDays * 24 * 60 * 60 * 1000);
-
-      await updateDoc(doc(db, "users", docId), {
-        role: "pro",
-        planExpires: newExpiry
-      });
-
-      alert(`🎉 Awarded +${bonusDays} Pro days to ${target.name} for referrals!`);
-      fetchAllUsers();
-    };
-
-    // 7. Search filter
-    window.filterUsersTable = () => {
-      const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
-      if (!q) {
-        renderUsersTable(allUsersCache);
+      if (![7, 15].includes(Number(bonusDays))) {
+        showToast("Unsupported referral bonus duration.", "error");
         return;
       }
-      const filtered = allUsersCache.filter(u => 
-        (u.name && u.name.toLowerCase().includes(q)) || 
-        (u.email && u.email.toLowerCase().includes(q))
-      );
+      if (!confirm(`Award +${bonusDays} Pro days to ${target.email}? Make sure the referral is verified and has not already received a bonus.`)) return;
+
+      const now = Date.now();
+      const oldExpiry = Number(target.planExpires || 0);
+      const base = target.role === "pro" && oldExpiry > now ? oldExpiry : now;
+      const newExpiry = base + Number(bonusDays) * DAY_MS;
+
+      try {
+        await updateDoc(doc(db, "users", docId), {
+          role: "pro",
+          planExpires: newExpiry,
+          lastReferralBonusDays: Number(bonusDays),
+          lastReferralBonusAt: serverTimestamp(),
+          planUpdatedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        logSessionActivity("Referral bonus", target, `+${bonusDays} days`);
+        await writeAuditEvent("referral_bonus", target, `Awarded +${bonusDays} days`, { bonusDays, oldExpiry, newExpiry });
+        showToast(`Awarded +${bonusDays} Pro days to ${target.email}.`);
+        await window.fetchAllUsers();
+      } catch (e) {
+        console.error("Referral bonus failed:", e);
+        showToast("Referral bonus was not saved. Check permissions and retry.", "error");
+      }
+    };
+
+    window.filterUsersTable = () => {
+      const q = ($("userSearchInput")?.value || "").toLowerCase().trim();
+      const status = $("userStatusFilter")?.value || "all";
+      const now = Date.now();
+      const filtered = allUsersCache.filter(u => {
+        const name = String(u.name || u.displayName || "").toLowerCase();
+        const email = String(u.email || "").toLowerCase();
+        const matchesSearch = !q || name.includes(q) || email.includes(q) || String(u.referralCode || "").toLowerCase().includes(q);
+        const expiry = Number(u.planExpires || 0);
+        const active = isProActive(u);
+        const expiring = active && expiry - now <= 7 * DAY_MS;
+        const matchesStatus = status === "all" ||
+          (status === "pro" && active) ||
+          (status === "free" && !active) ||
+          (status === "expiring" && expiring);
+        return matchesSearch && matchesStatus;
+      });
       renderUsersTable(filtered);
+    };
+
+    window.exportUsersCsv = () => {
+      const headers = ["Name", "Email", "Role", "Plan Expiry", "Referral Code", "Referral Count", "User ID"];
+      const rows = allUsersCache.map(u => [
+        u.name || u.displayName || "",
+        u.email || "",
+        isProActive(u) ? "pro" : "free",
+        u.planExpires ? new Date(Number(u.planExpires)).toISOString() : "",
+        u.referralCode || "",
+        Number(u.referralCount || 0),
+        u.docId
+      ]);
+      const csvCell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+      const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\r\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mickkk-users-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast("User CSV exported.");
     };
   </script>
 
@@ -510,6 +697,9 @@
     document.addEventListener("DOMContentLoaded", () => {
       if (window.lucide) lucide.createIcons();
       syncIcons(document.documentElement.classList.contains("dark"));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") window.closeUpgradeModal?.();
+      });
     });
   </script>
 
