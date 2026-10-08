@@ -185,6 +185,42 @@
         </div>
       </div>
 
+
+      <section class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 dark:border-borderDark flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-white">Referral Management</h3>
+            <p class="text-xs text-slate-400 mt-1">Review signup attribution, verify eligible referrals, and award Pro days with a saved reward status.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <select id="referralStatusFilter" onchange="filterReferralRows()" class="px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="rewarded">Rewarded</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button onclick="fetchReferrals()" class="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">Sync Referrals</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b border-slate-100 dark:border-borderDark">
+          <div class="rounded-xl bg-slate-50 dark:bg-slate-900/70 p-3"><p class="text-[10px] text-slate-400 uppercase font-black">Tracked</p><p id="refTrackedCount" class="text-xl font-black mt-1">0</p></div>
+          <div class="rounded-xl bg-slate-50 dark:bg-slate-900/70 p-3"><p class="text-[10px] text-slate-400 uppercase font-black">Pending</p><p id="refPendingCount" class="text-xl font-black mt-1 text-amber-500">0</p></div>
+          <div class="rounded-xl bg-slate-50 dark:bg-slate-900/70 p-3"><p class="text-[10px] text-slate-400 uppercase font-black">Verified</p><p id="refVerifiedCount" class="text-xl font-black mt-1 text-emerald-500">0</p></div>
+          <div class="rounded-xl bg-slate-50 dark:bg-slate-900/70 p-3"><p class="text-[10px] text-slate-400 uppercase font-black">Rewards given</p><p id="refRewardedCount" class="text-xl font-black mt-1 text-cyan-500">0</p></div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left min-w-[850px]">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 uppercase tracking-wider text-[10px]">
+              <tr><th class="p-3">Referrer</th><th class="p-3">New account</th><th class="p-3">Signup date</th><th class="p-3">Status</th><th class="p-3">Reward</th><th class="p-3 text-right">Actions</th></tr>
+            </thead>
+            <tbody id="referralsTableBody" class="divide-y divide-slate-100 dark:divide-borderDark">
+              <tr><td colspan="6" class="p-6 text-center text-slate-400">Referral records will appear here once attribution is saved.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-200 dark:border-borderDark flex items-center justify-between gap-3">
           <div>
@@ -279,8 +315,8 @@
     import { auth, db } from './auth.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
     import {
-      collection, getDocs, doc, updateDoc, query, orderBy,
-      addDoc, serverTimestamp
+      collection, getDocs, doc, updateDoc, query, orderBy, where,
+      addDoc, serverTimestamp, getDoc, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     // UI whitelist is a convenience guard, NOT the security boundary.
@@ -393,6 +429,7 @@
         avatarEl.replaceChildren(img);
       }
       await window.fetchAllUsers();
+      await window.fetchReferrals();
     });
 
     window.fetchAllUsers = async () => {
@@ -628,6 +665,139 @@
       } catch (e) {
         console.error("Referral bonus failed:", e);
         showToast("Referral bonus was not saved. Check permissions and retry.", "error");
+      }
+    };
+
+
+    let allReferralRecords = [];
+
+    function referralDateLabel(value) {
+      if (!value) return "—";
+      const date = value.toDate ? value.toDate() : new Date(value);
+      return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    window.fetchReferrals = async () => {
+      const tbody = $("referralsTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">Loading referral records…</td></tr>';
+      try {
+        const snap = await getDocs(query(collection(db, "referrals"), orderBy("createdAt", "desc")));
+        allReferralRecords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        $("refTrackedCount").textContent = allReferralRecords.length;
+        $("statTotalReferrals").textContent = allReferralRecords.length;
+        $("refPendingCount").textContent = allReferralRecords.filter(r => (r.status || "pending") === "pending").length;
+        $("refVerifiedCount").textContent = allReferralRecords.filter(r => ["verified", "rewarded"].includes(r.status)).length;
+        $("refRewardedCount").textContent = allReferralRecords.filter(r => r.rewardStatus === "awarded" || r.status === "rewarded").length;
+        window.filterReferralRows();
+      } catch (err) {
+        console.error("Could not load referrals:", err);
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-rose-500">Could not load referrals. Check Firestore rules and referrals collection setup.</td></tr>';
+        showToast("Referral records could not be loaded. Configure admin read permissions.", "error");
+      }
+    };
+
+    window.filterReferralRows = () => {
+      const statusFilter = $("referralStatusFilter")?.value || "all";
+      const records = allReferralRecords.filter(r => statusFilter === "all" || (r.status || "pending") === statusFilter);
+      const tbody = $("referralsTableBody");
+      if (!tbody) return;
+      if (!records.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">No referral records for this filter.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = records.map(r => {
+        const status = String(r.status || "pending");
+        const badgeClass = status === "verified" || status === "rewarded" ? "bg-emerald-500/10 text-emerald-500" : status === "rejected" ? "bg-rose-500/10 text-rose-500" : "bg-amber-500/10 text-amber-600";
+        const rewardText = r.rewardStatus === "awarded" ? `+${Number(r.rewardDays || 0)} days awarded` : "Not awarded";
+        const rid = escapeHtml(r.id);
+        const canVerify = status === "pending";
+        const canReward = (status === "verified" || status === "rewarded") && r.rewardStatus !== "awarded";
+        return `<tr>
+          <td class="p-3"><div class="font-bold">${escapeHtml(r.referrerEmail || r.referrerUid || "Unknown")}</div><div class="text-[10px] text-slate-400">${escapeHtml(r.referralCode || "")}</div></td>
+          <td class="p-3"><div class="font-bold">${escapeHtml(r.referredEmail || r.referredUid || "Unknown")}</div><div class="text-[10px] text-slate-400">${escapeHtml(r.referredUid || "")}</div></td>
+          <td class="p-3 text-slate-500">${escapeHtml(referralDateLabel(r.createdAt))}</td>
+          <td class="p-3"><span class="rounded-full px-2 py-1 text-[10px] font-bold ${badgeClass}">${escapeHtml(status)}</span></td>
+          <td class="p-3 font-semibold">${escapeHtml(rewardText)}</td>
+          <td class="p-3 text-right whitespace-nowrap">
+            ${canVerify ? `<button onclick="setReferralStatus('${rid}','verified')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold mr-1">Verify</button><button onclick="setReferralStatus('${rid}','rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 text-rose-500 font-bold">Reject</button>` : ""}
+            ${canReward ? `<button onclick="awardReferralRecord('${rid}',7)" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 font-bold mr-1">+7D</button><button onclick="awardReferralRecord('${rid}',15)" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold">+15D</button>` : ""}
+            ${r.rewardStatus === "awarded" ? '<span class="text-[10px] text-emerald-500 font-bold">Rewarded ✓</span>' : ""}
+          </td>
+        </tr>`;
+      }).join("");
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.setReferralStatus = async (referralId, status) => {
+      if (!["verified", "rejected"].includes(status)) return;
+      const record = allReferralRecords.find(r => r.id === referralId);
+      if (!record || record.status !== "pending") return;
+      if (!confirm(`${status === "verified" ? "Verify" : "Reject"} referral for ${record.referredEmail || record.referredUid}?`)) return;
+      try {
+        await updateDoc(doc(db, "referrals", referralId), {
+          status,
+          reviewedBy: auth.currentUser?.uid || null,
+          reviewedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        logSessionActivity(`Referral ${status}`, { email: record.referredEmail || record.referredUid }, `Referrer: ${record.referrerEmail || record.referrerUid}`);
+        await writeAuditEvent(`referral_${status}`, { docId: record.referrerUid, email: record.referrerEmail }, `Referral ${referralId} ${status}`, { referralId, referredUid: record.referredUid });
+        showToast(`Referral ${status}.`);
+        await window.fetchReferrals();
+      } catch (err) {
+        console.error(err);
+        showToast("Could not update referral status. Check permissions.", "error");
+      }
+    };
+
+    window.awardReferralRecord = async (referralId, days) => {
+      if (![7, 15].includes(Number(days))) return;
+      const record = allReferralRecords.find(r => r.id === referralId);
+      if (!record || record.status !== "verified" || record.rewardStatus === "awarded") {
+        showToast("Only verified, not-yet-rewarded referrals can receive a bonus.", "warning");
+        return;
+      }
+      if (!confirm(`Award +${days} Pro days to ${record.referrerEmail || record.referrerUid}?`)) return;
+      try {
+        const userRef = doc(db, "users", record.referrerUid);
+        const referralRef = doc(db, "referrals", referralId);
+        await runTransaction(db, async (transaction) => {
+          const [userSnap, referralSnap] = await Promise.all([transaction.get(userRef), transaction.get(referralRef)]);
+          if (!userSnap.exists() || !referralSnap.exists()) throw new Error("User/referral record not found.");
+          const currentReferral = referralSnap.data();
+          if (currentReferral.status !== "verified" || currentReferral.rewardStatus === "awarded") {
+            throw new Error("Referral is not eligible or bonus was already awarded.");
+          }
+          const user = userSnap.data();
+          const now = Date.now();
+          const oldExpiry = Number(user.planExpires || 0);
+          const base = user.role === "pro" && oldExpiry > now ? oldExpiry : now;
+          const newExpiry = base + Number(days) * DAY_MS;
+          transaction.update(userRef, {
+            role: "pro",
+            planExpires: newExpiry,
+            lastReferralBonusDays: Number(days),
+            planUpdatedAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+          transaction.update(referralRef, {
+            status: "rewarded",
+            rewardStatus: "awarded",
+            rewardDays: Number(days),
+            rewardedAt: serverTimestamp(),
+            rewardedBy: auth.currentUser?.uid || null,
+            updatedAt: serverTimestamp()
+          });
+        });
+        logSessionActivity("Referral reward awarded", { email: record.referrerEmail || record.referrerUid }, `+${days} Pro days; referred ${record.referredEmail || record.referredUid}`);
+        await writeAuditEvent("referral_reward_awarded", { docId: record.referrerUid, email: record.referrerEmail }, `Awarded +${days} days`, { referralId, days, referredUid: record.referredUid });
+        showToast(`+${days} Pro days awarded.`);
+        await window.fetchAllUsers();
+        await window.fetchReferrals();
+      } catch (err) {
+        console.error(err);
+        showToast(err.message || "Could not award referral bonus. Check permissions.", "error");
       }
     };
 
