@@ -4,92 +4,204 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#050914">
-  <title>Refer & Earn — Mickkk.com</title>
+  <title>Refer &amp; Earn — Mickkk.com</title>
+  
   <script>
     (() => { try {
       const saved = localStorage.getItem("theme");
       if (saved === "dark" || (!saved && matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.classList.add("dark");
     } catch(e) {} })();
   </script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:"class",theme:{extend:{colors:{brandDark:"#050914",cardDark:"#0b1325",borderDark:"#16233b"}}}};</script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brandDark: "#050914",
+            cardDark: "#0b1325",
+            borderDark: "#16233b"
+          }
+        }
+      }
+    };
+  </script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
-<body class="min-h-screen bg-slate-50 dark:bg-brandDark text-slate-800 dark:text-slate-100 antialiased">
+<body class="min-h-screen bg-slate-50 dark:bg-brandDark text-slate-800 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= TOP HEADER ================= -->
   <header class="sticky top-0 z-20 border-b border-slate-200 dark:border-borderDark bg-white/90 dark:bg-[#070e1c]/90 backdrop-blur-xl">
     <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
       <a href="index.html" class="font-extrabold tracking-tight text-lg">Mickkk<span class="text-emerald-500">.com</span></a>
       <div class="flex items-center gap-2">
-        <button id="themeBtn" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle theme"><i data-lucide="sun-moon" class="w-4 h-4"></i></button>
-        <a href="overview.html" class="text-xs font-bold px-3 py-2 rounded-lg border border-slate-200 dark:border-borderDark">Terminal</a>
+        <button id="themeBtn" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 cursor-pointer" aria-label="Toggle theme">
+          <i data-lucide="sun-moon" class="w-4 h-4"></i>
+        </button>
+        <a href="overview.html" class="text-xs font-bold px-3 py-2 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          Terminal →
+        </a>
       </div>
     </div>
   </header>
 
+  <!-- ================= MAIN CONTENT ================= -->
   <main class="max-w-6xl mx-auto px-5 py-10 md:py-14">
+    
+    <!-- Hero Header -->
     <div class="max-w-3xl mb-8">
-      <div class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[.16em] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-300"><i data-lucide="gift" class="w-3.5 h-3.5"></i> Refer & Earn</div>
-      <h1 class="mt-4 text-3xl md:text-5xl font-black tracking-tight">Share Mickkk.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-400">Grow together.</span></h1>
-      <p class="mt-4 text-sm md:text-base leading-relaxed text-slate-500 dark:text-slate-400">Invite traders with your personal link. Your referral activity and any eligible rewards will appear here.</p>
+      <div class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[.16em] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-300">
+        <i data-lucide="gift" class="w-3.5 h-3.5"></i> Refer &amp; Earn Programme
+      </div>
+      <h1 class="mt-4 text-3xl md:text-5xl font-black tracking-tight leading-tight">
+        Share Mickkk.<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-400">Earn Free Pro Days.</span>
+      </h1>
+      <p class="mt-4 text-sm md:text-base leading-relaxed text-slate-500 dark:text-slate-400">
+        Invite fellow traders with your unique link. When they upgrade, your account automatically receives Pro plan extensions.
+      </p>
+
+      <!-- Reward Policy Grid -->
       <section class="mt-6 rounded-3xl border border-emerald-500/20 bg-white dark:bg-cardDark p-5 md:p-6 shadow-sm">
-        <div class="flex items-start justify-between gap-4"><div><h2 class="text-lg font-extrabold">Referral reward policy</h2><p class="text-xs mt-1 text-slate-500 dark:text-slate-400">Bonus Pro days depend on the paid plan your referred friend purchases. Online payment is coming soon.</p></div><span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-300">Pro days</span></div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
-          <div class="rounded-2xl border border-slate-200 dark:border-borderDark p-4"><p class="text-xs text-slate-500">1 Month · 30 days · ₹199</p><p class="text-2xl font-black text-emerald-500 mt-1">+7 days</p></div>
-          <div class="rounded-2xl border border-slate-200 dark:border-borderDark p-4"><p class="text-xs text-slate-500">3 Months · 90 days · ₹499</p><p class="text-2xl font-black text-emerald-500 mt-1">+15 days</p></div>
-          <div class="rounded-2xl border border-slate-200 dark:border-borderDark p-4"><p class="text-xs text-slate-500">6 Months · 180 days · ₹899</p><p class="text-2xl font-black text-emerald-500 mt-1">+30 days</p></div>
-          <div class="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4"><p class="text-xs text-slate-500">1 Year · 365 days · ₹1,499</p><p class="text-2xl font-black text-emerald-500 mt-1">+60 days</p></div>
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-base md:text-lg font-extrabold text-slate-900 dark:text-white">Referral Reward Structure</h2>
+            <p class="text-xs mt-1 text-slate-500 dark:text-slate-400">Bonus Pro days are awarded based on the paid plan chosen by your referred friend.</p>
+          </div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shrink-0">
+            Pro Rewards
+          </span>
         </div>
-        <p class="text-[11px] leading-relaxed text-slate-400 mt-4">These are the planned Pro prices. Online payment is coming soon and checkout is not available yet. The referred user's eligible purchase and referral must be verified by the Mickkk team before the bonus is awarded. Each eligible referred account can earn one reward. Pro days extend your current active expiry date.</p>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+          <div class="rounded-2xl border border-slate-200 dark:border-borderDark p-4 bg-slate-50/50 dark:bg-slate-900/30">
+            <p class="text-[11px] font-bold text-slate-500">1 Month · ₹199</p>
+            <p class="text-2xl font-black text-emerald-500 mt-1 font-mono-num">+7 Days</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Free Pro Extension</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 dark:border-borderDark p-4 bg-slate-50/50 dark:bg-slate-900/30">
+            <p class="text-[11px] font-bold text-slate-500">3 Months · ₹499</p>
+            <p class="text-2xl font-black text-emerald-500 mt-1 font-mono-num">+15 Days</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Free Pro Extension</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 dark:border-borderDark p-4 bg-slate-50/50 dark:bg-slate-900/30">
+            <p class="text-[11px] font-bold text-slate-500">6 Months · ₹899</p>
+            <p class="text-2xl font-black text-emerald-500 mt-1 font-mono-num">+30 Days</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">1 Full Month Pro</p>
+          </div>
+          <div class="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4">
+            <p class="text-[11px] font-bold text-slate-500">1 Year · ₹1,499</p>
+            <p class="text-2xl font-black text-emerald-500 mt-1 font-mono-num">+60 Days</p>
+            <p class="text-[10px] text-emerald-600 dark:text-[#00f5a0] mt-0.5 font-bold">2 Full Months Pro</p>
+          </div>
+        </div>
+
+        <p class="text-[11px] leading-relaxed text-slate-400 mt-4">
+          *Bonus Pro days extend your active plan expiry date automatically. Self-referrals are blocked.
+        </p>
       </section>
     </div>
 
-    <div id="signedOut" class="hidden rounded-3xl bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark p-6 md:p-10 shadow-sm">
-      <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><i data-lucide="log-in" class="w-6 h-6"></i></div>
-      <h2 class="mt-4 text-xl font-extrabold">Sign in to get your referral link</h2>
-      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Your referral code is linked to your Mickkk account.</p>
-      <button id="loginBtn" class="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm"><i data-lucide="chrome" class="w-4 h-4"></i> Continue with Google</button>
+    <!-- Signed Out State (Prompts Login) -->
+    <div id="signedOut" class="hidden rounded-3xl bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark p-6 md:p-10 shadow-sm text-center max-w-lg mx-auto">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
+        <i data-lucide="log-in" class="w-6 h-6"></i>
+      </div>
+      <h2 class="mt-4 text-xl font-extrabold text-slate-900 dark:text-white">Sign in to Get Your Referral Link</h2>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        Your personal referral code will be generated instantly and linked with your Google account.
+      </p>
+      <button id="loginBtn" class="mt-5 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 transition-all cursor-pointer">
+        <i data-lucide="chrome" class="w-4 h-4"></i>
+        <span>Sign in with Google</span>
+      </button>
     </div>
 
+    <!-- Signed In Dashboard -->
     <div id="dashboard" class="hidden space-y-6">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark"><p class="text-xs text-slate-500">Your referral code</p><p id="refCode" class="mt-2 text-xl font-black font-mono">Loading…</p></div>
-        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark"><p class="text-xs text-slate-500">Total referrals</p><p id="refTotal" class="mt-2 text-2xl font-black">0</p></div>
-        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark"><p class="text-xs text-slate-500">Verified referrals</p><p id="refVerified" class="mt-2 text-2xl font-black text-emerald-500">0</p></div>
-        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark"><p class="text-xs text-slate-500">Rewards awarded</p><p id="refRewards" class="mt-2 text-2xl font-black text-cyan-500">0 days</p></div>
+      
+      <!-- 4 Stats Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark shadow-sm">
+          <p class="text-xs text-slate-500 font-bold">Your Referral Code</p>
+          <p id="refCode" class="mt-2 text-xl font-black font-mono text-blue-500 truncate">Loading…</p>
+        </div>
+        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark shadow-sm">
+          <p class="text-xs text-slate-500 font-bold">Total Referrals</p>
+          <p id="refTotal" class="mt-2 text-2xl font-black font-mono-num text-slate-900 dark:text-white">0</p>
+        </div>
+        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark shadow-sm">
+          <p class="text-xs text-slate-500 font-bold">Verified Referrals</p>
+          <p id="refVerified" class="mt-2 text-2xl font-black font-mono-num text-emerald-500">0</p>
+        </div>
+        <div class="rounded-2xl p-5 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark shadow-sm">
+          <p class="text-xs text-slate-500 font-bold">Pro Rewards Earned</p>
+          <p id="refRewards" class="mt-2 text-2xl font-black font-mono-num text-cyan-500">0 days</p>
+        </div>
       </div>
 
+      <!-- Invite Link Sharing Card -->
       <section class="rounded-3xl bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark p-5 md:p-7 shadow-sm">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div><h2 class="text-lg font-extrabold">Your personal invite link</h2><p class="text-xs mt-1 text-slate-500 dark:text-slate-400">Copy it and share it with your trading friends.</p></div>
-          <button id="shareBtn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs"><i data-lucide="share-2" class="w-4 h-4"></i> Share link</button>
+          <div>
+            <h2 class="text-base md:text-lg font-extrabold text-slate-900 dark:text-white">Your Personal Invite Link</h2>
+            <p class="text-xs mt-1 text-slate-500 dark:text-slate-400">Share this link across WhatsApp trading groups, Telegram or Twitter.</p>
+          </div>
+          <button id="shareBtn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 transition-all cursor-pointer">
+            <i data-lucide="share-2" class="w-4 h-4"></i> Share Link
+          </button>
         </div>
+
         <div class="mt-4 flex flex-col sm:flex-row gap-2">
-          <input id="refLink" readonly class="min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 px-4 py-3 text-sm font-mono outline-none" />
-          <button id="copyBtn" class="px-5 py-3 rounded-xl border border-slate-200 dark:border-borderDark font-extrabold text-xs hover:border-emerald-500">Copy link</button>
+          <input id="refLink" readonly class="min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 px-4 py-3 text-xs md:text-sm font-mono outline-none" />
+          <button id="copyBtn" class="px-5 py-3 rounded-xl border border-slate-200 dark:border-borderDark font-extrabold text-xs hover:border-emerald-500 transition-colors cursor-pointer">
+            Copy Link
+          </button>
         </div>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <a id="whatsappBtn" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs"><i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp</a>
-          <span id="feedback" role="status" aria-live="polite" class="self-center text-xs text-slate-500"></span>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <a id="whatsappBtn" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs hover:bg-[#25D366]/20 transition-all">
+            <i data-lucide="message-circle" class="w-4 h-4 text-[#25D366]"></i> Share via WhatsApp
+          </a>
+          <span id="feedback" role="status" aria-live="polite" class="text-xs font-bold text-emerald-500"></span>
         </div>
       </section>
 
+      <!-- Referral Activity Table -->
       <section class="rounded-3xl bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark overflow-hidden shadow-sm">
-        <div class="p-5 md:p-6 border-b border-slate-100 dark:border-borderDark"><h2 class="font-extrabold">Referral activity</h2><p class="text-xs mt-1 text-slate-500 dark:text-slate-400">Sign-ups linked to your code and their current status.</p></div>
+        <div class="p-5 md:p-6 border-b border-slate-100 dark:border-borderDark">
+          <h2 class="font-extrabold text-base text-slate-900 dark:text-white">Referral Activity Log</h2>
+          <p class="text-xs mt-1 text-slate-500 dark:text-slate-400">Traders who joined using your invite code and their verification status.</p>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs min-w-[650px]">
-            <thead class="bg-slate-50 dark:bg-slate-900/70 text-slate-400 uppercase tracking-wider text-[10px]"><tr><th class="p-4">Referred account</th><th class="p-4">Signup date</th><th class="p-4">Status</th><th class="p-4">Reward</th></tr></thead>
-            <tbody id="refRows" class="divide-y divide-slate-100 dark:divide-borderDark"><tr><td colspan="4" class="p-6 text-slate-400">Loading referral activity…</td></tr></tbody>
+            <thead class="bg-slate-50 dark:bg-slate-900/70 text-slate-400 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="p-4">Referred Member</th>
+                <th class="p-4">Signup Date</th>
+                <th class="p-4">Status</th>
+                <th class="p-4">Reward</th>
+              </tr>
+            </thead>
+            <tbody id="refRows" class="divide-y divide-slate-100 dark:divide-borderDark font-medium">
+              <tr><td colspan="4" class="p-6 text-center text-slate-400">Loading referral activity…</td></tr>
+            </tbody>
           </table>
         </div>
       </section>
-      <p class="text-[11px] text-slate-400">Rewards are granted only when referral eligibility is verified. Never share private account credentials.</p>
+
     </div>
+
     <div id="errorBox" class="hidden mt-4 rounded-xl border border-amber-300/50 bg-amber-50 dark:bg-amber-950/20 p-4 text-xs text-amber-800 dark:text-amber-200"></div>
   </main>
 
+  <!-- Theme Toggle -->
   <script>
     document.getElementById("themeBtn").addEventListener("click", () => {
       const dark = document.documentElement.classList.toggle("dark");
@@ -97,92 +209,125 @@
     });
     if (window.lucide) window.lucide.createIcons();
   </script>
+
+  <!-- ================= JAVASCRIPT ENGINE ================= -->
   <script type="module">
     import { auth, db, loginWithGoogle, initAuthListener } from "./auth.js";
-    import { doc, getDoc, setDoc, collection, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import { 
+      doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     const $ = id => document.getElementById(id);
+
+    // Capture incoming referral parameter
     try {
       const incomingCode = new URLSearchParams(location.search).get("ref");
       if (incomingCode && /^[a-zA-Z0-9_-]{3,64}$/.test(incomingCode)) {
-        localStorage.setItem("mickkk_pending_referral", incomingCode);
+        localStorage.setItem("mickkk_pending_referral", incomingCode.trim());
       }
     } catch (e) {}
+
     let currentUser = null;
     let currentLink = "";
 
     function safeCode(value) {
       return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48);
     }
+
     function makeCode(user) {
-      const base = safeCode((user.email || user.uid).split("@")[0]).toLowerCase();
-      const suffix = user.uid.slice(-5).toLowerCase();
-      return (base.slice(0, 18) || "trader") + suffix;
-    }
-    function escapeText(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-    function setFeedback(message, error = false) {
-      $("feedback").textContent = message;
-      $("feedback").className = `self-center text-xs ${error ? "text-rose-500" : "text-emerald-500"}`;
-    }
-    function dateLabel(value) {
-      if (!value) return "Pending";
-      const date = value.toDate ? value.toDate() : new Date(value);
-      return Number.isNaN(date.getTime()) ? "Pending" : date.toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" });
+      const base = (user.email || user.uid).split("@")[0].replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toLowerCase();
+      const suffix = user.uid.slice(-4).toLowerCase();
+      return (base || "trader") + suffix;
     }
 
+    function escapeText(v) { 
+      return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); 
+    }
+
+    function setFeedback(message, error = false) {
+      $("feedback").textContent = message;
+      $("feedback").className = `text-xs font-bold ${error ? "text-rose-500" : "text-emerald-500"}`;
+      setTimeout(() => { if ($("feedback")) $("feedback").textContent = ""; }, 3000);
+    }
+
+    function dateLabel(value) {
+      if (!value) return "Just now";
+      const date = value.toDate ? value.toDate() : new Date(value);
+      return Number.isNaN(date.getTime()) ? "Just now" : date.toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" });
+    }
+
+    // Ensures user has an active referral code in both users and referralCodes
     async function ensureUserReferralCode(user) {
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
       const data = snap.exists() ? snap.data() : {};
       let code = safeCode(data.referralCode);
+
       if (!code) {
         code = makeCode(user);
         await setDoc(userRef, {
-          email: user.email || "",
-          name: user.displayName || "",
-          photoURL: user.photoURL || "",
           referralCode: code,
+          referralCount: Number(data.referralCount || 0),
           updatedAt: serverTimestamp()
         }, { merge: true });
       }
-      // The public lookup contains only the code-to-UID mapping, not profile details.
-      const codeRef = doc(db, "referralCodes", code);
-      const codeSnap = await getDoc(codeRef);
-      if (!codeSnap.exists()) {
-        await setDoc(codeRef, { uid: user.uid, createdAt: serverTimestamp() });
-      } else if (codeSnap.data().uid !== user.uid) {
-        throw new Error("Referral code collision detected. Please contact support.");
+
+      // Public lookup mapping (keys: uid, email, createdAt)
+      try {
+        const codeRef = doc(db, "referralCodes", code);
+        const codeSnap = await getDoc(codeRef);
+        if (!codeSnap.exists()) {
+          await setDoc(codeRef, { 
+            uid: user.uid, 
+            email: user.email || "", 
+            createdAt: serverTimestamp() 
+          });
+        }
+      } catch (err) {
+        console.warn("Referral code mapping check:", err);
       }
+
       return code;
     }
 
+    // Fixed Attribution without permission errors
     async function attachPendingReferral(user) {
       try {
         const code = localStorage.getItem("mickkk_pending_referral");
         if (!code || !user) return;
+
         const ownRef = doc(db, "users", user.uid);
         const ownSnap = await getDoc(ownRef);
         const ownData = ownSnap.exists() ? ownSnap.data() : {};
+
+        // Pehle se referral linked ho toh dobara na chale
         if (ownData.referredBy || ownData.referralCodeUsed) {
           localStorage.removeItem("mickkk_pending_referral");
           return;
         }
+
+        // Public referralCodes se read karein (Never read users/{referrerUid})
         const codeSnap = await getDoc(doc(db, "referralCodes", code));
         if (!codeSnap.exists()) return;
-        const referrerUid = codeSnap.data().uid;
+
+        const codeData = codeSnap.data();
+        const referrerUid = codeData.uid;
+        const referrerEmail = codeData.email || "";
+
+        // Self-referral block
         if (!referrerUid || referrerUid === user.uid) {
           localStorage.removeItem("mickkk_pending_referral");
           return;
         }
-        const referrerSnap = await getDoc(doc(db, "users", referrerUid));
-        const referrerData = referrerSnap.exists() ? referrerSnap.data() : {};
+
         const referralId = `${referrerUid}_${user.uid}`;
         const referralRef = doc(db, "referrals", referralId);
         const existing = await getDoc(referralRef);
+
         if (!existing.exists()) {
           await setDoc(referralRef, {
             referrerUid,
-            referrerEmail: referrerData.email || "",
+            referrerEmail,
             referredUid: user.uid,
             referredEmail: user.email || "",
             referralCode: code,
@@ -191,94 +336,143 @@
             createdAt: serverTimestamp()
           });
         }
+
         await setDoc(ownRef, {
-          email: user.email || ownData.email || "",
-          name: user.displayName || ownData.name || "",
-          photoURL: user.photoURL || ownData.photoURL || "",
           referredBy: referrerUid,
           referralCodeUsed: code,
           referralStatus: "pending",
           updatedAt: serverTimestamp()
         }, { merge: true });
+
         localStorage.removeItem("mickkk_pending_referral");
       } catch (e) {
-        console.warn("Referral attribution could not be saved yet.", e);
+        console.warn("Referral attribution note:", e);
       }
     }
 
+    // Dashboard Data Loader
     async function loadDashboard(user) {
       currentUser = user;
       $("signedOut").classList.add("hidden");
       $("dashboard").classList.remove("hidden");
+
       try {
         const code = await ensureUserReferralCode(user);
         currentLink = `${location.origin}/?ref=${encodeURIComponent(code)}`;
+        
         $("refCode").textContent = code;
         $("refLink").value = currentLink;
 
+        // WhatsApp Share Message
+        const shareMsg = encodeURIComponent(`Hey! Check out Mickkk.com — Market Breadth & Trading Terminal. Join with my invite link to claim your 7-Day Free Pro trial: ${currentLink}`);
+        $("whatsappBtn").href = `https://wa.me/?text=${shareMsg}`;
+
+        // Fetch user's invited referrals
         const q = query(collection(db, "referrals"), where("referrerUid", "==", user.uid));
         const snap = await getDocs(q);
-        const records = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        const records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
         const verified = records.filter(r => r.status === "verified" || r.status === "rewarded").length;
         const days = records.reduce((sum, r) => sum + (r.rewardStatus === "awarded" ? Number(r.rewardDays || 0) : 0), 0);
+
         $("refTotal").textContent = records.length;
         $("refVerified").textContent = verified;
         $("refRewards").textContent = `${days} days`;
 
         const rows = $("refRows");
         if (!records.length) {
-          rows.innerHTML = '<tr><td colspan="4" class="p-6 text-slate-400">No referrals yet. Share your link to invite your first member.</td></tr>';
+          rows.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">No referrals yet. Share your link to invite your first trader friend!</td></tr>';
         } else {
-          records.sort((a,b) => {
+          records.sort((a, b) => {
             const av = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
             const bv = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-            return bv-av;
+            return bv - av;
           });
+
           rows.innerHTML = records.map(r => {
             const status = String(r.status || "pending");
-            const reward = r.rewardStatus === "awarded" ? `+${Number(r.rewardDays || 0)} days` : "Not awarded";
-            return `<tr><td class="p-4 font-semibold">${escapeText(r.referredEmail || "New member")}</td><td class="p-4 text-slate-500">${escapeText(dateLabel(r.createdAt))}</td><td class="p-4"><span class="rounded-full px-2 py-1 text-[10px] font-bold ${status === "verified" || status === "rewarded" ? "bg-emerald-500/10 text-emerald-500" : status === "rejected" ? "bg-rose-500/10 text-rose-500" : "bg-amber-500/10 text-amber-600"}">${escapeText(status)}</span></td><td class="p-4 font-semibold">${escapeText(reward)}</td></tr>`;
+            const reward = r.rewardStatus === "awarded" ? `+${Number(r.rewardDays || 0)} days` : "Pending purchase";
+            const badgeClass = (status === "verified" || status === "rewarded") 
+              ? "bg-emerald-500/10 text-emerald-500" 
+              : (status === "rejected" ? "bg-rose-500/10 text-rose-500" : "bg-amber-500/10 text-amber-600");
+
+            return `
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="p-4 font-semibold text-slate-800 dark:text-slate-100">${escapeText(r.referredEmail || "New member")}</td>
+                <td class="p-4 text-slate-500 font-mono-num">${escapeText(dateLabel(r.createdAt))}</td>
+                <td class="p-4"><span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${badgeClass}">${escapeText(status)}</span></td>
+                <td class="p-4 font-bold font-mono-num ${r.rewardStatus === 'awarded' ? 'text-emerald-500' : 'text-slate-400'}">${escapeText(reward)}</td>
+              </tr>
+            `;
           }).join("");
         }
+
       } catch (err) {
         console.error(err);
-        $("errorBox").textContent = "Referral data could not be loaded. Check that Firestore rules allow a user to read their own profile and referral records.";
+        $("errorBox").textContent = "Referral data could not be loaded. Check connection and retry.";
         $("errorBox").classList.remove("hidden");
       }
     }
 
+    // Event Listeners
     $("loginBtn").addEventListener("click", async () => {
-      try { await loginWithGoogle(); } catch(e) { $("errorBox").textContent = e.message || "Google sign-in failed."; $("errorBox").classList.remove("hidden"); }
-    });
-    $("copyBtn").addEventListener("click", async () => {
-      try { await navigator.clipboard.writeText(currentLink); setFeedback("Referral link copied."); }
-      catch(e) { $("refLink").select(); setFeedback("Select and copy the link manually.", true); }
-    });
-    $("shareBtn").addEventListener("click", async () => {
-      try {
-        if (navigator.share) await navigator.share({ title:"Join Mickkk.com", text:"Join me on Mickkk.com — a trading tools platform.", url:currentLink });
-        else { await navigator.clipboard.writeText(currentLink); setFeedback("Referral link copied."); }
-      } catch(e) { if (e.name !== "AbortError") setFeedback("Could not share automatically. Copy the link instead.", true); }
-    });
-    $("whatsappBtn").href = "https://wa.me/?text=" + encodeURIComponent("Join me on Mickkk.com: " + location.origin + "/");
-    $("whatsappBtn").addEventListener("click", (e) => {
-      $("whatsappBtn").href = "https://wa.me/?text=" + encodeURIComponent("Join me on Mickkk.com: " + currentLink);
+      try { 
+        await loginWithGoogle(); 
+      } catch(e) { 
+        $("errorBox").textContent = e.message || "Google sign-in failed."; 
+        $("errorBox").classList.remove("hidden"); 
+      }
     });
 
-    initAuthListener(async user => {
-      if (user) {
-        await attachPendingReferral(user);
-        loadDashboard(user);
+    $("copyBtn").addEventListener("click", async () => {
+      try { 
+        await navigator.clipboard.writeText(currentLink); 
+        setFeedback("Referral link copied!"); 
+      } catch(e) { 
+        $("refLink").select(); 
+        setFeedback("Select and copy link manually.", true); 
       }
-      else {
+    });
+
+    $("shareBtn").addEventListener("click", async () => {
+      try {
+        if (navigator.share) {
+          await navigator.share({ 
+            title: "Join Mickkk.com", 
+            text: "Join me on Mickkk.com — Smarter Tools for Better Trading Decisions.", 
+            url: currentLink 
+          });
+        } else { 
+          await navigator.clipboard.writeText(currentLink); 
+          setFeedback("Referral link copied!"); 
+        }
+      } catch(e) { 
+        if (e.name !== "AbortError") setFeedback("Could not share. Please copy link.", true); 
+      }
+    });
+
+    // Auth State Listener
+    initAuthListener(
+      async user => {
+        if (user) {
+          await attachPendingReferral(user);
+          loadDashboard(user);
+        } else {
+          $("dashboard").classList.add("hidden");
+          $("signedOut").classList.remove("hidden");
+        }
+        if (window.lucide) window.lucide.createIcons();
+      }, 
+      () => {
         $("dashboard").classList.add("hidden");
         $("signedOut").classList.remove("hidden");
+        if (window.lucide) window.lucide.createIcons();
       }
-    }, () => {
-      $("dashboard").classList.add("hidden");
-      $("signedOut").classList.remove("hidden");
+    );
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) window.lucide.createIcons();
     });
-    if (window.lucide) window.lucide.createIcons();
   </script>
 </body>
 </html>
