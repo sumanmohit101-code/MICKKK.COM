@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
@@ -58,7 +57,6 @@ html
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
-    .tagline-font { font-family: 'Montserrat', sans-serif; }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
@@ -104,11 +102,20 @@ html
       border: 1px solid #1e293b;
     }
 
-    .collapse-float-btn { position: absolute; right: -12px; top: 22px; z-index: 60; }
+
     .metric-strip-card { position:relative; overflow:hidden; }
     .metric-strip-card::after { content:""; position:absolute; inset:auto -30px -35px auto; width:90px; height:90px; border-radius:999px; background:currentColor; opacity:.035; }
     .chart-card { min-height:300px; }
+    .table-scroll { scrollbar-width:thin; }
     .summary-accent { border-left-width:3px; }
+    .mini-stat { min-width:0; }
+
+    .collapse-float-btn {
+      position: absolute;
+      right: -12px;
+      top: 22px;
+      z-index: 60;
+    }
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
@@ -184,6 +191,7 @@ html
         <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
         </a>
+        <!-- ACTIVE: Trading Journal -->
         <a href="journal.html" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="book-open" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Trading Journal</span>
         </a>
@@ -199,15 +207,15 @@ html
       </nav>
     </div>
 
-    <!-- BOTTOM USER PANEL -->
+    <!-- BOTTOM USER CARD -->
     <div>
       <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
           <div class="flex items-center gap-2 min-w-0">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden" id="sideUserAvatar">M</div>
-            <div class="min-w-0 flex flex-col justify-center">
-              <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate" id="sideUserName">Trader</div>
-              <div class="text-[9px] font-mono-num text-slate-400 truncate" id="sideUserEmail">Cloud Connected</div>
+            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0" id="userInitialBadge">M</div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate" id="userNameLabel">Mickkk Account</div>
+              <div class="text-[9px] text-slate-400 truncate" id="userEmailLabel">Checking sign-in…</div>
             </div>
           </div>
           <div class="flex items-center gap-1 text-slate-400">
@@ -215,12 +223,11 @@ html
               <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
               <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
             </button>
-            <button onclick="handleLogout()" class="p-1 hover:text-rose-500 cursor-pointer" title="Logout">
+            <button onclick="signOutJournal()" class="p-1 hover:text-rose-500 cursor-pointer" title="Sign out of Mickkk">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         </div>
-        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
       </div>
 
       <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
@@ -228,7 +235,7 @@ html
           <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
           <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
         </button>
-        <button onclick="handleLogout()" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
+        <button onclick="signOutJournal()" class="p-1 text-slate-400 hover:text-rose-500" title="Sign out">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
       </div>
@@ -246,16 +253,21 @@ html
             <h1 class="text-xl font-extrabold tracking-tight">Trading Journal &amp; Risk Terminal</h1>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 border border-emerald-500/30 flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span id="syncStatusBadge">Private Cloud Synced</span>
+              <span id="syncStatusBadge">Private Firebase</span>
             </span>
           </div>
-          <p class="text-xs text-slate-400 mt-0.5">Track executions, calculate R-multiples, examine MFE/MAE excursions, and eliminate psychological leaks.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Track executions, calculate R-multiples, examine MFE/MAE excursions, and keep your journal private to your signed-in account.</p>
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
-          <button onclick="refreshLTP()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+          <button type="button" title="Your signed-in Mickkk account" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-xs font-bold shadow-sm cursor-default">
+            <i data-lucide="user-round-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+            <span id="btnAccountEmail">Checking account…</span>
+          </button>
+          
+          <button onclick="refreshLTP()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
             <i data-lucide="refresh-cw" id="ltpSpinner" class="w-3.5 h-3.5 text-blue-500"></i>
-            <span>Refresh LTP</span>
+            <span id="ltpButtonLabel">Refresh LTP</span>
           </button>
 
           <button onclick="openTradeModal()" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 transition-all cursor-pointer">
@@ -265,7 +277,7 @@ html
         </div>
       </div>
 
-      <!-- Navigation Tab Strip -->
+      <!-- Modern Navigation Tab Strip -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scroll text-xs font-bold">
         <button onclick="switchTab('positions')" id="tab-btn-positions" class="tab-btn px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-500 flex items-center gap-2 transition-all">
           <i data-lucide="layout-grid" class="w-4 h-4"></i> Positions Dashboard
@@ -287,13 +299,14 @@ html
         </button>
       </div>
 
-      <!-- ================= 1. TAB: POSITIONS ================= -->
+      <!-- ================= 1. TAB: POSITIONS (LIVE TRADING DESK) ================= -->
       <section id="pane-positions" class="tab-pane space-y-6">
+        <!-- 6 KPI Metric Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm">
             <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">OPEN POSITIONS</span>
             <div class="text-xl font-black font-mono-num mt-1" id="kpi-open-count">0</div>
-            <p class="text-[10px] text-slate-400 mt-0.5" id="kpi-lots-count">0 Active Lots</p>
+            <p class="text-[10px] text-slate-400 mt-0.5" id="kpi-lots-count">0 Lots Deployed</p>
           </div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm">
             <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">RISK-FREE POSITIONS</span>
@@ -322,11 +335,12 @@ html
           </div>
         </div>
 
+        <!-- Open Positions Table -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">ACTIVE TRADING POSITIONS</h3>
+              <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">ACTIVE TRADING POSITIONS (PYRAMID BLENDED)</h3>
             </div>
             <button onclick="refreshLTP()" class="text-xs font-bold text-emerald-600 hover:underline cursor-pointer flex items-center gap-1">
               <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Live Prices
@@ -359,8 +373,9 @@ html
         </div>
       </section>
 
-      <!-- ================= 2. TAB: TRADES LOG ================= -->
+      <!-- ================= 2. TAB: TRADES LOG (LEDGER) ================= -->
       <section id="pane-trades" class="tab-pane hidden space-y-4">
+        <!-- Ledger Controls -->
         <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark flex flex-wrap items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-2 flex-1 max-w-sm">
             <div class="relative w-full">
@@ -369,6 +384,7 @@ html
             </div>
           </div>
 
+          <!-- Quick Filters -->
           <div class="flex items-center gap-1.5 flex-wrap font-bold">
             <button onclick="setTradeFilter('all', this)" class="trade-filter-btn px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-500">All</button>
             <button onclick="setTradeFilter('open', this)" class="trade-filter-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">⏳ Open</button>
@@ -381,6 +397,8 @@ html
           </div>
         </div>
 
+
+        <!-- Trade Log Summary -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <div class="metric-strip-card bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm summary-accent border-l-cyan-500 text-cyan-500">
             <span class="text-[10px] font-extrabold uppercase text-slate-400">TOTAL TRADES</span>
@@ -390,7 +408,7 @@ html
           <div class="metric-strip-card bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm summary-accent border-l-emerald-500 text-emerald-500">
             <span class="text-[10px] font-extrabold uppercase text-slate-400">NET P&amp;L</span>
             <div class="text-xl font-black font-mono-num mt-1" id="sum-net-pnl">₹0</div>
-            <p class="text-[10px] text-slate-400 mt-0.5">Realized</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">After brokerage</p>
           </div>
           <div class="metric-strip-card bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm summary-accent border-l-blue-500 text-blue-500">
             <span class="text-[10px] font-extrabold uppercase text-slate-400">WIN RATE</span>
@@ -400,7 +418,7 @@ html
           <div class="metric-strip-card bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm summary-accent border-l-amber-500 text-amber-500">
             <span class="text-[10px] font-extrabold uppercase text-slate-400">PROFIT FACTOR</span>
             <div class="text-xl font-black font-mono-num mt-1 text-amber-500" id="sum-profit-factor">0.00</div>
-            <p class="text-[10px] text-slate-400 mt-0.5">Gross win ÷ loss</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Gross win ÷ gross loss</p>
           </div>
           <div class="metric-strip-card bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm summary-accent border-l-violet-500 text-violet-500">
             <span class="text-[10px] font-extrabold uppercase text-slate-400">AVG P&amp;L / TRADE</span>
@@ -414,6 +432,7 @@ html
           </div>
         </div>
 
+        <!-- Ledger Table -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark overflow-hidden shadow-sm">
           <div class="overflow-x-auto custom-scroll relative">
             <table class="w-full text-xs text-left border-collapse">
@@ -436,7 +455,7 @@ html
                   <th class="py-2.5 px-2 text-right">MAE %</th>
                   <th class="py-2.5 px-2 text-right">Trailing SL</th>
                   <th class="py-2.5 px-2 text-right">Partial Exit</th>
-                  <th class="py-2.5 px-2">Setup</th>
+                  <th class="py-2.5 px-2">Setup / Pattern</th>
                   <th class="py-2.5 px-3">Notes</th>
                   <th class="py-2.5 px-2 text-center">Chart</th>
                   <th class="py-2.5 px-3 text-center">Actions</th>
@@ -445,6 +464,8 @@ html
               <tbody id="tradesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
             </table>
           </div>
+          <!-- Pagination -->
+          <div id="tradesPagination" class="px-5 py-3 border-t border-slate-100 dark:border-borderDark flex items-center justify-between text-xs text-slate-500"></div>
         </div>
       </section>
 
@@ -452,38 +473,49 @@ html
       <section id="pane-performance" class="tab-pane hidden space-y-6">
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">WIN RATE</span><div class="text-xl font-black font-mono-num text-emerald-500 mt-1" id="perf-wr">0.0%</div><p class="text-[10px] text-slate-400 mt-0.5" id="perf-wr-sub">0 Wins / 0 Losses</p></div>
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">PROFIT FACTOR</span><div class="text-xl font-black font-mono-num text-amber-500 mt-1" id="perf-pf">0.00</div><p class="text-[10px] text-slate-400 mt-0.5">Gross Win ÷ Loss</p></div>
+          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">PROFIT FACTOR</span><div class="text-xl font-black font-mono-num text-amber-500 mt-1" id="perf-pf">0.00</div><p class="text-[10px] text-slate-400 mt-0.5">Gross Win ÷ Gross Loss</p></div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">AVG WIN</span><div class="text-xl font-black font-mono-num text-emerald-500 mt-1" id="perf-avg-win">₹0</div><p class="text-[10px] text-slate-400 mt-0.5">Per Winning Trade</p></div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">AVG LOSS</span><div class="text-xl font-black font-mono-num text-rose-500 mt-1" id="perf-avg-loss">₹0</div><p class="text-[10px] text-slate-400 mt-0.5">Per Losing Trade</p></div>
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">PAYOFF RATIO</span><div class="text-xl font-black font-mono-num text-cyan-500 mt-1" id="perf-payoff">0.00x</div><p class="text-[10px] text-slate-400 mt-0.5">Avg Win ÷ Loss</p></div>
+          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">PAYOFF RATIO</span><div class="text-xl font-black font-mono-num text-cyan-500 mt-1" id="perf-payoff">0.00x</div><p class="text-[10px] text-slate-400 mt-0.5">Avg Win ÷ Avg Loss</p></div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">PORTFOLIO RETURN</span><div class="text-xl font-black font-mono-num mt-1" id="perf-total-return">0.00%</div><p class="text-[10px] text-slate-400 mt-0.5" id="perf-capital-label">Base: ₹3,00,000</p></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Equity Curve — Cumulative Net P&amp;L</h4><div class="h-64"><canvas id="chartEquity"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Equity Curve — Cumulative Net Realized P&amp;L</h4><div class="h-64"><canvas id="chartEquity"></canvas></div></div>
           <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Monthly P&amp;L Breakdown</h4><div class="h-64"><canvas id="chartMonthly"></canvas></div></div>
           <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Avg P&amp;L / Trade — Running</h4><div class="h-64"><canvas id="chartAvgPnlRunning"></canvas></div></div>
           <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Trade Outcomes Distribution</h4><div class="h-64"><canvas id="chartOutcomePie"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Win Rate — Running %</h4><div class="h-64"><canvas id="chartWinRateRunning"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Avg Win vs Avg Loss</h4><div class="h-64"><canvas id="chartAvgWinLoss"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Win vs Loss — Count</h4><div class="h-64"><canvas id="chartWinLossCount"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Avg Risk / Trade — Running</h4><div class="h-64"><canvas id="chartAvgRiskRunning"></canvas></div></div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+            <h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">P&amp;L Statistics</h4>
+            <div class="overflow-x-auto"><table class="w-full text-xs"><tbody id="pnlStatsTable" class="divide-y divide-slate-100 dark:divide-borderDark"></tbody></table></div>
+          </div>
+          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+            <h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Risk Analysis</h4>
+            <div class="overflow-x-auto"><table class="w-full text-xs"><tbody id="riskAnalysisTable" class="divide-y divide-slate-100 dark:divide-borderDark"></tbody></table></div>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Monthly Breakdown</h4>
+          <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-[10px] uppercase text-slate-400"><tr><th class="text-left py-2">Month</th><th class="text-right py-2">Trades</th><th class="text-right py-2">Wins</th><th class="text-right py-2">Losses</th><th class="text-right py-2">Win Rate</th><th class="text-right py-2">Net P&amp;L</th><th class="text-right py-2">Avg P&amp;L</th></tr></thead><tbody id="monthlyBreakdownTable" class="divide-y divide-slate-100 dark:divide-borderDark"></tbody></table></div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-black text-xs uppercase tracking-wider text-emerald-500 mb-3">Top Winning Trades</h4><div id="topWinnersList" class="space-y-2 text-xs"></div></div>
-          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-black text-xs uppercase tracking-wider text-rose-500 mb-3">Top Losing Trades</h4><div id="topLosersList" class="space-y-2 text-xs"></div></div>
+          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-black text-xs uppercase tracking-wider text-emerald-500 mb-3">Top 10 Winning Trades</h4><div id="topWinnersList" class="space-y-2 text-xs"></div></div>
+          <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-black text-xs uppercase tracking-wider text-rose-500 mb-3">Top 10 Losing Trades</h4><div id="topLosersList" class="space-y-2 text-xs"></div></div>
         </div>
       </section>
 
       <!-- ================= 4. TAB: ANALYTICS & MFE/MAE ================= -->
       <section id="pane-analytics" class="tab-pane hidden space-y-6">
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-extrabold text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">Analytics &amp; MFE / MAE Excursion</h3>
-              <p class="text-xs text-slate-400 mt-0.5">Portfolio growth, drawdown, execution quality and trade expectancy diagnostics.</p>
-            </div>
-            <button onclick="computeMFEMAE()" id="btnComputeMFE" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalculate
-            </button>
-          </div>
+          <div class="flex items-center justify-between mb-3"><div><h3 class="font-extrabold text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">Analytics &amp; MFE / MAE</h3><p class="text-xs text-slate-400 mt-0.5">Portfolio growth, drawdown, time-of-day patterns, setup impact and trade-quality diagnostics.</p></div><button onclick="computeMFEMAE()" id="btnComputeMFE" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalculate</button></div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
             <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase">AVG MFE %</span><div class="text-lg font-black font-mono-num text-emerald-500 mt-0.5" id="stat-avg-mfe">--</div></div>
             <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800"><span class="text-[10px] font-bold text-slate-400 uppercase">AVG MAE %</span><div class="text-lg font-black font-mono-num text-rose-500 mt-0.5" id="stat-avg-mae">--</div></div>
@@ -493,40 +525,54 @@ html
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Capital Growth</h4><div class="h-64"><canvas id="chartCapitalGrowth"></canvas></div></div>
-          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Drawdown %</h4><div class="h-64"><canvas id="chartDrawdown"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Capital Growth — Capital + Cumulative P/L</h4><div class="h-64"><canvas id="chartCapitalGrowth"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Drawdown — Peak-to-Trough %</h4><div class="h-64"><canvas id="chartDrawdown"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Trades by Day of Week</h4><div class="h-64"><canvas id="chartTradesDow"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Avg P&amp;L by Day of Week</h4><div class="h-64"><canvas id="chartAvgDow"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Pattern Impact on Portfolio</h4><div class="h-64"><canvas id="chartPatternImpact"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Trades per Pattern</h4><div class="h-64"><canvas id="chartTradesPattern"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Trade Quality — MFE / MAE</h4><div class="h-64"><canvas id="chartTradeQuality"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">MFE Distribution</h4><div class="h-64"><canvas id="chartMfeDist"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">MAE Distribution</h4><div class="h-64"><canvas id="chartMaeDist"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Exit Efficiency — Actual Profit ÷ MFE</h4><div class="h-64"><canvas id="chartExitEfficiency"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">Heat Analysis — MAE ÷ Planned Risk</h4><div class="h-64"><canvas id="chartHeat"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">MFE vs Holding Time</h4><div class="h-64"><canvas id="chartMfeHolding"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">R-Multiple Distribution</h4><div class="h-64"><canvas id="chartRDistribution"></canvas></div></div>
+          <div class="chart-card bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm"><h4 class="font-extrabold text-xs uppercase tracking-wider mb-3">MAE vs Holding Time</h4><div class="h-64"><canvas id="chartMaeHolding"></canvas></div></div>
         </div>
       </section>
 
-      <!-- ================= 5. TAB: WATCHLIST (CLOUD SAVED) ================= -->
+      <!-- ================= 5. TAB: WATCHLIST ================= -->
       <section id="pane-watchlist" class="tab-pane hidden space-y-6">
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-4">Add Setup to Watchlist</h3>
           <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-xs">
-            <input type="text" id="w-ticker" placeholder="Ticker *" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark uppercase font-bold">
+            <input type="text" id="w-ticker" list="nseTickerList" placeholder="Ticker *" title="Search NSE symbol or company name" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark uppercase font-bold">
             <input type="date" id="w-date" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
             <input type="text" id="w-setup" placeholder="Setup Pattern" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
             <input type="number" step="0.05" id="w-entry" placeholder="Entry ₹" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
             <input type="number" step="0.05" id="w-sl" placeholder="SL ₹" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
             <input type="number" step="0.05" id="w-target" placeholder="Target ₹" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
             <input type="text" id="w-notes" placeholder="Notes" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark lg:col-span-1">
-            <button onclick="addWatchItem()" class="p-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold transition-all cursor-pointer">＋ Add</button>
+            <button onclick="addWatchItem()" class="p-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold transition-all">＋ Add</button>
           </div>
         </div>
 
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
-          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">Your Tracked Setups</h4>
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-3">Tracked Watchlist Setups</h4>
           <div id="watchListContainer" class="divide-y divide-slate-100 dark:divide-borderDark text-xs"></div>
         </div>
       </section>
 
-      <!-- ================= 6. TAB: TOOLS ================= -->
+      <!-- ================= 6. TAB: TOOLS (SIZING & R-MULTIPLE) ================= -->
       <section id="pane-tools" class="tab-pane hidden space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Position Sizing Tool -->
           <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm space-y-4">
             <div>
               <h3 class="font-extrabold text-sm text-slate-800 dark:text-slate-100">📐 Position Sizing Calculator</h3>
-              <p class="text-xs text-slate-400 mt-0.5">Determine exact quantity to buy based on portfolio risk tolerance.</p>
+              <p class="text-xs text-slate-400 mt-0.5">Determine exact quantity to buy based on disciplined portfolio risk tolerance.</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-xs">
@@ -557,6 +603,7 @@ html
             </div>
           </div>
 
+          <!-- R-Multiple Visualizer -->
           <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm space-y-4">
             <div>
               <h3 class="font-extrabold text-sm text-slate-800 dark:text-slate-100">🎯 R-Multiple Target Ladder</h3>
@@ -581,12 +628,13 @@ html
             <div class="overflow-x-auto custom-scroll">
               <table class="w-full text-xs text-left">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] uppercase font-bold">
-                  <tr><th class="py-2">Level</th><th class="py-2">Price Target</th><th class="py-2">Gain %</th><th class="py-2">Status</th></tr>
+                  <tr><th class="py-2">Level</th><th class="py-2">Price Target</th><th class="py-2">Gain %</th><th class="py-2">Ladder Status</th></tr>
                 </thead>
                 <tbody id="rLadderTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num font-semibold"></tbody>
               </table>
             </div>
           </div>
+
         </div>
       </section>
 
@@ -606,7 +654,7 @@ html
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Stock Symbol *</label>
-            <input type="text" id="fSym" placeholder="RELIANCE" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark uppercase font-bold">
+            <input type="text" id="fSym" list="nseTickerList" placeholder="Search symbol / company (e.g. RELIANCE)" title="Search NSE symbol or company name" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark uppercase font-bold">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Direction</label>
@@ -645,11 +693,11 @@ html
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Trailing SL (₹)</label>
-            <input type="number" step="0.05" id="fTrailingSL" placeholder="Dynamic SL" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+            <input type="number" step="0.05" id="fTrailingSL" placeholder="Dynamic / current SL" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Planned Risk (₹)</label>
-            <input type="number" step="0.01" id="fPlannedRisk" placeholder="Auto from SL" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+            <input type="number" step="0.01" id="fPlannedRisk" placeholder="Auto from Entry &amp; SL" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pyramid Group</label>
@@ -661,11 +709,11 @@ html
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">MFE %</label>
-            <input type="number" step="0.01" id="fMfe" placeholder="Favorable %" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+            <input type="number" step="0.01" id="fMfe" placeholder="Max favorable excursion" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">MAE %</label>
-            <input type="number" step="0.01" id="fMae" placeholder="Adverse %" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+            <input type="number" step="0.01" id="fMae" placeholder="Max adverse excursion" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
           </div>
         </div>
 
@@ -673,14 +721,12 @@ html
           <div class="flex items-center justify-between mb-2">
             <div>
               <h4 class="font-extrabold text-[10px] uppercase tracking-wider text-slate-700 dark:text-slate-200">Partial Exits / Scale-Outs</h4>
-              <p class="text-[9px] text-slate-400">Record partial exits. Remaining quantity stays live.</p>
+              <p class="text-[9px] text-slate-400">Record one or multiple partial exits. Remaining quantity stays live.</p>
             </div>
-            <button type="button" onclick="addPartialExitRow()" class="px-2.5 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold text-[10px] cursor-pointer">+ Add Partial Exit</button>
+            <button type="button" onclick="addPartialExitRow()" class="px-2.5 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold text-[10px]">+ Add Partial Exit</button>
           </div>
           <div id="partialExitRows" class="space-y-2"></div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Entry Date</label>
             <input type="date" id="fEdate" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
@@ -708,17 +754,19 @@ html
         </div>
 
         <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rationale / Notes</label>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rationale / Mistakes / Notes</label>
           <textarea id="fNotes" rows="2" placeholder="Entry trigger, volume notes, psychological mistakes..." class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark"></textarea>
         </div>
       </div>
 
       <div class="px-6 py-3 border-t border-slate-200 dark:border-borderDark flex justify-end gap-2">
-        <button onclick="closeTradeModal()" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-borderDark text-xs font-bold cursor-pointer">Cancel</button>
-        <button onclick="saveTradeLog()" id="btnSaveTrade" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 cursor-pointer">Save Trade</button>
+        <button onclick="closeTradeModal()" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-borderDark text-xs font-bold">Cancel</button>
+        <button onclick="saveTradeLog()" id="btnSaveTrade" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20">Save Trade</button>
       </div>
     </div>
   </div>
+
+  <datalist id="nseTickerList"></datalist>
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
@@ -726,20 +774,11 @@ html
     <span id="toastMsg">Status message</span>
   </div>
 
-  <!-- ================= FIREBASE AUTOMATIC MULTI-USER JAVASCRIPT ENGINE ================= -->
-  <script type="module">
-    import { auth, db, requireAuth, logoutUser, initAuthListener } from './auth.js';
-    import { 
-      collection, doc, getDocs, setDoc, deleteDoc, serverTimestamp, query, orderBy 
-    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  <!-- NSE ticker master from the repository root (tickers.js) -->
+  <script src="./tickers.js"></script>
 
-    // Route Guard: Ensures user is logged in
-    requireAuth();
-
-    window.handleLogout = async () => {
-      await logoutUser();
-    };
-
+  <!-- ================= JAVASCRIPT ENGINE ================= -->
+  <script>
     const BROKERAGE = 40;
     let PORTFOLIO_CAPITAL = 300000;
     
@@ -751,10 +790,27 @@ html
     let activeFilter = 'all';
     let sortField = 'edate';
     let sortAsc = false;
-    let currentUid = null;
+    let currentPage = 1;
+    const PAGE_SIZE = 30;
+    const LTP_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTO-Cu6ZFADy0HS563bj73xXuV49dFQo5leiOVQcUahGU0AYIZv0TMdfk9Fh6qlLdumQ/exec";
+    let ltpLastUpdated = null;
+
+    function populateNSETickerList() {
+      const list = document.getElementById("nseTickerList");
+      const items = (typeof NSE_TICKERS !== "undefined" && Array.isArray(NSE_TICKERS)) ? NSE_TICKERS : (Array.isArray(window.NSE_TICKERS) ? window.NSE_TICKERS : []);
+      if (!list || !items.length) return;
+      list.innerHTML = items.map(row => `<option value="${String(row[0]).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" label="${String(row[1]).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"></option>`).join("");
+    }
+
+    function tickerCompanyName(symbol) {
+      const rows = (typeof NSE_TICKERS !== "undefined" && Array.isArray(NSE_TICKERS)) ? NSE_TICKERS : [];
+      const key = String(symbol || "").trim().toUpperCase();
+      const found = rows.find(row => String(row[0]).toUpperCase() === key);
+      return found ? found[1] : "";
+    }
 
     // Toast Utility
-    window.showToast = function(msg, isError = false) {
+    function showToast(msg, isError = false) {
       const toast = document.getElementById("toast");
       const icon = document.getElementById("toastIcon");
       const text = document.getElementById("toastMsg");
@@ -769,10 +825,10 @@ html
       setTimeout(() => {
         toast.classList.add("translate-y-20", "opacity-0");
       }, 3500);
-    };
+    }
 
     // Sidebar & Theme Sync
-    window.toggleSidebar = function() {
+    function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
       const mainContent = document.getElementById("mainContent");
       const arrow = document.getElementById("collapseArrow");
@@ -794,16 +850,16 @@ html
       } catch (e) {}
 
       if (window.lucide) lucide.createIcons();
-    };
+    }
 
-    window.toggleTheme = function() {
+    function toggleTheme() {
       const isDark = document.documentElement.classList.toggle("dark");
       syncThemeIcons(isDark);
       try {
         localStorage.setItem("theme", isDark ? "dark" : "light");
       } catch (e) {}
       renderPerformanceCharts();
-    };
+    }
 
     function syncThemeIcons(isDark) {
       const sunIconSide = document.getElementById("sunIconSide");
@@ -818,7 +874,7 @@ html
     }
 
     // Tab Switching
-    window.switchTab = function(tabId) {
+    function switchTab(tabId) {
       document.querySelectorAll(".tab-pane").forEach(p => p.classList.add("hidden"));
       const targetPane = document.getElementById("pane-" + tabId);
       if (targetPane) targetPane.classList.remove("hidden");
@@ -838,7 +894,33 @@ html
       if (tabId === 'analytics') renderAnalyticsView();
       if (tabId === 'watchlist') renderWatchlist();
       if (tabId === 'tools') { runSizingCalc(); runRLadder(); }
-    };
+    }
+
+    // Account identity comes only from Mickkk Firebase Authentication.
+    function updateUserHeaderBadge() {
+      const user = window.journalUser || null;
+      const email = user?.email || "Not signed in";
+      const display = (user?.displayName || email.split("@")[0] || "Trader");
+      const btnLabel = document.getElementById("btnAccountEmail");
+      const userEmailLabel = document.getElementById("userEmailLabel");
+      const userNameLabel = document.getElementById("userNameLabel");
+      const badge = document.getElementById("userInitialBadge");
+      if (btnLabel) btnLabel.innerText = email;
+      if (userEmailLabel) userEmailLabel.innerText = email;
+      if (userNameLabel) userNameLabel.innerText = display;
+      if (badge) badge.innerText = display.charAt(0).toUpperCase();
+    }
+
+    async function signOutJournal() {
+      if (!window.journalAuth?.signOut) { showToast("Account service is still loading. Please try again.", true); return; }
+      try { await window.journalAuth.signOut(); window.location.href = "index.html"; }
+      catch (err) { console.error(err); showToast("Could not sign out. Please try again.", true); }
+    }
+
+    function userTradeCacheKey() { return `mickkk_journal_trades_${window.journalUser?.uid || "signed-out"}`; }
+    function userWatchCacheKey() { return `mickkk_journal_watchlist_${window.journalUser?.uid || "signed-out"}`; }
+    function cacheTrades() { try { localStorage.setItem(userTradeCacheKey(), JSON.stringify(trades)); } catch (e) {} }
+    function cacheWatchlist() { try { localStorage.setItem(userWatchCacheKey(), JSON.stringify(watchlist)); } catch (e) {} }
 
     // -------------------- Data / Calculation Helpers --------------------
     function safeNum(v, fallback = 0) {
@@ -893,6 +975,7 @@ html
     function calcPnL(t) {
       if (!t) return null;
       const partials = getPartialExits(t);
+      const pqty = partialQty(t);
       const rem = remainingQty(t);
       let gross = partialPnL(t);
       if (t.exit && rem > 0) {
@@ -987,50 +1070,34 @@ html
       return {label,data,backgroundColor:data.map(v => v >= 0 ? positive : negative),borderRadius:4};
     }
 
-    // -------------------- AUTOMATIC FIREBASE LOAD TRADES --------------------
-    async function loadTradesFromFirebase(uid) {
-      if (!uid) return;
+    // Fetch this signed-in user's trades from their own Firestore subcollection.
+    async function loadTrades() {
       try {
-        const tradesCol = collection(db, "users", uid, "trades");
-        const q = query(tradesCol, orderBy("edate", "desc"));
-        const snapshot = await getDocs(q);
-
-        trades = [];
-        snapshot.forEach(docSnap => {
-          trades.push({ id: docSnap.id, ...docSnap.data() });
-        });
-
-        // Offline cache for instant speed
-        try {
-          localStorage.setItem(`mickkk_trades_${uid}`, JSON.stringify(trades));
-        } catch(e) {}
-
+        const user = await window.journalStoreReady;
+        if (!user || !window.journalStore) throw new Error("No authenticated account");
+        trades = await window.journalStore.listTrades();
+        cacheTrades();
       } catch (err) {
-        console.warn("Firestore fetch error, reading cached:", err);
-        try {
-          const cached = localStorage.getItem(`mickkk_trades_${uid}`);
-          if (cached) trades = JSON.parse(cached);
-        } catch(e) {}
+        console.error("Could not load cloud trades:", err);
+        try { const cached = localStorage.getItem(userTradeCacheKey()); if (cached) trades = JSON.parse(cached); } catch (e) {}
+        showToast("Cloud data could not be loaded. Check your connection or account permissions.", true);
       }
-
       renderPositionsTable();
       renderTradesTable();
       renderPerformanceMetrics();
       renderAnalyticsView();
     }
 
-    // Load User Watchlist from Firebase
-    async function loadWatchlistFromFirebase(uid) {
-      if (!uid) return;
+    async function loadWatchlist() {
       try {
-        const watchCol = collection(db, "users", uid, "watchlist");
-        const snap = await getDocs(watchCol);
-        watchlist = [];
-        snap.forEach(d => watchlist.push({ id: d.id, ...d.data() }));
-        renderWatchlist();
-      } catch(e) {
-        console.warn("Watchlist load error:", e);
+        await window.journalStoreReady;
+        watchlist = await window.journalStore.listWatchlist();
+        cacheWatchlist();
+      } catch (err) {
+        console.error("Could not load cloud watchlist:", err);
+        try { const cached = localStorage.getItem(userWatchCacheKey()); if (cached) watchlist = JSON.parse(cached); } catch (e) {}
       }
+      renderWatchlist();
     }
 
     // Positions Dashboard
@@ -1051,13 +1118,18 @@ html
       document.getElementById("kpi-cap-invested").innerText = `${((invested / PORTFOLIO_CAPITAL) * 100).toFixed(1)}%`;
       document.getElementById("kpi-cap-deployed-val").innerText = `₹${invested.toLocaleString('en-IN',{maximumFractionDigits:0})} deployed`;
 
-      let totalUnreal = 0;
+      let totalUnreal = 0, pricedPositions = 0;
       open.forEach(t => {
-        const ltp = safeNum(ltpCache[t.symbol], safeNum(t.entry));
-        totalUnreal += (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) * remainingQty(t);
+        const rawLtp = ltpCache[String(t.symbol || "").toUpperCase()];
+        const ltp = Number(rawLtp);
+        if (Number.isFinite(ltp) && ltp > 0) {
+          totalUnreal += (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) * remainingQty(t);
+          pricedPositions++;
+        }
       });
       const unrealEl = document.getElementById("kpi-unreal-pnl");
-      unrealEl.innerText = `${totalUnreal >= 0 ? '+₹' : '-₹'}${Math.abs(totalUnreal).toFixed(0)}`;
+      unrealEl.innerText = open.length && !pricedPositions ? "—" : `${totalUnreal >= 0 ? '+₹' : '-₹'}${Math.abs(totalUnreal).toFixed(0)}${pricedPositions < open.length ? ' *' : ''}`;
+      unrealEl.title = pricedPositions < open.length ? `LTP available for ${pricedPositions} of ${open.length} open positions. Refresh LTP to update.` : (ltpLastUpdated ? `LTP updated ${ltpLastUpdated.toLocaleString()}` : "Refresh LTP to fetch current available quotes");
       unrealEl.className = `text-xl font-black font-mono-num mt-1 ${totalUnreal >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
 
       const realGain = closed.reduce((sum,t) => sum + (calcPnL(t) || 0), 0);
@@ -1067,15 +1139,17 @@ html
 
       const tbody = document.getElementById("positionsTbody");
       if (!open.length) {
-        tbody.innerHTML = `<tr><td colspan="15" class="py-8 text-center text-slate-400">No open positions. Click "Log Trade" above to record active trades.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="15" class="py-8 text-center text-slate-400">No open positions. Click "Log Trade" above to deploy capital.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = open.map(t => {
-        const ltp = safeNum(ltpCache[t.symbol], safeNum(t.entry));
+        const rawLtp = ltpCache[String(t.symbol || "").toUpperCase()];
+        const ltp = Number(rawLtp);
+        const hasLtp = Number.isFinite(ltp) && ltp > 0;
         const rem = remainingQty(t);
         const investedVal = safeNum(t.entry) * rem;
-        const unreal = (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) * rem;
+        const unreal = hasLtp ? (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) * rem : null;
         const activeSL = safeNum(t.trailingSL || t.sl);
         const riskVal = activeSL ? Math.abs(safeNum(t.entry) - activeSL) * rem : null;
         const riskPct = riskVal ? (riskVal / PORTFOLIO_CAPITAL) * 100 : null;
@@ -1087,15 +1161,15 @@ html
           <td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${rem.toLocaleString()}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num font-bold">₹${ltp.toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num font-bold" title="${hasLtp && ltpLastUpdated ? 'Fetched '+ltpLastUpdated.toLocaleString() : 'Click Refresh LTP to fetch quote'}">${hasLtp?'₹'+ltp.toFixed(2):'—'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num text-amber-500">${activeSL?'₹'+activeSL.toFixed(2):'-'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">₹${investedVal.toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${riskPct!==null?riskPct.toFixed(2)+'%':'-'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num font-bold ${unreal>=0?'text-emerald-500':'text-rose-500'}">${unreal>=0?'+':''}₹${unreal.toFixed(0)}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num font-bold ${unreal===null?'text-slate-400':unreal>=0?'text-emerald-500':'text-rose-500'}">${unreal===null?'—':`${unreal>=0?'+':''}₹${unreal.toFixed(0)}`}</td>
           <td class="py-2.5 px-2 text-center text-[10px]">${pe.length?`✓ ${pe.length} exit${pe.length>1?'s':''}`:'—'}</td>
           <td class="py-2.5 px-2 text-center text-[10px] font-bold">${t.pyramidGroup?`${t.pyramidGroup}${t.pyramidLeg?' · L'+t.pyramidLeg:''}`:'—'}</td>
-          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500 cursor-pointer" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500 cursor-pointer" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
+          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
         </tr>`;
       }).join('');
       if (window.lucide) lucide.createIcons();
@@ -1139,7 +1213,7 @@ html
         return sortAsc ? String(av).localeCompare(String(bv),undefined,{numeric:true}) : String(bv).localeCompare(String(av),undefined,{numeric:true});
       });
       const tbody=document.getElementById("tradesTbody");
-      if(!list.length){tbody.innerHTML=`<tr><td colspan="21" class="py-8 text-center text-slate-400">No trades found. Click "Log Trade" above to start journaling!</td></tr>`;renderTradeSummary();return;}
+      if(!list.length){tbody.innerHTML=`<tr><td colspan="20" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
       tbody.innerHTML=list.map(t=>{
         const pnl=calcPnL(t), stat=outcome(t), ret=(safeNum(t.entry)&&pnl!==null)?pnl/(safeNum(t.entry)*safeNum(t.qty))*100:null;
         const activeSL=safeNum(t.trailingSL||t.sl), rr=(activeSL&&t.target)?Math.abs(safeNum(t.target)-safeNum(t.entry))/Math.abs(safeNum(t.entry)-activeSL):null;
@@ -1165,40 +1239,40 @@ html
           <td class="py-2.5 px-2 max-w-[120px] truncate text-slate-400" title="${t.setup||''}">${t.setup||'No Pattern'}</td>
           <td class="py-2.5 px-3 max-w-[140px] truncate text-slate-400" title="${t.notes||''}">${t.notes||'-'}</td>
           <td class="py-2.5 px-2 text-center">${t.chartLink?`<a href="${t.chartLink}" target="_blank" rel="noopener" class="text-blue-500 hover:underline">📈</a>`:'-'}</td>
-          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500 cursor-pointer"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
+          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
         </tr>`;
       }).join('');
       renderTradeSummary();
       if(window.lucide)lucide.createIcons();
     }
 
-    window.setTradeFilter = function(f,btn){
+    function setTradeFilter(f,btn){
       activeFilter=f;
       document.querySelectorAll(".trade-filter-btn").forEach(b=>b.className="trade-filter-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800");
       btn.className="trade-filter-btn px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-500";
       renderTradesTable();
-    };
+    }
 
-    window.sortTrades = function(field){
+    function sortTrades(field){
       if(sortField===field) sortAsc=!sortAsc; else {sortField=field;sortAsc=true;}
       renderTradesTable();
-    };
+    }
 
     // Partial Exit editor
     let partialExitDraft=[];
     function renderPartialExitRows(){
       const box=document.getElementById('partialExitRows');
       if(!box)return;
-      box.innerHTML=partialExitDraft.map((x,i)=>`<div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center"><input type="number" min="1" step="1" value="${safeNum(x.qty)||''}" data-pe-qty="${i}" placeholder="Qty" class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num"><input type="number" step="0.05" value="${safeNum(x.price)||''}" data-pe-price="${i}" placeholder="Exit price" class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num"><input type="date" value="${isoDate(x.date)||''}" data-pe-date="${i}" class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-borderDark"><button type="button" onclick="removePartialExitRow(${i})" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`).join('');
+      box.innerHTML=partialExitDraft.map((x,i)=>`<div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center"><input type="number" min="1" step="1" value="${safeNum(x.qty)||''}" data-pe-qty="${i}" placeholder="Qty" class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num"><input type="number" step="0.05" value="${safeNum(x.price)||''}" data-pe-price="${i}" placeholder="Exit price" class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num"><input type="date" value="${isoDate(x.date)||''}" data-pe-date="${i}" class="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-borderDark"><button type="button" onclick="removePartialExitRow(${i})" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`).join('');
       if(window.lucide)lucide.createIcons();
     }
     function syncPartialExitDraft(){
       partialExitDraft=partialExitDraft.map((x,i)=>({...x,qty:safeNum(document.querySelector(`[data-pe-qty="${i}"]`)?.value),price:safeNum(document.querySelector(`[data-pe-price="${i}"]`)?.value),date:document.querySelector(`[data-pe-date="${i}"]`)?.value||''}));
     }
-    window.addPartialExitRow = function(){syncPartialExitDraft();partialExitDraft.push({qty:'',price:'',date:new Date().toISOString().slice(0,10)});renderPartialExitRows();};
-    window.removePartialExitRow = function(i){syncPartialExitDraft();partialExitDraft.splice(i,1);renderPartialExitRows();};
+    function addPartialExitRow(){syncPartialExitDraft();partialExitDraft.push({qty:'',price:'',date:new Date().toISOString().slice(0,10)});renderPartialExitRows();}
+    function removePartialExitRow(i){syncPartialExitDraft();partialExitDraft.splice(i,1);renderPartialExitRows();}
 
-    window.openTradeModal = function(id=null){
+    function openTradeModal(id=null){
       document.getElementById("tradeModalTitle").innerText=id?"Edit Trade Log":"Add New Trade Log";
       document.getElementById("fTradeId").value=id||"";
       if(id){
@@ -1211,145 +1285,168 @@ html
       } else {
         ["fSym","fQty","fEntry","fExit","fSL","fTarget","fTrailingSL","fPlannedRisk","fPyramidGroup","fPyramidLeg","fMfe","fMae","fEdate","fXdate","fChartLink","fNotes"].forEach(fid=>{const el=document.getElementById(fid);if(el)el.value='';});
         document.getElementById("fDir").value="B";document.getElementById("fType").value="Swing";document.getElementById("fSetup").value="";
-        document.getElementById("fEdate").value=new Date().toISOString().slice(0,10);
         partialExitDraft=[];
       }
       renderPartialExitRows();
       document.getElementById("tradeModal").classList.remove("hidden");
       if(window.lucide)lucide.createIcons();
-    };
+    }
 
-    window.closeTradeModal = function(){document.getElementById("tradeModal").classList.add("hidden");};
+    function closeTradeModal(){document.getElementById("tradeModal").classList.add("hidden");}
 
-    // SAVE TRADE TO FIREBASE (ISOLATED TO CURRENT USER)
-    window.saveTradeLog = async function(){
-      if (!currentUid) {
-        showToast("Please sign in to save your trades!", true);
-        return;
-      }
-
+    async function saveTradeLog(){
       const sym=document.getElementById("fSym").value.trim().toUpperCase();
       const qty=parseFloat(document.getElementById("fQty").value), entry=parseFloat(document.getElementById("fEntry").value);
       if(!sym||isNaN(qty)||qty<=0||isNaN(entry)){showToast("Please provide Symbol, Quantity and Entry price!",true);return;}
-      
       syncPartialExitDraft();
       const pe=partialExitDraft.filter(x=>safeNum(x.qty)>0&&safeNum(x.price)>0).map(x=>({qty:safeNum(x.qty),price:safeNum(x.price),date:x.date||document.getElementById("fXdate").value||new Date().toISOString().slice(0,10)}));
       const peQty=pe.reduce((s,x)=>s+x.qty,0);
       if(peQty>qty){showToast("Partial exit quantity cannot exceed total quantity.",true);return;}
-
-      const id=document.getElementById("fTradeId").value||("TRD_"+Date.now());
+      const user=window.journalUser; if(!user){showToast("Please sign in to save your journal.",true);return;} const id=document.getElementById("fTradeId").value||("T_"+Date.now());
       const sl=safeNum(document.getElementById("fSL").value)||null;
       const explicitRisk=safeNum(document.getElementById("fPlannedRisk").value);
-      
       const tradeObj={
-        id,
-        symbol:sym,
-        dir:document.getElementById("fDir").value,
-        type:document.getElementById("fType").value,
-        qty,
-        entry,
-        exit:safeNum(document.getElementById("fExit").value)||null,
-        sl,
-        target:safeNum(document.getElementById("fTarget").value)||null,
-        trailingSL:safeNum(document.getElementById("fTrailingSL").value)||null,
-        plannedRisk:explicitRisk||(sl?Math.abs(entry-sl)*qty:null),
-        pyramidGroup:document.getElementById("fPyramidGroup").value.trim(),
-        pyramidLeg:safeNum(document.getElementById("fPyramidLeg").value)||null,
-        partialExits:pe,
-        mfe:document.getElementById("fMfe").value===''?'':safeNum(document.getElementById("fMfe").value),
+        id,ownerUid:user.uid,userEmail:user.email||"",symbol:sym,companyName:tickerCompanyName(sym),dir:document.getElementById("fDir").value,type:document.getElementById("fType").value,qty,entry,
+        exit:safeNum(document.getElementById("fExit").value)||null,sl,target:safeNum(document.getElementById("fTarget").value)||null,
+        trailingSL:safeNum(document.getElementById("fTrailingSL").value)||null,plannedRisk:explicitRisk||(sl?Math.abs(entry-sl)*qty:null),
+        pyramidGroup:document.getElementById("fPyramidGroup").value.trim(),pyramidLeg:safeNum(document.getElementById("fPyramidLeg").value)||null,
+        partialExits:pe,mfe:document.getElementById("fMfe").value===''?'':safeNum(document.getElementById("fMfe").value),
         mae:document.getElementById("fMae").value===''?'':safeNum(document.getElementById("fMae").value),
-        edate:document.getElementById("fEdate").value || new Date().toISOString().slice(0,10),
-        xdate:document.getElementById("fXdate").value || (document.getElementById("fExit").value ? new Date().toISOString().slice(0,10) : ""),
-        setup:document.getElementById("fSetup").value,
-        chartLink:document.getElementById("fChartLink").value,
-        notes:document.getElementById("fNotes").value,
-        updatedAt: Date.now()
+        edate:document.getElementById("fEdate").value,xdate:document.getElementById("fXdate").value,setup:document.getElementById("fSetup").value,
+        chartLink:document.getElementById("fChartLink").value,notes:document.getElementById("fNotes").value
       };
+      if(!tradeObj.xdate && tradeObj.exit) tradeObj.xdate=new Date().toISOString().slice(0,10);
+      if(tradeObj.exit && peQty<qty) tradeObj.xdate=tradeObj.xdate||new Date().toISOString().slice(0,10);
 
-      // Local optimistic update
       const existingIdx=trades.findIndex(x=>String(x.id)===String(id));
+      const previousTrades=[...trades];
       if(existingIdx>=0)trades[existingIdx]=tradeObj;else trades.unshift(tradeObj);
-
-      closeTradeModal(); 
-      renderPositionsTable(); 
-      renderTradesTable(); 
-      renderPerformanceMetrics(); 
-      renderAnalyticsView();
-
-      showToast("Saving trade to your private cloud...");
-
-      // Write to Firebase subcollection: users/{uid}/trades/{id}
+      closeTradeModal(); renderPositionsTable(); renderTradesTable(); renderPerformanceMetrics(); renderAnalyticsView();
       try {
-        const tradeDocRef = doc(db, "users", currentUid, "trades", id);
-        await setDoc(tradeDocRef, tradeObj);
-        showToast("✓ Trade securely logged to your account!");
-      } catch (err) {
-        console.error("Firestore trade save error:", err);
-        showToast("Error saving to cloud. Saved in local offline cache.", true);
+        await window.journalStore.saveTrade(tradeObj);
+        cacheTrades();
+        showToast("✓ Trade saved to your private Mickkk account!");
+      } catch(err) {
+        console.error("Firestore save failed:",err); trades=previousTrades;
+        renderPositionsTable(); renderTradesTable(); renderPerformanceMetrics(); renderAnalyticsView();
+        showToast("Trade could not be saved to cloud. Check account permissions/connection.",true);
       }
-    };
+    }
 
-    window.editTrade = function(id){openTradeModal(id);};
-
-    window.deleteTrade = async function(id){
-      if(!confirm("Are you sure you want to delete this trade log?")) return;
-      if (!currentUid) return;
-
+    function editTrade(id){openTradeModal(id);}
+    async function deleteTrade(id){
+      if(!confirm("Are you sure you want to delete this trade?"))return;
+      const backup=[...trades];
       trades=trades.filter(x=>String(x.id)!==String(id));
-      renderPositionsTable(); renderTradesTable(); renderPerformanceMetrics(); renderAnalyticsView();
-
+      renderPositionsTable();renderTradesTable();renderPerformanceMetrics();renderAnalyticsView();
       try {
-        await deleteDoc(doc(db, "users", currentUid, "trades", id));
-        showToast("✓ Trade deleted from your journal!");
+        await window.journalStore.deleteTrade(id);
+        cacheTrades();
+        showToast("✓ Trade deleted from your private account.");
       } catch(e) {
-        console.error("Delete error:", e);
-        showToast("Could not delete from cloud.", true);
+        console.error("Firestore delete failed:",e); trades=backup;
+        renderPositionsTable();renderTradesTable();renderPerformanceMetrics();renderAnalyticsView();
+        showToast("Delete failed to sync. Your trade was restored.",true);
       }
-    };
+    }
 
-    // Live Prices (LTP) Fetch
-    window.refreshLTP = async function(){
-      const open=trades.filter(t=>outcome(t)==='OPEN');
-      if(!open.length){showToast("No open positions to refresh.");return;}
-      const syms=[...new Set(open.map(t=>t.symbol))];
-      const spin=document.getElementById("ltpSpinner");
-      if(spin) spin.classList.add("animate-spin");
-
-      try{
-        const res=await fetch(`https://script.google.com/macros/s/AKfycbz9TTgMmVvFDOhUda_L2Od3C1Qqip39nFkyK5QtHKbxaaMdz-usqV-zBs-IsQ3V5sBR/exec?action=ltp&symbols=${encodeURIComponent(syms.join(','))}`);
-        const data=await res.json();
-        if(data&&data.prices){
-          ltpCache={...ltpCache,...data.prices};
-          renderPositionsTable();
-          showToast("✓ Live market prices updated!");
+    async function refreshLTP(){
+      const buttonLabel = document.getElementById("ltpButtonLabel");
+      const spinner = document.getElementById("ltpSpinner");
+      const buttons = Array.from(document.querySelectorAll('button[onclick="refreshLTP()"]'));
+      if (window.__ltpRefreshInProgress) { showToast("LTP refresh is already running."); return; }
+      const symbols = [...new Set([
+        ...trades.filter(t => outcome(t) === "OPEN").map(t => String(t.symbol || "").trim().toUpperCase()),
+        ...watchlist.map(w => String(w.ticker || "").trim().toUpperCase())
+      ].filter(s => /^[A-Z0-9&_-]{1,30}$/.test(s)))];
+      if (!symbols.length) { showToast("Add a trade or watchlist stock first, then refresh LTP.", true); return; }
+      window.__ltpRefreshInProgress = true;
+      buttons.forEach(b => b.disabled = true);
+      if (buttonLabel) buttonLabel.textContent = "Fetching…";
+      if (spinner) spinner.classList.add("animate-spin");
+      let succeeded = 0, failed = [];
+      try {
+        // Apps Script accepts up to 50 symbols per request. JSONP avoids browser CORS issues.
+        for (let start = 0; start < symbols.length; start += 50) {
+          const batch = symbols.slice(start, start + 50);
+          const payload = await requestLTPBatch_(batch);
+          if (!payload || payload.success !== true || !payload.prices) {
+            throw new Error(payload?.error || "Apps Script did not return a valid quote response.");
+          }
+          batch.forEach(symbol => {
+            const price = Number(payload.prices[symbol]);
+            if (Number.isFinite(price) && price > 0) { ltpCache[symbol] = price; succeeded++; }
+            else failed.push(symbol);
+          });
         }
-      }catch(e){
-        showToast("LTP service busy, keeping existing marks.");
-      }finally{
-        if(spin) spin.classList.remove("animate-spin");
+        ltpLastUpdated = new Date();
+        renderPositionsTable();
+        renderTradesTable();
+        if (succeeded) {
+          const time = ltpLastUpdated.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+          showToast(`LTP refreshed: ${succeeded} quote(s) updated at ${time}${failed.length ? `. Unavailable: ${failed.slice(0,5).join(", ")}${failed.length>5?"…":""}` : ""}${failed.length ? "" : ""}` , failed.length > 0 && succeeded === 0);
+        } else {
+          showToast("Google Finance did not return prices for these symbols: " + failed.slice(0,8).join(", ") + ". Quotes may be unavailable or delayed.", true);
+        }
+      } catch (err) {
+        console.error("LTP refresh failed:", err);
+        showToast("LTP refresh failed: " + (err.message || "Could not contact Apps Script") + ". Check deployment access and try again.", true);
+      } finally {
+        window.__ltpRefreshInProgress = false;
+        buttons.forEach(b => b.disabled = false);
+        if (buttonLabel) buttonLabel.textContent = "Refresh LTP";
+        if (spinner) spinner.classList.remove("animate-spin");
       }
-    };
+    }
 
-    // Performance Metrics
+    function requestLTPBatch_(symbols) {
+      return new Promise((resolve, reject) => {
+        const callbackName = "__mickkkLtpCallback_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
+        let finished = false;
+        const cleanup = () => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timer);
+          script.remove();
+          try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+        };
+        window[callbackName] = data => { cleanup(); resolve(data); };
+        script.onerror = () => { cleanup(); reject(new Error("Apps Script request blocked or unavailable.")); };
+        const timer = setTimeout(() => { cleanup(); reject(new Error("Apps Script timed out. Please try again.")); }, 25000);
+        const url = new URL(LTP_WEB_APP_URL);
+        url.searchParams.set("action", "ltp");
+        url.searchParams.set("symbols", symbols.join(","));
+        url.searchParams.set("callback", callbackName);
+        script.src = url.toString();
+        document.head.appendChild(script);
+      });
+    }
+
+    // -------------------- Performance Metrics --------------------
     function renderPerformanceMetrics(){
       const closed=trades.filter(t=>outcome(t)!=='OPEN'),wins=closed.filter(t=>outcome(t)==='WIN'),losses=closed.filter(t=>outcome(t)==='LOSS');
       const grossWin=wins.reduce((s,t)=>s+(calcPnL(t)||0),0),grossLoss=Math.abs(losses.reduce((s,t)=>s+(calcPnL(t)||0),0));
       const pf=grossLoss?grossWin/grossLoss:(grossWin>0?Infinity:0),avgWin=wins.length?grossWin/wins.length:0,avgLoss=losses.length?grossLoss/losses.length:0;
       const wr=closed.length?wins.length/closed.length*100:0,payoff=avgLoss?avgWin/avgLoss:0,net=closed.reduce((s,t)=>s+(calcPnL(t)||0),0),ret=net/PORTFOLIO_CAPITAL*100;
-      
-      document.getElementById("perf-wr").innerText=wr.toFixed(1)+"%";
-      document.getElementById("perf-wr-sub").innerText=`${wins.length} Wins / ${losses.length} Losses`;
-      document.getElementById("perf-pf").innerText=Number.isFinite(pf)?pf.toFixed(2):"∞";
-      document.getElementById("perf-avg-win").innerText=`₹${avgWin.toFixed(0)}`;
-      document.getElementById("perf-avg-loss").innerText=`₹${avgLoss.toFixed(0)}`;
-      document.getElementById("perf-payoff").innerText=payoff.toFixed(2)+"x";
-      document.getElementById("perf-total-return").innerText=`${ret>=0?'+':''}${ret.toFixed(2)}%`;
-      document.getElementById("perf-total-return").className=`text-xl font-black font-mono-num mt-1 ${ret>=0?'text-emerald-500':'text-rose-500'}`;
+      document.getElementById("perf-wr").innerText=wr.toFixed(1)+"%";document.getElementById("perf-wr-sub").innerText=`${wins.length} Wins / ${losses.length} Losses`;
+      document.getElementById("perf-pf").innerText=Number.isFinite(pf)?pf.toFixed(2):"∞";document.getElementById("perf-avg-win").innerText=`₹${avgWin.toFixed(0)}`;document.getElementById("perf-avg-loss").innerText=`₹${avgLoss.toFixed(0)}`;document.getElementById("perf-payoff").innerText=payoff.toFixed(2)+"x";
+      document.getElementById("perf-total-return").innerText=`${ret>=0?'+':''}${ret.toFixed(2)}%`;document.getElementById("perf-total-return").className=`text-xl font-black font-mono-num mt-1 ${ret>=0?'text-emerald-500':'text-rose-500'}`;
       document.getElementById("perf-capital-label").innerText=`Base: ₹${PORTFOLIO_CAPITAL.toLocaleString('en-IN')}`;
 
       const sorted=[...wins].sort((a,b)=>(calcPnL(b)||0)-(calcPnL(a)||0)), losers=[...losses].sort((a,b)=>(calcPnL(a)||0)-(calcPnL(b)||0));
       const renderList=(el,arr,cls)=>{const node=document.getElementById(el);if(!node)return;node.innerHTML=arr.slice(0,10).map((t,i)=>`<div class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-borderDark"><span class="font-mono-num font-bold">#${i+1} ${t.symbol}</span><span class="font-mono-num font-bold ${cls}">${(calcPnL(t)||0)>=0?'+':'-'}₹${Math.abs(calcPnL(t)||0).toFixed(0)}</span></div>`).join('')||'<p class="text-slate-400">No closed trades yet.</p>';};
       renderList('topWinnersList',sorted,'text-emerald-500');renderList('topLosersList',losers,'text-rose-500');
+
+      const pnlRows=[['Net P&L',`₹${net.toFixed(0)}`],['Gross Profit',`₹${grossWin.toFixed(0)}`],['Gross Loss',`₹${grossLoss.toFixed(0)}`],['Average P&L / Trade',`₹${closed.length?(net/closed.length).toFixed(0):'0'}`],['Best Trade',wins.length?`₹${Math.max(...wins.map(t=>calcPnL(t))).toFixed(0)}`:'₹0'],['Worst Trade',losses.length?`₹${Math.min(...losses.map(t=>calcPnL(t))).toFixed(0)}`:'₹0'],['Expectancy / Trade',`₹${closed.length?(net/closed.length).toFixed(0):'0'}`]];
+      document.getElementById('pnlStatsTable').innerHTML=pnlRows.map(r=>`<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
+
+      const rs=closed.map(rMultiple).filter(v=>v!==null), avgRisk=closed.length?closed.reduce((s,t)=>s+plannedRiskAmount(t),0)/closed.length:0,maxRisk=rs.length?Math.max(...rs):0;
+      const riskRows=[['Average Planned Risk',`₹${avgRisk.toFixed(0)}`],['Max Planned Risk',`₹${Math.max(0,...closed.map(plannedRiskAmount)).toFixed(0)}`],['Average R-Multiple',`${rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(2):'0.00'}R`],['Best R-Multiple',`${maxRisk.toFixed(2)}R`],['Worst R-Multiple',`${rs.length?Math.min(...rs).toFixed(2):'0.00'}R`],['Risk / Capital',`${PORTFOLIO_CAPITAL?((avgRisk/PORTFOLIO_CAPITAL)*100).toFixed(2):'0.00'}%`]];
+      document.getElementById('riskAnalysisTable').innerHTML=riskRows.map(r=>`<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
+
+      const mm={};closed.forEach(t=>{const k=monthKey(t);if(!mm[k])mm[k]={n:0,w:0,l:0,p:0};mm[k].n++;if(outcome(t)==='WIN')mm[k].w++;if(outcome(t)==='LOSS')mm[k].l++;mm[k].p+=calcPnL(t)||0;});
+      document.getElementById('monthlyBreakdownTable').innerHTML=Object.keys(mm).sort().map(k=>{const m=mm[k];return `<tr><td class="py-2 font-bold">${monthLabel(k)}</td><td class="py-2 text-right">${m.n}</td><td class="py-2 text-right text-emerald-500">${m.w}</td><td class="py-2 text-right text-rose-500">${m.l}</td><td class="py-2 text-right">${m.n?(m.w/m.n*100).toFixed(1):'0.0'}%</td><td class="py-2 text-right font-mono-num font-bold ${m.p>=0?'text-emerald-500':'text-rose-500'}">${m.p>=0?'+':'-'}₹${Math.abs(m.p).toFixed(0)}</td><td class="py-2 text-right font-mono-num">${m.n?'₹'+(m.p/m.n).toFixed(0):'₹0'}</td></tr>`}).join('')||'<tr><td colspan="7" class="py-4 text-center text-slate-400">No closed trades.</td></tr>';
 
       renderPerformanceCharts();
     }
@@ -1365,10 +1462,16 @@ html
       makeChart('chartAvgPnlRunning','avgPnlRunning','line',labels,[lineDataset('Avg P&L / Trade',avgRun,'#06b6d4','rgba(6,182,212,.07)')]);
       const counts=[closed.filter(t=>outcome(t)==='WIN').length,closed.filter(t=>outcome(t)==='LOSS').length,closed.filter(t=>outcome(t)==='BE').length];
       makeChart('chartOutcomePie','outcomePie','doughnut',['Wins','Losses','Break-even'],[{data:counts,backgroundColor:['#10b981','#ef4444','#94a3b8'],borderWidth:0}],{plugins:{legend:{position:'bottom'}}});
+      let w=0;const wr=closed.map((t,i)=>{if(outcome(t)==='WIN')w++;return w/(i+1)*100;});
+      makeChart('chartWinRateRunning','winRateRunning','line',labels,[lineDataset('Running Win Rate %',wr,'#8b5cf6','rgba(139,92,246,.07)')],{scales:{y:{min:0,max:100}}});
+      makeChart('chartAvgWinLoss','avgWinLoss','bar',['Average Win','Average Loss'],[{data:[closed.filter(t=>outcome(t)==='WIN').length?closed.filter(t=>outcome(t)==='WIN').reduce((s,t)=>s+calcPnL(t),0)/closed.filter(t=>outcome(t)==='WIN').length:0,closed.filter(t=>outcome(t)==='LOSS').length?Math.abs(closed.filter(t=>outcome(t)==='LOSS').reduce((s,t)=>s+calcPnL(t),0)/closed.filter(t=>outcome(t)==='LOSS').length):0],backgroundColor:['#10b981','#ef4444'],borderRadius:4}],{plugins:{legend:{display:false}}});
+      makeChart('chartWinLossCount','winLossCount','bar',['Wins','Losses'],[{data:counts.slice(0,2),backgroundColor:['#10b981','#ef4444'],borderRadius:4}],{plugins:{legend:{display:false}}});
+      let riskRun=0;const riskAvg=closed.map((t,i)=>{riskRun+=plannedRiskAmount(t);return riskRun/(i+1);});
+      makeChart('chartAvgRiskRunning','avgRiskRunning','line',labels,[lineDataset('Avg Planned Risk',riskAvg,'#f59e0b','rgba(245,158,11,.07)')]);
     }
 
-    // Analytics MFE/MAE
-    window.computeMFEMAE = function(){
+    // -------------------- Analytics & MFE/MAE --------------------
+    function computeMFEMAE(){
       const closed=trades.filter(t=>outcome(t)!=='OPEN'),mfes=closed.map(t=>safeNum(t.mfe)).filter(v=>v!==0),maes=closed.map(t=>safeNum(t.mae)).filter(v=>v!==0);
       const avgMFE=mfes.length?mfes.reduce((a,b)=>a+b,0)/mfes.length:0,avgMAE=maes.length?maes.reduce((a,b)=>a+b,0)/maes.length:0;
       const eff=closed.map(t=>{const mfe=Math.abs(safeNum(t.mfe));return mfe>0&&calcPnL(t)!==null?Math.max(0,(calcPnL(t)/safeNum(t.entry)/safeNum(t.qty))*100)/mfe:null;}).filter(v=>v!==null);
@@ -1377,21 +1480,44 @@ html
       document.getElementById('stat-avg-mae').innerText=maes.length?avgMAE.toFixed(2)+'%':'--';
       document.getElementById('stat-exit-eff').innerText=eff.length?(eff.reduce((a,b)=>a+b,0)/eff.length*100).toFixed(1)+'%':'--';
       document.getElementById('stat-expectancy').innerText=expectancy.toFixed(2)+'R';
-    };
+    }
 
-    function renderAnalyticsView(){
-      computeMFEMAE();
+    function renderAnalyticsView(){computeMFEMAE();renderAnalyticsCharts();}
+
+    function renderAnalyticsCharts(){
       if(typeof Chart==='undefined')return;
       const closed=trades.filter(t=>outcome(t)!=='OPEN').sort((a,b)=>isoDate(a.xdate||a.edate).localeCompare(isoDate(b.xdate||b.edate)));
       const labels=closed.map(t=>formatDate(t.xdate||t.edate));
-      let cum=0,peak=PORTFOLIO_CAPITAL;
-      const capital=closed.map(t=>{cum+=calcPnL(t)||0;return PORTFOLIO_CAPITAL+cum;}),dd=capital.map(v=>{peak=Math.max(peak,v);return peak?((v-peak)/peak)*100:0;});
+      let cum=0,peak=PORTFOLIO_CAPITAL;const capital=closed.map(t=>{cum+=calcPnL(t)||0;return PORTFOLIO_CAPITAL+cum;}),dd=capital.map(v=>{peak=Math.max(peak,v);return peak?((v-peak)/peak)*100:0;});
       makeChart('chartCapitalGrowth','capitalGrowth','line',labels,[lineDataset('Capital',capital,'#10b981','rgba(16,185,129,.06)')]);
       makeChart('chartDrawdown','dd','line',labels,[lineDataset('Drawdown %',dd,'#ef4444','rgba(239,68,68,.08)')],{scales:{y:{ticks:{callback:v=>v+'%'}}}});
+      const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],dowCounts=days.map(d=>closed.filter(t=>weekdayLabel(t)===d).length),dowAvg=days.map(d=>{const a=closed.filter(t=>weekdayLabel(t)===d);return a.length?a.reduce((s,t)=>s+calcPnL(t),0)/a.length:0;});
+      makeChart('chartTradesDow','tradesDow','bar',days,[{data:dowCounts,backgroundColor:'#06b6d4',borderRadius:4}],{plugins:{legend:{display:false}}});
+      makeChart('chartAvgDow','avgDow','bar',days,[barDataset('Avg P&L',dowAvg)],{plugins:{legend:{display:false}}});
+
+      const pats=[...new Set(closed.map(patternOf))].sort(),pnlPat=pats.map(p=>closed.filter(t=>patternOf(t)===p).reduce((s,t)=>s+calcPnL(t),0)),cntPat=pats.map(p=>closed.filter(t=>patternOf(t)===p).length);
+      makeChart('chartPatternImpact','patternImpact','bar',pats,[barDataset('Net P&L',pnlPat)],{plugins:{legend:{display:false}}});
+      makeChart('chartTradesPattern','tradesPattern','bar',pats,[{data:cntPat,backgroundColor:'#8b5cf6',borderRadius:4}],{plugins:{legend:{display:false}}});
+
+      const mfe=closed.map(t=>safeNum(t.mfe)),mae=closed.map(t=>safeNum(t.mae));
+      makeChart('chartTradeQuality','tradeQuality','scatter',[],[{label:'MFE vs MAE',data:closed.filter(t=>t.mfe!==''&&t.mae!=='').map(t=>({x:safeNum(t.mfe),y:safeNum(t.mae)})),backgroundColor:'#8b5cf6',pointRadius:4}],{scales:{x:{title:{display:true,text:'MFE %'}},y:{title:{display:true,text:'MAE %'}}}});
+      const hist=(vals,bins)=>{const labels=[],data=[];if(!vals.length)return {labels,data};const min=Math.min(...vals),max=Math.max(...vals),step=(max-min||1)/bins;for(let i=0;i<bins;i++){const lo=min+i*step,hi=i===bins-1?max+1:lo+step;labels.push(`${lo.toFixed(1)}–${hi.toFixed(1)}`);data.push(vals.filter(v=>v>=lo&&v<hi).length);}return {labels,data};};
+      const mh=hist(mfe.filter(v=>v!==0),8),ah=hist(mae.filter(v=>v!==0),8);
+      makeChart('chartMfeDist','mfeDist','bar',mh.labels,[{data:mh.data,backgroundColor:'#10b981',borderRadius:3}],{plugins:{legend:{display:false}}});
+      makeChart('chartMaeDist','maeDist','bar',ah.labels,[{data:ah.data,backgroundColor:'#ef4444',borderRadius:3}],{plugins:{legend:{display:false}}});
+
+      const eff=closed.map(t=>{const mfePct=safeNum(t.mfe);const pnlPct=safeNum(t.entry)&&safeNum(t.qty)?(calcPnL(t)/(safeNum(t.entry)*safeNum(t.qty)))*100:0;return mfePct?pnlPct/mfePct*100:0;});
+      makeChart('chartExitEfficiency','exitEfficiency','line',labels,[lineDataset('Exit Efficiency %',eff,'#06b6d4','rgba(6,182,212,.06)')]);
+      const heat=closed.map(t=>{const risk=plannedRiskAmount(t),maePct=safeNum(t.mae);const maeAmt=safeNum(t.entry)&&safeNum(t.qty)?(maePct/100)*safeNum(t.entry)*safeNum(t.qty):0;return risk?maeAmt/risk*100:0;});
+      makeChart('chartHeat','heat','line',labels,[lineDataset('MAE ÷ Planned Risk %',heat,'#f59e0b','rgba(245,158,11,.06)')]);
+      makeChart('chartMfeHolding','mfeHolding','scatter',[],[{label:'MFE vs Holding Days',data:closed.map(t=>({x:holdingDays(t),y:safeNum(t.mfe)})),backgroundColor:'#10b981',pointRadius:4}],{scales:{x:{title:{display:true,text:'Holding Days'}},y:{title:{display:true,text:'MFE %'}}}});
+      const rs=closed.map(rMultiple).filter(v=>v!==null),rh=hist(rs,10);
+      makeChart('chartRDistribution','rDistribution','bar',rh.labels,[{data:rh.data,backgroundColor:'#8b5cf6',borderRadius:3}],{plugins:{legend:{display:false}}});
+      makeChart('chartMaeHolding','maeHolding','scatter',[],[{label:'MAE vs Holding Days',data:closed.map(t=>({x:holdingDays(t),y:safeNum(t.mae)})),backgroundColor:'#ef4444',pointRadius:4}],{scales:{x:{title:{display:true,text:'Holding Days'}},y:{title:{display:true,text:'MAE %'}}}});
     }
 
     // Tools Sizing Calculator
-    window.runSizingCalc = function() {
+    function runSizingCalc() {
       const cap = parseFloat(document.getElementById("toolCap").value) || 0;
       const riskPct = parseFloat(document.getElementById("toolRiskPct").value) || 0;
       const entry = parseFloat(document.getElementById("toolEntry").value) || 0;
@@ -1410,9 +1536,9 @@ html
       document.getElementById("resQty").innerText = `${qty.toLocaleString()} Shares`;
       document.getElementById("resPosValue").innerText = `₹${posVal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
       document.getElementById("resExposure").innerText = `${exposure.toFixed(1)}% of Capital`;
-    };
+    }
 
-    window.runRLadder = function() {
+    function runRLadder() {
       const entry = parseFloat(document.getElementById("rEntry").value) || 0;
       const sl = parseFloat(document.getElementById("rSL").value) || 0;
       const cur = parseFloat(document.getElementById("rCurrent").value) || entry;
@@ -1430,76 +1556,65 @@ html
             <td class="py-2">${r === -1 ? 'SL (-1R)' : (r === 0 ? 'Entry (0R)' : `Target +${r}R`)}</td>
             <td class="py-2 font-bold">₹${target.toFixed(2)}</td>
             <td class="py-2 ${gainPct >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}%</td>
-            <td class="py-2 ${hit ? 'text-emerald-500 font-bold' : 'text-slate-400'}">${hit ? '✓ Hit' : 'Pending'}</td>
+            <td class="py-2 ${hit ? 'text-emerald-500 font-bold' : 'text-slate-400'}">${hit ? '✓ Triggered' : 'Pending'}</td>
           </tr>
         `;
       }).join('');
-    };
+    }
 
-    // Watchlist Management
+    // Watchlist
     function renderWatchlist() {
       const container = document.getElementById("watchListContainer");
       if (!container) return;
       if (!watchlist.length) {
-        container.innerHTML = '<p class="py-4 text-slate-400">No stocks in your private watchlist.</p>';
+        container.innerHTML = '<p class="py-4 text-slate-400">No stocks in watchlist.</p>';
         return;
       }
       container.innerHTML = watchlist.map((w, idx) => `
         <div class="py-3 flex justify-between items-center">
           <div>
-            <span class="font-bold font-mono-num text-blue-500">${w.ticker}</span>
-            <span class="ml-2 text-slate-400 font-semibold">${w.setup || 'Setup'}</span>
+            <span class="font-bold font-mono-num text-blue-500" title="${w.companyName || tickerCompanyName(w.ticker)}">${w.ticker}</span>
+            <span class="ml-2 text-slate-400">${w.companyName || tickerCompanyName(w.ticker) || ''}</span>
+            <span class="ml-2 text-slate-400">${w.setup || 'Setup'}</span>
             <div class="text-[11px] text-slate-400 mt-0.5">Entry ₹${w.entry} | SL ₹${w.sl} | Target ₹${w.target}</div>
           </div>
-          <button onclick="deleteWatchItem('${w.id}', ${idx})" class="text-rose-500 p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button onclick="removeWatchItem(${idx})" class="text-rose-500 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </div>
       `).join('');
       if (window.lucide) lucide.createIcons();
     }
 
-    window.addWatchItem = async function() {
-      if (!currentUid) return;
+    async function addWatchItem() {
       const ticker = document.getElementById("w-ticker").value.trim().toUpperCase();
       if (!ticker) return;
-
-      const watchObj = {
-        id: "W_" + Date.now(),
-        ticker,
+      const item = {
+        id: "W_" + Date.now(), ticker, companyName: tickerCompanyName(ticker),
         setup: document.getElementById("w-setup").value,
         entry: document.getElementById("w-entry").value,
         sl: document.getElementById("w-sl").value,
         target: document.getElementById("w-target").value,
-        notes: document.getElementById("w-notes").value,
-        createdAt: Date.now()
+        notes: document.getElementById("w-notes").value
       };
-
-      watchlist.push(watchObj);
-      document.getElementById("w-ticker").value = "";
-      renderWatchlist();
-
       try {
-        await setDoc(doc(db, "users", currentUid, "watchlist", watchObj.id), watchObj);
-        showToast("Setup added to your cloud watchlist!");
-      } catch(e) {
-        console.warn("Watchlist save error:", e);
-      }
-    };
+        await window.journalStore.saveWatchlistItem(item);
+        watchlist.unshift(item); cacheWatchlist(); renderWatchlist();
+        document.getElementById("w-ticker").value = "";
+        document.getElementById("w-setup").value = ""; document.getElementById("w-entry").value = "";
+        document.getElementById("w-sl").value = ""; document.getElementById("w-target").value = ""; document.getElementById("w-notes").value = "";
+        showToast("Watchlist setup saved to your private account!");
+      } catch (err) { console.error(err); showToast("Watchlist could not be saved. Check connection/permissions.", true); }
+    }
 
-    window.deleteWatchItem = async function(id, idx) {
-      if (!currentUid) return;
-      watchlist.splice(idx, 1);
-      renderWatchlist();
-      try {
-        await deleteDoc(doc(db, "users", currentUid, "watchlist", id));
-      } catch(e) {}
-    };
+    async function removeWatchItem(index) {
+      const item = watchlist[index]; if (!item) return;
+      const previous = [...watchlist]; watchlist.splice(index, 1); renderWatchlist();
+      try { await window.journalStore.deleteWatchlistItem(item.id); cacheWatchlist(); showToast("Watchlist setup deleted."); }
+      catch (err) { console.error(err); watchlist = previous; renderWatchlist(); showToast("Could not delete watchlist setup.", true); }
+    }
 
     // CSV Export
-    window.exportCSV = function() {
-      if (!trades.length) {
-        showToast("No trades to export.", true);
-        return;
-      }
+    function exportCSV() {
+      if (!trades.length) return;
       let csv = "Symbol,Type,Dir,Entry,Exit,Qty,SL,Target,NetPnL,ReturnPct,Status,EntryDate,ExitDate,Notes\n";
       trades.forEach(t => {
         const pnl = calcPnL(t);
@@ -1511,43 +1626,79 @@ html
       a.href = URL.createObjectURL(blob);
       a.download = `Mickkk_Journal_${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
-    };
+    }
 
-    // ================= MULTI-USER AUTH INITIALIZATION =================
-    initAuthListener(
-      async (user, role) => {
-        currentUid = user.uid;
-
-        const nameEl = document.getElementById("sideUserName");
-        const emailEl = document.getElementById("sideUserEmail");
-        const avatarEl = document.getElementById("sideUserAvatar");
-
-        if (nameEl) nameEl.innerText = user.displayName || "Trader";
-        if (emailEl) emailEl.innerText = user.email || "";
-        if (avatarEl) {
-          if (user.photoURL) {
-            avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
-          } else {
-            avatarEl.innerText = (user.displayName || "U")[0].toUpperCase();
-          }
-        }
-
-        // Automatically fetch logged-in user's private data
-        await loadTradesFromFirebase(user.uid);
-        await loadWatchlistFromFirebase(user.uid);
-        runSizingCalc();
-        runRLadder();
-
-        if (window.lucide) lucide.createIcons();
-      },
-      () => {
-        // If not logged in, requireAuth will redirect to index.html
-      }
-    );
-
+    // Init
     document.addEventListener("DOMContentLoaded", () => {
       syncThemeIcons(document.documentElement.classList.contains("dark"));
+      populateNSETickerList();
+      updateUserHeaderBadge();
+      loadTrades();
+      loadWatchlist();
+      runSizingCalc();
+      runRLadder();
       if (window.lucide) lucide.createIcons();
+    });
+  </script>
+  <!-- Mickkk Firebase Auth + per-user Firestore storage. Google Apps Script is used only for manual LTP refresh. -->
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBpa5zxymgAvV0k-gZvM9e2hefLnogG4As",
+      authDomain: "mickkk-terminal.firebaseapp.com",
+      projectId: "mickkk-terminal",
+      storageBucket: "mickkk-terminal.appspot.com",
+      messagingSenderId: "708877453716",
+      appId: "1:708877453716:web:5d371d47ec10b014126781"
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.journalAuth = { signOut: () => signOut(auth) };
+
+    let resolveJournalUser;
+    window.journalStoreReady = new Promise(resolve => { resolveJournalUser = resolve; });
+    function currentUser() {
+      const user = window.journalUser;
+      if (!user) throw new Error("Sign-in is required");
+      return user;
+    }
+    function userCollection(name) { return collection(db, "users", currentUser().uid, name); }
+    function safeDocId(id) { return String(id).replace(/[\/#?\[\]]/g, "_"); }
+
+    window.journalStore = {
+      async listTrades() {
+        const snap = await getDocs(userCollection("trades"));
+        return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+      },
+      async saveTrade(trade) {
+        const id = safeDocId(trade.id);
+        await setDoc(doc(db, "users", currentUser().uid, "trades", id), { ...trade, id, ownerUid: currentUser().uid, updatedAt: serverTimestamp() }, { merge: true });
+      },
+      async deleteTrade(id) { await deleteDoc(doc(db, "users", currentUser().uid, "trades", safeDocId(id))); },
+      async listWatchlist() {
+        const snap = await getDocs(userCollection("watchlist"));
+        return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+      },
+      async saveWatchlistItem(item) {
+        const id = safeDocId(item.id);
+        await setDoc(doc(db, "users", currentUser().uid, "watchlist", id), { ...item, id, ownerUid: currentUser().uid, updatedAt: serverTimestamp() }, { merge: true });
+      },
+      async deleteWatchlistItem(id) { await deleteDoc(doc(db, "users", currentUser().uid, "watchlist", safeDocId(id))); }
+    };
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.journalUser = null;
+        window.location.replace("index.html?auth=required");
+        return;
+      }
+      window.journalUser = user;
+      resolveJournalUser(user);
+      if (typeof window.updateUserHeaderBadge === "function") window.updateUserHeaderBadge();
     });
   </script>
 </body>
