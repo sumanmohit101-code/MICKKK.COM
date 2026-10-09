@@ -394,6 +394,9 @@
             <button onclick="exportCSV()" class="ml-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1 font-semibold">
               <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
             </button>
+            <button onclick="openImportModal()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 font-bold shadow-sm">
+              <i data-lucide="file-up" class="w-3.5 h-3.5"></i> Import Broker Report
+            </button>
           </div>
         </div>
 
@@ -641,6 +644,33 @@
     </main>
   </div>
 
+  <!-- ================= BROKER TRADE IMPORT MODAL ================= -->
+  <div id="brokerImportModal" class="fixed inset-0 z-[60] hidden bg-slate-900/70 backdrop-blur-sm items-center justify-center p-3 sm:p-5">
+    <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-borderDark flex items-center justify-between gap-3">
+        <div><h3 class="font-extrabold text-sm">Import Broker Trade Report</h3><p class="text-[10px] text-slate-400 mt-1">Zerodha / Groww · CSV or Excel · saved to your signed-in account</p></div>
+        <button onclick="closeImportModal()" class="text-slate-400 hover:text-rose-500 p-1" aria-label="Close import"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="p-5 overflow-y-auto custom-scroll space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-[1fr_1.3fr] gap-3">
+          <div><label for="brokerImportSelect" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Broker</label><select id="brokerImportSelect" onchange="previewBrokerImport()" class="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark"><option value="auto">Auto-detect broker</option><option value="Zerodha">Zerodha</option><option value="Groww">Groww</option></select></div>
+          <div><label for="brokerImportFile" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Trade report file</label><input id="brokerImportFile" type="file" accept=".xlsx,.xls,.csv" onchange="previewBrokerImport()" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:text-white file:px-3 file:py-1.5"></div>
+        </div>
+        <div class="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900 p-3 text-amber-800 dark:text-amber-200 text-[11px] leading-relaxed">Imports executed equity trades only. The importer matches buy/sell executions FIFO by symbol to create closed trades and keeps unmatched quantities as open positions. Fees/charges are not present in these sample reports and will not be inferred.</div>
+        <div id="brokerImportStatus" class="text-xs text-slate-500">Choose a Zerodha or Groww report to preview its trades.</div>
+        <div id="brokerImportPreviewWrap" class="hidden border border-slate-200 dark:border-borderDark rounded-xl overflow-hidden">
+          <div id="brokerImportSummary" class="p-3 bg-slate-50 dark:bg-slate-900 text-xs font-bold"></div>
+          <div class="overflow-x-auto max-h-72 custom-scroll"><table class="w-full text-xs text-left"><thead class="sticky top-0 bg-slate-100 dark:bg-slate-900 text-slate-500 uppercase text-[10px]"><tr><th class="p-2">Symbol</th><th class="p-2">Dir</th><th class="p-2 text-right">Qty</th><th class="p-2 text-right">Entry</th><th class="p-2 text-right">Exit</th><th class="p-2">Entry date</th><th class="p-2">Exit date</th><th class="p-2">State</th></tr></thead><tbody id="brokerImportPreviewBody" class="divide-y divide-slate-100 dark:divide-borderDark"></tbody></table></div>
+          <p id="brokerImportPreviewMore" class="hidden p-2 text-center text-slate-400"></p>
+        </div>
+      </div>
+      <div class="px-5 py-4 border-t border-slate-200 dark:border-borderDark flex flex-wrap justify-end gap-2">
+        <button onclick="closeImportModal()" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-borderDark font-bold">Cancel</button>
+        <button id="brokerImportConfirmBtn" onclick="confirmBrokerImport()" disabled class="px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed"><i data-lucide="database" class="w-3.5 h-3.5 inline mr-1"></i> Import to Trade Log</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= LOG TRADE MODAL ================= -->
   <div id="tradeModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -775,6 +805,7 @@
   </div>
 
   <!-- NSE ticker master from the repository root (tickers.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="./tickers.js"></script>
 
   <!-- ================= JAVASCRIPT ENGINE ================= -->
@@ -1421,6 +1452,213 @@
         script.src = url.toString();
         document.head.appendChild(script);
       });
+    }
+
+    // -------------------- Broker Trade Import (Zerodha / Groww) --------------------
+    let pendingBrokerImport = null;
+
+    function openImportModal() {
+      pendingBrokerImport = null;
+      const modal = document.getElementById('brokerImportModal');
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+      document.getElementById('brokerImportFile').value = '';
+      document.getElementById('brokerImportStatus').textContent = 'Choose a Zerodha or Groww report to preview its trades.';
+      document.getElementById('brokerImportPreviewWrap').classList.add('hidden');
+      document.getElementById('brokerImportConfirmBtn').disabled = true;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeImportModal() {
+      const modal = document.getElementById('brokerImportModal');
+      modal.classList.add('hidden'); modal.classList.remove('flex');
+      pendingBrokerImport = null;
+    }
+
+    function importCellText(v) { return String(v == null ? '' : v).trim(); }
+    function importHeaderKey(v) { return importCellText(v).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+    function importParseDate(value) {
+      if (value instanceof Date && !isNaN(value.getTime())) return value;
+      if (typeof value === 'number' && window.XLSX && XLSX.SSF) {
+        const d = XLSX.SSF.parse_date_code(value);
+        if (d) return new Date(d.y, d.m - 1, d.d, d.H || 0, d.M || 0, Math.floor(d.S || 0));
+      }
+      const str = importCellText(value);
+      if (!str) return null;
+      let m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+      if (m) return new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+      m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})(?:\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?)?/i);
+      if (m) {
+        let h = +(m[4] || 0); const ap = (m[6] || '').toUpperCase();
+        if (ap === 'PM' && h < 12) h += 12; if (ap === 'AM' && h === 12) h = 0;
+        return new Date(+m[3], +m[2]-1, +m[1], h, +(m[5]||0));
+      }
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function importIsoDate(d) {
+      if (!d || isNaN(d.getTime())) return '';
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function importStableHash(text) {
+      let h = 2166136261;
+      for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+      return (h >>> 0).toString(36).toUpperCase();
+    }
+
+    function importFindHeader(rows) {
+      for (let i = 0; i < Math.min(rows.length, 40); i++) {
+        const keys = (rows[i] || []).map(importHeaderKey);
+        if (keys.includes('symbol') && keys.includes('tradetype') && keys.includes('quantity') && keys.includes('price')) return { row: i, broker: 'Zerodha', keys };
+        if (keys.includes('stockname') && keys.includes('symbol') && keys.includes('type') && keys.includes('quantity') && keys.includes('value')) return { row: i, broker: 'Groww', keys };
+      }
+      throw new Error('Report format not recognized. Please use a Zerodha tradebook or Groww stock order-history report.');
+    }
+
+    function importBrokerRows(rows, forcedBroker) {
+      const found = importFindHeader(rows);
+      const broker = forcedBroker === 'auto' ? found.broker : forcedBroker;
+      if (broker !== found.broker) throw new Error('Selected broker does not match this file. Choose Auto-detect or ' + found.broker + '.');
+      const idx = {}; found.keys.forEach((k, i) => { if (k && idx[k] === undefined) idx[k] = i; });
+      const val = (r, k) => r[idx[k]];
+      const fillsByKey = new Map();
+      let skipped = 0;
+      for (let i = found.row + 1; i < rows.length; i++) {
+        const r = rows[i] || [];
+        const symbol = importCellText(val(r, 'symbol')).toUpperCase();
+        const side = importCellText(val(r, broker === 'Zerodha' ? 'tradetype' : 'type')).toUpperCase();
+        const qty = Number(val(r, 'quantity'));
+        const rawPrice = broker === 'Zerodha' ? Number(val(r, 'price')) : (Number(val(r, 'value')) / qty);
+        const dateValue = broker === 'Zerodha' ? (val(r, 'tradeexecutiontime') || val(r, 'tradedate')) : val(r, 'executiondateandtime');
+        const date = importParseDate(dateValue);
+        const status = broker === 'Groww' ? importCellText(val(r, 'orderstatus')).toLowerCase() : '';
+        if (broker === 'Groww' && status && !['executed','complete','completed','traded'].includes(status)) { skipped++; continue; }
+        if (!symbol || !['BUY','SELL'].includes(side) || !Number.isFinite(qty) || qty <= 0 || !Number.isFinite(rawPrice) || rawPrice <= 0 || !date) { if (r.some(x => importCellText(x))) skipped++; continue; }
+        const orderId = importCellText(val(r, broker === 'Zerodha' ? 'orderid' : 'exchangeorderid')) || importCellText(val(r, broker === 'Zerodha' ? 'tradeid' : 'isin')) || ('ROW' + (i+1));
+        const tradeId = importCellText(val(r, 'tradeid'));
+        const key = [broker, symbol, side, importIsoDate(date), orderId].join('|');
+        const existing = fillsByKey.get(key) || { key, symbol, side, qty: 0, amount: 0, date, orderId, executionIds: [] };
+        existing.qty += qty; existing.amount += qty * rawPrice;
+        if (tradeId) existing.executionIds.push(tradeId);
+        fillsByKey.set(key, existing);
+      }
+      const fills = [...fillsByKey.values()].map(f => ({ ...f, price: f.amount / f.qty })).sort((a,b) => a.date - b.date || a.key.localeCompare(b.key));
+      if (!fills.length) throw new Error('No valid executed equity trades found in this file.');
+      const queues = new Map(), output = [], sourceEntryKeys = new Set();
+      const makeTrade = (entryFill, exitFill, qty) => {
+        const dir = entryFill.side === 'BUY' ? 'B' : 'S';
+        const state = exitFill ? 'CLOSED' : 'OPEN';
+        const sourceKey = [broker, entryFill.key, exitFill ? exitFill.key : 'OPEN'].join('::');
+        const id = 'IMP_' + importStableHash(sourceKey);
+        sourceEntryKeys.add(entryFill.key);
+        return {
+          id, symbol: entryFill.symbol, companyName: tickerCompanyName(entryFill.symbol), dir,
+          type: exitFill && importIsoDate(entryFill.date) === importIsoDate(exitFill.date) ? 'Intraday' : 'Swing',
+          qty: +qty.toFixed(6), entry: +entryFill.price.toFixed(6), exit: exitFill ? +exitFill.price.toFixed(6) : null,
+          sl: null, target: null, trailingSL: null, plannedRisk: null, pyramidGroup: '', pyramidLeg: null,
+          partialExits: [], mfe: '', mae: '', edate: importIsoDate(entryFill.date), xdate: exitFill ? importIsoDate(exitFill.date) : '',
+          setup: 'Broker Import', chartLink: '', notes: `${broker} import · Order ${entryFill.orderId}${exitFill ? ' → ' + exitFill.orderId : ' · Open quantity'}`,
+          importBroker: broker, importEntryKey: entryFill.key, importSourceKey: sourceKey, importState: state,
+          importOrderIds: [entryFill.orderId, ...(exitFill ? [exitFill.orderId] : [])]
+        };
+      };
+      fills.forEach(fill => {
+        let remaining = fill.qty;
+        const q = queues.get(fill.symbol) || [];
+        while (remaining > 0.000001 && q.length && q[0].side !== fill.side) {
+          const lot = q[0];
+          const matched = Math.min(remaining, lot.qty);
+          output.push(makeTrade(lot, fill, matched));
+          lot.qty -= matched; remaining -= matched;
+          if (lot.qty <= 0.000001) q.shift();
+        }
+        if (remaining > 0.000001) {
+          q.push({ ...fill, qty: remaining });
+        }
+        queues.set(fill.symbol, q);
+      });
+      for (const q of queues.values()) q.forEach(lot => { if (lot.qty > 0.000001) output.push(makeTrade(lot, null, lot.qty)); });
+      output.sort((a,b) => (a.edate || '').localeCompare(b.edate || '') || a.symbol.localeCompare(b.symbol));
+      return { broker, fills, trades: output, skipped, sourceEntryKeys: [...sourceEntryKeys] };
+    }
+
+    async function previewBrokerImport() {
+      pendingBrokerImport = null;
+      const file = document.getElementById('brokerImportFile').files[0];
+      const status = document.getElementById('brokerImportStatus');
+      const wrap = document.getElementById('brokerImportPreviewWrap');
+      const confirm = document.getElementById('brokerImportConfirmBtn');
+      wrap.classList.add('hidden'); confirm.disabled = true;
+      if (!file) return;
+      try {
+        if (typeof XLSX === 'undefined') throw new Error('Spreadsheet parser did not load. Check your internet connection and retry.');
+        status.textContent = 'Reading report and matching executions…';
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+        const rows = [];
+        workbook.SheetNames.forEach(name => {
+          const sheetRows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, raw: true, defval: '' });
+          if (sheetRows.some(r => r.some(c => ['tradetype','stockname'].includes(importHeaderKey(c))))) rows.push(...sheetRows);
+        });
+        const result = importBrokerRows(rows, document.getElementById('brokerImportSelect').value);
+        await window.journalStoreReady;
+        if (!window.journalUser || !window.journalStore) throw new Error('Please sign in before importing trades.');
+        const existingIds = new Set(trades.map(t => String(t.id)));
+        const duplicates = result.trades.filter(t => existingIds.has(t.id)).length;
+        pendingBrokerImport = { ...result, fileName: file.name, duplicates };
+        document.getElementById('brokerImportSummary').textContent = `${result.broker} · ${result.fills.length} grouped orders · ${result.trades.length} matched/open trade rows · ${duplicates} already imported · ${result.skipped} rows skipped`;
+        const shown = result.trades.slice(0, 60);
+        document.getElementById('brokerImportPreviewBody').innerHTML = shown.map(t => `<tr><td class="p-2 font-bold">${escapeImportHtml(t.symbol)}</td><td class="p-2">${t.dir === 'B' ? 'BUY / Long' : 'SELL / Short'}</td><td class="p-2 text-right font-mono-num">${t.qty}</td><td class="p-2 text-right font-mono-num">₹${t.entry.toFixed(2)}</td><td class="p-2 text-right font-mono-num">${t.exit ? '₹'+t.exit.toFixed(2) : '—'}</td><td class="p-2">${t.edate}</td><td class="p-2">${t.xdate || '—'}</td><td class="p-2 ${t.importState==='OPEN'?'text-amber-500':'text-emerald-500'}">${t.importState}</td></tr>`).join('');
+        const more = document.getElementById('brokerImportPreviewMore');
+        more.classList.toggle('hidden', result.trades.length <= shown.length);
+        more.textContent = `Showing ${shown.length} of ${result.trades.length} trade rows.`;
+        wrap.classList.remove('hidden'); confirm.disabled = false;
+        status.textContent = 'Review the preview, then confirm. Trades will only be written after you click Import.';
+      } catch (err) {
+        console.error('Broker import preview failed:', err);
+        status.textContent = err.message || 'Could not read this report.';
+        showToast(err.message || 'Could not read broker report.', true);
+      }
+    }
+
+    function escapeImportHtml(v) {
+      return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    async function confirmBrokerImport() {
+      if (!pendingBrokerImport) return;
+      const btn = document.getElementById('brokerImportConfirmBtn');
+      btn.disabled = true; btn.textContent = 'Importing…';
+      try {
+        await window.journalStoreReady;
+        const result = pendingBrokerImport;
+        if (!window.journalUser || !window.journalStore) throw new Error('Please sign in before importing trades.');
+        const newIds = new Set(result.trades.map(t => String(t.id)));
+        const entryKeys = new Set(result.sourceEntryKeys);
+        // If an imported open lot from an entry order is now fully closed in the new report,
+        // remove its old OPEN row so it does not remain as a duplicate position.
+        const staleOpen = trades.filter(t => t.importBroker === result.broker && t.importState === 'OPEN' && entryKeys.has(t.importEntryKey) && !newIds.has(String(t.id)));
+        let saved = 0, failed = [];
+        for (const t of result.trades) {
+          try { await window.journalStore.saveTrade({ ...t, ownerUid: window.journalUser.uid, userEmail: window.journalUser.email || '' }); saved++; }
+          catch (err) { failed.push({ symbol: t.symbol, error: err.message || String(err) }); }
+        }
+        if (failed.length) throw new Error(`${saved} rows saved; ${failed.length} failed. Check Firebase rules/network, then retry the same file (stable import IDs avoid duplicates).`);
+        for (const old of staleOpen) await window.journalStore.deleteTrade(old.id);
+        closeImportModal();
+        await loadTrades();
+        showToast(`✓ Imported ${saved} ${result.broker} trade rows. Existing matching imports were updated, not duplicated.`);
+      } catch (err) {
+        console.error('Broker import save failed:', err);
+        document.getElementById('brokerImportStatus').textContent = err.message || 'Import failed.';
+        showToast(err.message || 'Import failed. Please retry.', true);
+      } finally {
+        btn.disabled = !pendingBrokerImport;
+        btn.innerHTML = '<i data-lucide="database" class="w-3.5 h-3.5 inline mr-1"></i> Import to Trade Log';
+        if (window.lucide) lucide.createIcons();
+      }
     }
 
     // -------------------- Performance Metrics --------------------
