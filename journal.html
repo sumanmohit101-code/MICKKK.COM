@@ -61,22 +61,6 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
 
-    /* Trade log: compact, aligned columns; dates stay on one line and notes never stretch the table. */
-    .trade-ledger { min-width: 1900px; table-layout: auto; font-variant-numeric: tabular-nums; }
-    .trade-ledger th { padding-top: .55rem !important; padding-bottom: .55rem !important; white-space: nowrap; }
-    .trade-ledger td { padding-top: .55rem !important; padding-bottom: .55rem !important; vertical-align: middle; }
-    .trade-ledger td.trade-notes { width: 165px; min-width: 165px; max-width: 165px; }
-    .trade-ledger td.trade-qty-amount { min-width: 88px; }
-    /* Trade modal: keep actions inside the card; only the form body scrolls. */
-    #tradeModal { overscroll-behavior: contain; box-sizing: border-box; }
-    #tradeModal > .trade-modal-card { min-height: 0; width: min(100%, 640px); max-height: min(90dvh, 900px); box-sizing: border-box; display: flex; flex-direction: column; }
-    #tradeModal .trade-modal-body { min-height: 0; flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; }
-    #tradeModal .trade-modal-footer { position: relative; z-index: 2; display: flex; flex: 0 0 auto; justify-content: flex-end; align-items: center; gap: .625rem; width: 100%; box-sizing: border-box; padding: .75rem 1.25rem; margin: 0; border-top: 1px solid var(--modal-footer-border, #e2e8f0); background: inherit; }
-    .dark #tradeModal .trade-modal-footer { --modal-footer-border: #1e293b; }
-    #tradeModal .trade-modal-footer button { box-sizing: border-box; min-height: 40px; white-space: nowrap; }
-    @media (max-width: 480px) { #tradeModal { padding: .5rem; } #tradeModal > .trade-modal-card { max-height: 96dvh; } #tradeModal .trade-modal-footer { padding: .65rem .85rem; } }
-    @media (max-height: 650px) { #tradeModal > .trade-modal-card { max-height: 96dvh; } }
-
     /* Mickkk Logo System */
     :root { 
       --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
@@ -365,7 +349,7 @@
           </div>
 
           <div class="overflow-x-auto custom-scroll relative">
-            <table class="trade-ledger w-full text-[11px] text-left border-collapse">
+            <table class="w-full text-xs text-left border-collapse">
               <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] uppercase font-bold tracking-wider">
                 <tr>
                   <th class="py-2.5 px-3">Stock</th><th class="py-2.5 px-2">Opened</th><th class="py-2.5 px-2 text-right">Qty</th><th class="py-2.5 px-2 text-right">Avg Buy</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL / TSL</th><th class="py-2.5 px-2 text-right">Invested</th><th class="py-2.5 px-2 text-right">Open Risk</th><th class="py-2.5 px-2 text-right">R-Multiple</th><th class="py-2.5 px-2 text-right">Unrealised P&amp;L</th><th class="py-2.5 px-2 text-right" title="Enter target profit to estimate sell quantity at latest LTP">Sell Qty ⓘ</th><th class="py-2.5 px-3 text-center">Actions ⓘ</th>
@@ -446,7 +430,7 @@
             <table class="w-full text-xs text-left border-collapse">
               <thead class="text-slate-400 border-b border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 text-[10px] uppercase font-bold tracking-wider">
                 <tr>
-                  <th class="py-2.5 px-3">Symbol</th><th class="py-2.5 px-2">Type</th><th class="py-2.5 px-2">Dir</th><th class="py-2.5 px-2 text-right">Entry ₹</th><th class="py-2.5 px-2 text-right">Exit ₹</th><th class="py-2 px-2 text-right whitespace-nowrap" title="Quantity and invested amount">Qty / Amount ₹</th><th class="py-2 px-2 text-right whitespace-nowrap cursor-pointer" onclick="sortTrades('edate')">Entry Date ⇅</th><th class="py-2 px-2 text-right whitespace-nowrap cursor-pointer" onclick="sortTrades('xdate')">Exit Date ↑</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('pnl')">Net P&amp;L ⇅</th><th class="py-2.5 px-2 text-right">Return % ⇅</th><th class="py-2.5 px-2 text-right">R:R Ratio ⇅</th><th class="py-2.5 px-2 text-right">Port. Risk %</th><th class="py-2.5 px-2 text-center">Outcome</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL ₹</th><th class="py-2.5 px-2 text-right">Target ₹</th><th class="py-2.5 px-2 text-right">MFE %</th><th class="py-2.5 px-2 text-right">MAE %</th><th class="py-2.5 px-2 text-right">MFE+</th><th class="py-2.5 px-2">Notes</th><th class="py-2.5 px-2 text-center">Chart</th><th class="py-2.5 px-3 text-center">Actions</th>
+                  <th class="py-2.5 px-3">Symbol</th><th class="py-2.5 px-2">Type</th><th class="py-2.5 px-2">Dir</th><th class="py-2.5 px-2 text-right">Entry ₹</th><th class="py-2.5 px-2 text-right">Exit ₹</th><th class="py-2.5 px-2 text-right">Qty</th><th class="py-2.5 px-2 text-right" title="Entry price × quantity">Amount ₹</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('edate')">Entry Date ⇅</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('xdate')">Exit Date ↑</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('pnl')">Net P&amp;L ⇅</th><th class="py-2.5 px-2 text-right">Return % ⇅</th><th class="py-2.5 px-2 text-right">R:R Ratio ⇅</th><th class="py-2.5 px-2 text-right">Port. Risk %</th><th class="py-2.5 px-2 text-center">Outcome</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL ₹</th><th class="py-2.5 px-2 text-right">Target ₹</th><th class="py-2.5 px-2 text-right">MFE %</th><th class="py-2.5 px-2 text-right">MAE %</th><th class="py-2.5 px-2 text-right">MFE+</th><th class="py-2.5 px-2">Notes</th><th class="py-2.5 px-2 text-center">Chart</th><th class="py-2.5 px-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody id="tradesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
@@ -660,13 +644,13 @@
 
   <!-- ================= LOG TRADE MODAL ================= -->
   <div id="tradeModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="trade-modal-card bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl max-h-[90dvh] shadow-2xl overflow-hidden">
+    <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-200 dark:border-borderDark flex items-center justify-between">
         <h3 id="tradeModalTitle" class="font-extrabold text-sm">Add New Trade Log</h3>
         <button onclick="closeTradeModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div class="trade-modal-body p-5 sm:p-6 custom-scroll space-y-4 text-xs">
+      <div class="p-6 overflow-y-auto custom-scroll space-y-4 text-xs">
         <input type="hidden" id="fTradeId">
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
@@ -708,15 +692,42 @@
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Target (₹)</label>
             <input type="number" step="0.05" id="fTarget" placeholder="0.00" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
           </div>
-          <input type="hidden" id="fTrailingSL" value="">
-          <input type="hidden" id="fPlannedRisk" value="">
-          <input type="hidden" id="fPyramidGroup" value="">
-          <input type="hidden" id="fPyramidLeg" value="">
-          <input type="hidden" id="fMfe" value="">
-          <input type="hidden" id="fMae" value="">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Trailing SL (₹)</label>
+            <input type="number" step="0.05" id="fTrailingSL" placeholder="Dynamic / current SL" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Planned Risk (₹)</label>
+            <input type="number" step="0.01" id="fPlannedRisk" placeholder="Auto from Entry &amp; SL" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pyramid Group</label>
+            <input type="text" id="fPyramidGroup" placeholder="e.g. RELIANCE-01" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-bold">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pyramid Leg</label>
+            <input type="number" min="1" id="fPyramidLeg" placeholder="1" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">MFE %</label>
+            <input type="number" step="0.01" id="fMfe" placeholder="Max favorable excursion" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">MAE %</label>
+            <input type="number" step="0.01" id="fMae" placeholder="Max adverse excursion" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark font-mono-num">
+          </div>
         </div>
 
-        <div id="partialExitRows" class="hidden" aria-hidden="true"></div>
+        <div class="rounded-xl border border-slate-200 dark:border-borderDark p-3 bg-slate-50/60 dark:bg-slate-900/40">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h4 class="font-extrabold text-[10px] uppercase tracking-wider text-slate-700 dark:text-slate-200">Partial Exits / Scale-Outs</h4>
+              <p class="text-[9px] text-slate-400">Record one or multiple partial exits. Remaining quantity stays live.</p>
+            </div>
+            <button type="button" onclick="addPartialExitRow()" class="px-2.5 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold text-[10px]">+ Add Partial Exit</button>
+          </div>
+          <div id="partialExitRows" class="space-y-2"></div>
+        </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Entry Date</label>
             <input type="date" id="fEdate" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
@@ -749,7 +760,7 @@
         </div>
       </div>
 
-      <div class="trade-modal-footer bg-white dark:bg-cardDark">
+      <div class="px-6 py-3 border-t border-slate-200 dark:border-borderDark flex justify-end gap-2">
         <button onclick="closeTradeModal()" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-borderDark text-xs font-bold">Cancel</button>
         <button onclick="saveTradeLog()" id="btnSaveTrade" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20">Save Trade</button>
       </div>
@@ -1227,7 +1238,7 @@
       let list=trades.filter(t=>{const stat=outcome(t);return tradeMatchesSearch(t,search)&&!(activeFilter==='open'&&stat!=='OPEN')&&!(activeFilter==='win'&&stat!=='WIN')&&!(activeFilter==='loss'&&stat!=='LOSS');});
       list.sort((a,b)=>{const val=t=>sortField==='pnl'?(calcPnL(t)||0):isoDate(sortField==='xdate'?(t.xdate||''):(t.edate||''));const av=val(a),bv=val(b);return sortAsc?String(av).localeCompare(String(bv),undefined,{numeric:true}):String(bv).localeCompare(String(av),undefined,{numeric:true});});
       const tbody=document.getElementById("tradesTbody");
-      if(!list.length){tbody.innerHTML=`<tr><td colspan="22" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
+      if(!list.length){tbody.innerHTML=`<tr><td colspan="23" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
       const total=list.length, totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE)); currentPage=Math.min(Math.max(1,currentPage),totalPages); const startIndex=(currentPage-1)*PAGE_SIZE; const pageList=list.slice(startIndex,startIndex+PAGE_SIZE);
       tbody.innerHTML=pageList.map(t=>{
         const pnl=calcPnL(t),stat=outcome(t),ret=(safeNum(t.entry)&&pnl!==null)?pnl/(safeNum(t.entry)*safeNum(t.qty))*100:null;
@@ -1236,14 +1247,14 @@
         const mfePlus=safeNum(t.mfe)>0&&pnl!==null&&safeNum(t.entry)*safeNum(t.qty)>0?((pnl/(safeNum(t.entry)*safeNum(t.qty)))/safeNum(t.mfe))*100:null;
         return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
           <td class="py-2.5 px-3 font-bold text-blue-600 dark:text-blue-400">${t.symbol||'-'}</td><td class="py-2.5 px-2 text-slate-400">${t.type||'Swing'}</td><td class="py-2.5 px-2 font-bold ${t.dir==='B'?'text-emerald-500':'text-rose-500'}">${t.dir==='B'?'BUY':'SELL'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.exit?'₹'+safeNum(t.exit).toFixed(2):'—'}</td><td class="trade-qty-amount py-2 px-2 text-right font-mono-num whitespace-nowrap"><span class="block font-bold text-slate-700 dark:text-slate-200">${safeNum(t.qty).toLocaleString('en-IN')}</span><span class="block text-[10px] font-medium text-slate-400" title="Entry price × quantity">₹${(safeNum(t.entry)*safeNum(t.qty)).toLocaleString('en-IN',{maximumFractionDigits:0})}</span></td>
-          <td class="py-2 px-2 text-right text-slate-400 whitespace-nowrap">${formatDate(t.edate)}</td><td class="py-2 px-2 text-right text-slate-400 whitespace-nowrap">${formatDate(t.xdate)}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.exit?'₹'+safeNum(t.exit).toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td><td class="py-2.5 px-2 text-right font-mono-num text-slate-400">₹${(safeNum(t.entry)*safeNum(t.qty)).toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
+          <td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.edate)}</td><td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.xdate)}</td>
           <td class="py-2.5 px-2 text-right font-mono-num font-bold ${pnl!==null?(pnl>=0?'text-emerald-500':'text-rose-500'):'text-slate-400'}">${pnl!==null?(pnl>=0?'+₹':'-₹')+Math.abs(pnl).toFixed(0):'Open'}</td><td class="py-2.5 px-2 text-right font-mono-num">${ret!==null?(ret>=0?'+':'')+ret.toFixed(2)+'%':'—'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${PORTFOLIO_CAPITAL?((risk/PORTFOLIO_CAPITAL)*100).toFixed(2)+'%':'—'}</td>
           <td class="py-2.5 px-2 text-center"><span class="text-[9px] font-black px-1.5 py-0.5 rounded ${stat==='WIN'?'bg-emerald-50 text-emerald-600':stat==='LOSS'?'bg-rose-50 text-rose-600':'bg-slate-100 text-slate-500'}">${stat}</span></td><td class="py-2.5 px-2 text-right font-mono-num">${hasLtp?'₹'+ltp.toFixed(2):'—'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${activeSL?'₹'+activeSL.toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.target)?'₹'+safeNum(t.target).toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.mfe!==''&&t.mfe!==undefined?safeNum(t.mfe).toFixed(2)+'%':'—'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${t.mae!==''&&t.mae!==undefined?safeNum(t.mae).toFixed(2)+'%':'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${mfePlus!==null?mfePlus.toFixed(1)+'%':'—'}</td>
-          <td class="trade-notes py-2 px-2" title="${String(t.notes||'').replace(/"/g,'&quot;')}"><span class="block max-w-[150px] truncate">${t.notes||'—'}</span></td><td class="py-2.5 px-2 text-center">${t.chartLink?`<a href="${t.chartLink}" target="_blank" rel="noopener" title="Open chart" class="text-blue-500 hover:underline">📈</a>`:'—'}</td>
+          <td class="py-2.5 px-2 max-w-xs truncate" title="${String(t.notes||'').replace(/"/g,'&quot;')}">${t.notes||'—'}</td><td class="py-2.5 px-2 text-center">${t.chartLink?`<a href="${t.chartLink}" target="_blank" rel="noopener" title="Open chart" class="text-blue-500 hover:underline">📈</a>`:'—'}</td>
           <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td></tr>`;
       }).join('');
       const pager=document.getElementById('tradesPagination'); if(pager){const from=total?startIndex+1:0,to=Math.min(startIndex+PAGE_SIZE,total);pager.innerHTML=`<span>Showing ${from}–${to} of ${total} trades</span><div class="flex items-center gap-3"><button onclick="changeTradePage(-1)" ${currentPage<=1?'disabled':''} class="px-3 py-1.5 rounded border border-slate-200 dark:border-borderDark disabled:opacity-30">‹ Prev</button><span>Page ${currentPage} / ${totalPages}</span><button onclick="changeTradePage(1)" ${currentPage>=totalPages?'disabled':''} class="px-3 py-1.5 rounded border border-slate-200 dark:border-borderDark disabled:opacity-30">Next ›</button></div>`;}
