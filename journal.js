@@ -1,5 +1,8 @@
 const BROKERAGE = 40;
 let PORTFOLIO_CAPITAL = 300000;
+
+// Separate and independent timeframe states
+let performanceTimeframe = "1M";
 let analyticsTimeframe = "1M";
 let perfCustomDates = null;
 let analyticsCustomDates = null;
@@ -7,8 +10,8 @@ let analyticsCustomDates = null;
 window.journalUserRole = window.journalUserRole || 'free';
 window.sellProfitTargets = window.sellProfitTargets || {};
 
-// -------------------- Capital Management --------------------
-function editPortfolioCapital(){ 
+// -------------------- Portfolio Capital Management --------------------
+function editPortfolioCapital() { 
   const current = PORTFOLIO_CAPITAL; 
   const raw = prompt("Enter total portfolio capital (₹):", String(current)); 
   if(raw === null) return; 
@@ -24,23 +27,46 @@ function editPortfolioCapital(){
   showToast("Portfolio capital updated.");
 }
 
-function updateCapitalDisplay(){
-  const e = document.getElementById("portfolioCapitalDisplay");
-  if(e) e.textContent = "₹" + PORTFOLIO_CAPITAL.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+function updateCapitalDisplay() {
+  const el = document.getElementById("portfolioCapitalDisplay");
+  if(el) el.textContent = "₹" + PORTFOLIO_CAPITAL.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-// -------------------- Performance Timeframe & Filters --------------------
+// -------------------- Universal Timeframe Filter Function --------------------
+function filterTradesByTimeframe(list, tf, customRange = null) {
+  if (customRange && customRange.from && customRange.to) {
+    const start = new Date(customRange.from + "T00:00:00");
+    const end = new Date(customRange.to + "T23:59:59");
+    return list.filter(t => {
+      const d = new Date(isoDate(t.xdate || t.edate) + "T12:00:00");
+      return !isNaN(d) && d >= start && d <= end;
+    });
+  }
+
+  const now = new Date();
+  let start = null;
+  if(tf === "1M") start = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+  else if(tf === "3M") start = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+  else if(tf === "1Y") start = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+  else if(tf === "YTD") start = new Date(now.getFullYear(), 0, 1);
+  else if(tf === "All") start = null;
+  if(!start) return list;
+
+  return list.filter(t => {
+    const d = new Date(isoDate(t.xdate || t.edate) + "T12:00:00");
+    return !isNaN(d) && d >= start;
+  });
+}
+
+// -------------------- Performance Timeframe Handlers --------------------
 function handlePerformanceTimeframe(tf) {
   if (window.journalUserRole !== 'pro' && tf !== '1M') {
     openProModal();
     return;
   }
   perfCustomDates = null;
-  setAnalyticsTimeframe(tf);
-}
+  performanceTimeframe = tf;
 
-function setAnalyticsTimeframe(tf){
-  analyticsTimeframe = tf;
   document.querySelectorAll(".timeframe-btn").forEach(b => {
     const on = b.dataset.timeframe === tf;
     b.classList.toggle("bg-emerald-500", on);
@@ -48,7 +74,7 @@ function setAnalyticsTimeframe(tf){
     b.classList.toggle("border-emerald-500", on);
   });
   const badge = document.getElementById("perfTimeframeBadge");
-  if(badge) badge.innerText = `${tf} (${window.journalUserRole === 'pro' ? 'Pro' : 'Free'})`;
+  if(badge) badge.innerText = `${tf} (${window.journalUserRole === 'pro' ? 'Pro' : 'Free Default'})`;
   renderPerformanceMetrics();
 }
 
@@ -67,15 +93,18 @@ function applyPerformanceDateFilter() {
   const badge = document.getElementById("perfTimeframeBadge");
   if(badge) badge.innerText = `Custom (${from} to ${to})`;
   renderPerformanceMetrics();
-  showToast("Custom performance date filter applied!");
+  showToast("Performance date filter applied!");
 }
 
+// -------------------- Analytics Timeframe Handlers (Independent) --------------------
 function handleAnalyticsTimeframe(tf) {
   if (window.journalUserRole !== 'pro') {
     openProModal();
     return;
   }
   analyticsCustomDates = null;
+  analyticsTimeframe = tf;
+
   document.querySelectorAll(".atimeframe-btn").forEach(b => {
     const on = b.dataset.atimeframe === tf;
     b.classList.toggle("bg-purple-600", on);
@@ -102,33 +131,10 @@ function applyAnalyticsDateFilter() {
   const badge = document.getElementById("analyticsTimeframeBadge");
   if(badge) badge.innerText = `Custom (${from} to ${to})`;
   renderAnalyticsView();
-  showToast("Custom analytics date filter applied!");
+  showToast("Analytics date filter applied!");
 }
 
-function timeframeTrades(list, customRange = null){
-  if (customRange && customRange.from && customRange.to) {
-    const start = new Date(customRange.from + "T00:00:00");
-    const end = new Date(customRange.to + "T23:59:59");
-    return list.filter(t => {
-      const d = new Date(isoDate(t.xdate || t.edate) + "T12:00:00");
-      return !isNaN(d) && d >= start && d <= end;
-    });
-  }
-
-  const now = new Date();
-  let start = null;
-  if(analyticsTimeframe === "1M") start = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-  else if(analyticsTimeframe === "3M") start = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-  else if(analyticsTimeframe === "1Y") start = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-  else if(analyticsTimeframe === "YTD") start = new Date(now.getFullYear(), 0, 1);
-  if(!start) return list;
-
-  return list.filter(t => {
-    const d = new Date(isoDate(t.xdate || t.edate) + "T12:00:00");
-    return !isNaN(d) && d >= start;
-  });
-}
-
+// -------------------- MFE/MAE Excursion API Calculation --------------------
 function handleComputeMFEMAE() {
   if (window.journalUserRole !== 'pro') {
     openProModal();
@@ -179,7 +185,7 @@ function requestHistoricalExcursion(t){
   });
 }
 
-// -------------------- Stores & Data Caches --------------------
+// -------------------- Local Cache & Data State --------------------
 let trades = [];
 let watchlist = [];
 let ltpCache = {};
@@ -307,7 +313,7 @@ function updateUserHeaderBadge() {
   }
 }
 
-// -------------------- Pro vs Free Visual Rules --------------------
+// -------------------- Pro / Free Lock Visibility Rules --------------------
 function applyJournalRoleRules(role) {
   window.journalUserRole = role || 'free';
   const isPro = (window.journalUserRole === 'pro');
@@ -577,7 +583,7 @@ async function loadWatchlist() {
   renderWatchlist();
 }
 
-// -------------------- Positions Dashboard (With Auto Sell Qty) --------------------
+// -------------------- Positions Dashboard --------------------
 function renderPositionsTable() {
   try { 
     const uid = window.journalUser?.uid; 
@@ -625,7 +631,6 @@ function renderPositionsTable() {
     realEl.className = `text-xl font-black font-mono-num mt-1 ${realGain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
   }
 
-  // Calculate Average Winning Trade P&L as auto target benchmark
   const wins = closed.filter(t => outcome(t) === 'WIN');
   const grossWin = wins.reduce((s,t) => s + (calcPnL(t) || 0), 0);
   const avgWinPnl = wins.length ? Math.round(grossWin / wins.length) : 2000;
@@ -643,7 +648,6 @@ function renderPositionsTable() {
     const activeSL = safeNum(t.trailingSL || t.sl), riskVal = activeSL ? Math.abs(safeNum(t.entry) - activeSL) * rem : null, riskPct = riskVal !== null ? (riskVal / PORTFOLIO_CAPITAL) * 100 : null;
     const rr = (activeSL && t.target && safeNum(t.entry) !== activeSL) ? Math.abs(safeNum(t.target) - safeNum(t.entry)) / Math.abs(safeNum(t.entry) - activeSL) : null;
     
-    // Auto calculate Sell Qty based on Avg P&L/Trade or User target
     const targetProfit = Number(window.sellProfitTargets?.[t.id] || avgWinPnl);
     const perShare = hasLtp ? (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) : 0;
     const sellQty = targetProfit > 0 && perShare > 0 ? Math.min(rem, Math.ceil(targetProfit / perShare)) : 0;
@@ -752,7 +756,7 @@ async function partialExitPosition(id){
   }
 }
 
-// -------------------- Trades Log --------------------
+// -------------------- Trades Log & Compact Fit Ledger --------------------
 function tradeMatchesSearch(t, search) {
   const hay = [t.symbol, t.notes, t.setup, t.pattern, t.pyramidGroup, t.type, t.dir].join(' ').toLowerCase();
   return hay.includes(search);
@@ -815,41 +819,41 @@ function renderTradesTable() {
     const mfePlus = safeNum(t.mfe) > 0 && pnl !== null && safeNum(t.entry) * safeNum(t.qty) > 0 ? ((pnl / (safeNum(t.entry) * safeNum(t.qty))) / safeNum(t.mfe)) * 100 : null;
 
     const mfeCell = isPro 
-      ? `<td class="py-2.5 px-2 text-right font-mono-num text-emerald-500">${t.mfe !== '' && t.mfe !== undefined ? safeNum(t.mfe).toFixed(2) + '%' : '—'}</td>`
-      : `<td class="py-2.5 px-2 text-right font-mono-num text-slate-400 row-locked-blur">🔒 0.0%</td>`;
+      ? `<td class="py-2 px-1.5 text-right font-mono-num text-emerald-500">${t.mfe !== '' && t.mfe !== undefined ? safeNum(t.mfe).toFixed(2) + '%' : '—'}</td>`
+      : `<td class="py-2 px-1.5 text-right font-mono-num text-slate-400 row-locked-blur">🔒 0.0%</td>`;
 
     const maeCell = isPro 
-      ? `<td class="py-2.5 px-2 text-right font-mono-num text-rose-500">${t.mae !== '' && t.mae !== undefined ? safeNum(t.mae).toFixed(2) + '%' : '—'}</td>`
-      : `<td class="py-2.5 px-2 text-right font-mono-num text-slate-400 row-locked-blur">🔒 0.0%</td>`;
+      ? `<td class="py-2 px-1.5 text-right font-mono-num text-rose-500">${t.mae !== '' && t.mae !== undefined ? safeNum(t.mae).toFixed(2) + '%' : '—'}</td>`
+      : `<td class="py-2 px-1.5 text-right font-mono-num text-slate-400 row-locked-blur">🔒 0.0%</td>`;
 
     const mfePlusCell = isPro 
-      ? `<td class="py-2.5 px-2 text-right font-mono-num">${mfePlus !== null ? mfePlus.toFixed(1) + '%' : '—'}</td>`
-      : `<td class="py-2.5 px-2 text-right font-mono-num text-slate-400 row-locked-blur">🔒 —</td>`;
+      ? `<td class="py-2 px-1.5 text-right font-mono-num">${mfePlus !== null ? mfePlus.toFixed(1) + '%' : '—'}</td>`
+      : `<td class="py-2 px-1.5 text-right font-mono-num text-slate-400 row-locked-blur">🔒 —</td>`;
 
     return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-      <td class="py-2.5 px-3 font-bold text-blue-600 dark:text-blue-400 font-mono-num">${t.symbol || '-'}</td>
-      <td class="py-2.5 px-2 text-center text-slate-400">${t.type || 'Swing'}</td>
-      <td class="py-2.5 px-2 text-center font-bold ${t.dir === 'B' ? 'text-emerald-500' : 'text-rose-500'}">${t.dir === 'B' ? 'BUY' : 'SELL'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${t.exit ? '₹' + safeNum(t.exit).toFixed(2) : '—'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num font-bold">${safeNum(t.qty).toLocaleString()}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num text-slate-500">₹${(safeNum(t.entry) * safeNum(t.qty)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
-      <td class="py-2.5 px-2 text-center text-slate-400 whitespace-nowrap">${formatDate(t.edate)}</td>
-      <td class="py-2.5 px-2 text-center text-slate-400 whitespace-nowrap">${formatDate(t.xdate)}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num font-bold ${pnl !== null ? (pnl >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-400'}">${pnl !== null ? (pnl >= 0 ? '+₹' : '-₹') + Math.abs(pnl).toFixed(0) : 'Open'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${ret !== null ? (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%' : '—'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${rr ? rr.toFixed(2) + 'R' : '—'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${PORTFOLIO_CAPITAL ? ((risk / PORTFOLIO_CAPITAL) * 100).toFixed(2) + '%' : '—'}</td>
-      <td class="py-2.5 px-2 text-center"><span class="text-[9px] font-black px-1.5 py-0.5 rounded ${stat === 'WIN' ? 'bg-emerald-50 text-emerald-600' : stat === 'LOSS' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-500'}">${stat}</span></td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${hasLtp ? '₹' + ltp.toFixed(2) : '—'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${activeSL ? '₹' + activeSL.toFixed(2) : '—'}</td>
-      <td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.target) ? '₹' + safeNum(t.target).toFixed(2) : '—'}</td>
+      <td class="py-2 px-2 font-bold text-blue-600 dark:text-blue-400 font-mono-num">${t.symbol || '-'}</td>
+      <td class="py-2 px-1.5 text-center text-slate-400">${t.type || 'Swing'}</td>
+      <td class="py-2 px-1.5 text-center font-bold ${t.dir === 'B' ? 'text-emerald-500' : 'text-rose-500'}">${t.dir === 'B' ? 'BUY' : 'SELL'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${t.exit ? '₹' + safeNum(t.exit).toFixed(2) : '—'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num font-bold">${safeNum(t.qty).toLocaleString()}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num text-slate-500">₹${(safeNum(t.entry) * safeNum(t.qty)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
+      <td class="py-2 px-1.5 text-center text-slate-400 whitespace-nowrap">${formatDate(t.edate)}</td>
+      <td class="py-2 px-1.5 text-center text-slate-400 whitespace-nowrap">${formatDate(t.xdate)}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num font-bold ${pnl !== null ? (pnl >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-400'}">${pnl !== null ? (pnl >= 0 ? '+₹' : '-₹') + Math.abs(pnl).toFixed(0) : 'Open'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${ret !== null ? (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%' : '—'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${rr ? rr.toFixed(2) + 'R' : '—'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${PORTFOLIO_CAPITAL ? ((risk / PORTFOLIO_CAPITAL) * 100).toFixed(2) + '%' : '—'}</td>
+      <td class="py-2 px-1.5 text-center"><span class="text-[9px] font-black px-1.5 py-0.5 rounded ${stat === 'WIN' ? 'bg-emerald-50 text-emerald-600' : stat === 'LOSS' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-500'}">${stat}</span></td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${hasLtp ? '₹' + ltp.toFixed(2) : '—'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${activeSL ? '₹' + activeSL.toFixed(2) : '—'}</td>
+      <td class="py-2 px-1.5 text-right font-mono-num">${safeNum(t.target) ? '₹' + safeNum(t.target).toFixed(2) : '—'}</td>
       ${mfeCell}
       ${maeCell}
       ${mfePlusCell}
-      <td class="py-2.5 px-3 max-w-xs truncate text-slate-500" title="${String(t.notes || '').replace(/"/g, '&quot;')}">${t.notes || '—'}</td>
-      <td class="py-2.5 px-2 text-center">${t.chartLink ? `<a href="${t.chartLink}" target="_blank" rel="noopener" class="text-blue-500 hover:underline">📈</a>` : '—'}</td>
-      <td class="py-2.5 px-3 text-center">
+      <td class="py-2 px-2 max-w-[130px] truncate text-slate-500 text-[10px]" title="${String(t.notes || '').replace(/"/g, '&quot;')}">${t.notes || '—'}</td>
+      <td class="py-2 px-1 text-center">${t.chartLink ? `<a href="${t.chartLink}" target="_blank" rel="noopener" class="text-blue-500 hover:underline">📈</a>` : '—'}</td>
+      <td class="py-2 px-2 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500 cursor-pointer" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
           <button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500 cursor-pointer" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
@@ -893,7 +897,7 @@ function sortTrades(field){
   renderTradesTable();
 }
 
-// -------------------- Partial Exits --------------------
+// -------------------- Partial Exits Scale-Out Logic --------------------
 let partialExitDraft = [];
 function renderPartialExitRows(){
   const box = document.getElementById('partialExitRows');
@@ -1139,9 +1143,9 @@ function requestLTPBatch_(symbols) {
   });
 }
 
-// -------------------- Performance 13 Metrics (Centered Math) --------------------
+// -------------------- Performance Metrics & Monthly Breakdown --------------------
 function renderPerformanceMetrics(){
-  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'), perfCustomDates);
+  const closed = filterTradesByTimeframe(trades.filter(t => outcome(t) !== 'OPEN'), performanceTimeframe, perfCustomDates);
   const wins = closed.filter(t => outcome(t) === 'WIN');
   const losses = closed.filter(t => outcome(t) === 'LOSS');
   const be = closed.filter(t => outcome(t) === 'BE');
@@ -1160,11 +1164,14 @@ function renderPerformanceMetrics(){
   const avgR = rs.length ? rs.reduce((a,b) => a + b, 0) / rs.length : 0;
   const avgRisk = closed.length ? closed.reduce((s,t) => s + plannedRiskAmount(t), 0) / closed.length : 0;
 
+  // Execution Counts (Row 2 in HTML)
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
   setEl("perf-total-count", closed.length);
   setEl("perf-win-count", wins.length);
   setEl("perf-loss-count", losses.length);
   setEl("perf-be-count", be.length);
+
+  // Financial & Risk Metrics (Row 1 in HTML)
   setEl("perf-wr", wr.toFixed(1) + "%");
   setEl("perf-wr-sub", `${wins.length} W / ${losses.length} L`);
   setEl("perf-pf", Number.isFinite(pf) ? pf.toFixed(2) : "∞");
@@ -1172,13 +1179,13 @@ function renderPerformanceMetrics(){
   const netEl = document.getElementById("perf-net-pnl");
   if(netEl) {
     netEl.innerText = `${net >= 0 ? '+₹' : '-₹'}${Math.abs(net).toFixed(0)}`;
-    netEl.className = `text-lg font-black font-mono-num mt-0.5 ${net >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+    netEl.className = `text-base font-black font-mono-num mt-0.5 ${net >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
   }
   
   const avgPnlEl = document.getElementById("perf-avg-pnl");
   if(avgPnlEl) {
     avgPnlEl.innerText = `${avgPnl >= 0 ? '+₹' : '-₹'}${Math.abs(avgPnl).toFixed(0)}`;
-    avgPnlEl.className = `text-lg font-black font-mono-num mt-0.5 ${avgPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+    avgPnlEl.className = `text-base font-black font-mono-num mt-0.5 ${avgPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
   }
 
   setEl("perf-avg-win", `₹${avgWin.toFixed(0)}`);
@@ -1188,7 +1195,7 @@ function renderPerformanceMetrics(){
   const retEl = document.getElementById("perf-total-return");
   if (retEl) {
     retEl.innerText = `${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%`;
-    retEl.className = `text-lg font-black font-mono-num mt-0.5 ${ret >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+    retEl.className = `text-base font-black font-mono-num mt-0.5 ${ret >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
   }
   setEl("perf-capital-label", `Base: ₹${(PORTFOLIO_CAPITAL / 100000).toFixed(1)}L`);
   setEl("perf-avg-risk", `₹${avgRisk.toFixed(0)}`);
@@ -1230,14 +1237,34 @@ function renderPerformanceMetrics(){
   const riskTable = document.getElementById('riskAnalysisTable');
   if (riskTable) riskTable.innerHTML = riskRows.map(r => `<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
 
+  // Monthly Breakdown Table Renderer
   const mm = {};
-  closed.forEach(t => { const k = monthKey(t); if(!mm[k]) mm[k] = {n:0, w:0, l:0, p:0}; mm[k].n++; if(outcome(t) === 'WIN') mm[k].w++; if(outcome(t) === 'LOSS') mm[k].l++; mm[k].p += calcPnL(t) || 0; });
+  closed.forEach(t => { 
+    const k = monthKey(t); 
+    if(!mm[k]) mm[k] = { n: 0, w: 0, l: 0, p: 0 }; 
+    mm[k].n++; 
+    if(outcome(t) === 'WIN') mm[k].w++; 
+    if(outcome(t) === 'LOSS') mm[k].l++; 
+    mm[k].p += calcPnL(t) || 0; 
+  });
+  
   const monthlyTable = document.getElementById('monthlyBreakdownTable');
   if (monthlyTable) {
-    monthlyTable.innerHTML = Object.keys(mm).sort().map(k => {
+    const keys = Object.keys(mm).sort().reverse();
+    monthlyTable.innerHTML = keys.map(k => {
       const m = mm[k];
-      return `<tr><td class="py-2 font-bold">${monthLabel(k)}</td><td class="py-2 text-right">${m.n}</td><td class="py-2 text-right text-emerald-500">${m.w}</td><td class="py-2 text-right text-rose-500">${m.l}</td><td class="py-2 text-right">${m.n ? (m.w / m.n * 100).toFixed(1) : '0.0'}%</td><td class="py-2 text-right font-mono-num font-bold ${m.p >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${m.p >= 0 ? '+' : '-'}₹${Math.abs(m.p).toFixed(0)}</td><td class="py-2 text-right font-mono-num">${m.n ? '₹' + (m.p / m.n).toFixed(0) : '₹0'}</td></tr>`;
-    }).join('') || '<tr><td colspan="7" class="py-4 text-center text-slate-400">No closed trades.</td></tr>';
+      const wrMonth = m.n ? (m.w / m.n * 100).toFixed(1) : '0.0';
+      const avgTradeMonth = m.n ? Math.round(m.p / m.n) : 0;
+      return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+        <td class="py-2.5 px-3 font-bold font-mono-num text-slate-800 dark:text-slate-200">${monthLabel(k)}</td>
+        <td class="py-2.5 px-3 text-right font-mono-num font-bold">${m.n}</td>
+        <td class="py-2.5 px-3 text-right font-mono-num font-bold text-emerald-500">${m.w}</td>
+        <td class="py-2.5 px-3 text-right font-mono-num font-bold text-rose-500">${m.l}</td>
+        <td class="py-2.5 px-3 text-right font-mono-num">${wrMonth}%</td>
+        <td class="py-2.5 px-3 text-right font-mono-num font-bold ${m.p >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${m.p >= 0 ? '+' : '-'}₹${Math.abs(m.p).toFixed(0)}</td>
+        <td class="py-2.5 px-3 text-right font-mono-num ${avgTradeMonth >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${avgTradeMonth >= 0 ? '+' : '-'}₹${Math.abs(avgTradeMonth)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" class="py-4 text-center text-slate-400">No closed trades in selected timeframe.</td></tr>';
   }
 
   renderPerformanceCharts();
@@ -1245,7 +1272,7 @@ function renderPerformanceMetrics(){
 
 function renderPerformanceCharts(){
   if(typeof Chart === 'undefined') return;
-  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'), perfCustomDates).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
+  const closed = filterTradesByTimeframe(trades.filter(t => outcome(t) !== 'OPEN'), performanceTimeframe, perfCustomDates).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
   let cum = 0;
   const labels = closed.map(t => formatDate(t.xdate || t.edate)), cumData = closed.map(t => cum += calcPnL(t) || 0);
   makeChart('chartEquity', 'equity', 'line', labels, [lineDataset('Cumulative Net P&L', cumData, '#10b981', 'rgba(16,185,129,.08)')]);
@@ -1278,15 +1305,14 @@ function renderPerformanceCharts(){
   makeChart('chartAvgRiskRunning', 'avgRiskRunning', 'line', labels, [lineDataset('Avg Planned Risk', riskAvg, '#f59e0b', 'rgba(245,158,11,.07)')]);
 }
 
-// -------------------- Analytics Diagnostics (With Avg Heat %) --------------------
+// -------------------- Analytics Diagnostics View --------------------
 function computeMFEMAE(){
-  const closed = trades.filter(t => outcome(t) !== 'OPEN');
+  const closed = filterTradesByTimeframe(trades.filter(t => outcome(t) !== 'OPEN'), analyticsTimeframe, analyticsCustomDates);
   const mfes = closed.map(t => safeNum(t.mfe)).filter(v => v !== 0);
   const maes = closed.map(t => safeNum(t.mae)).filter(v => v !== 0);
   const avgMFE = mfes.length ? mfes.reduce((a,b) => a + b, 0) / mfes.length : 0;
   const avgMAE = maes.length ? maes.reduce((a,b) => a + b, 0) / maes.length : 0;
   
-  // Calculate Avg Heat % (MAE / Planned Risk %)
   const heats = closed.map(t => {
     const risk = plannedRiskAmount(t);
     const maePct = safeNum(t.mae);
@@ -1316,7 +1342,7 @@ function renderAnalyticsView(){
 
 function renderAnalyticsCharts(){
   if(typeof Chart === 'undefined') return;
-  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'), analyticsCustomDates).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
+  const closed = filterTradesByTimeframe(trades.filter(t => outcome(t) !== 'OPEN'), analyticsTimeframe, analyticsCustomDates).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
   const labels = closed.map(t => formatDate(t.xdate || t.edate));
   let cum = 0, peak = PORTFOLIO_CAPITAL;
   const capital = closed.map(t => { cum += calcPnL(t) || 0; return PORTFOLIO_CAPITAL + cum; });
@@ -1426,7 +1452,7 @@ function runRLadder() {
   }).join('');
 }
 
-// -------------------- Watchlist (With Paper Test Exit & Return) --------------------
+// -------------------- Watchlist Functionality --------------------
 function renderWatchlist() {
   const container = document.getElementById("watchListContainer");
   if (!container) return;
@@ -1735,7 +1761,7 @@ async function confirmBrokerImport() {
   }
 }
 
-// -------------------- Window Exports --------------------
+// -------------------- Window Function Exports --------------------
 window.openProModal = openProModal;
 window.closeProModal = closeProModal;
 window.openWhatsAppTrialModal = openWhatsAppTrialModal;
@@ -1746,6 +1772,7 @@ window.handleAnalyticsTimeframe = handleAnalyticsTimeframe;
 window.applyAnalyticsDateFilter = applyAnalyticsDateFilter;
 window.handleComputeMFEMAE = handleComputeMFEMAE;
 window.computeMFEMAEForTrades = computeMFEMAEForTrades;
+window.computeMFEMAE = computeMFEMAE;
 window.editPortfolioCapital = editPortfolioCapital;
 window.refreshLTP = refreshLTP;
 window.openTradeModal = openTradeModal;
@@ -1776,6 +1803,7 @@ window.addPartialExitRow = addPartialExitRow;
 window.removePartialExitRow = removePartialExitRow;
 window.signOutJournal = signOutJournal;
 
+// -------------------- Initialization --------------------
 document.addEventListener("DOMContentLoaded", () => {
   syncThemeIcons(document.documentElement.classList.contains("dark"));
   populateNSETickerList();
