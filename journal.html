@@ -302,6 +302,7 @@
       <!-- ================= 1. TAB: POSITIONS (LIVE TRADING DESK) ================= -->
       <section id="pane-positions" class="tab-pane space-y-6">
         <!-- 6 KPI Metric Cards -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><div class="text-xs text-slate-400">Portfolio capital drives portfolio-risk calculations.</div><button onclick="editPortfolioCapital()" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-borderDark text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800" title="Change portfolio capital"><i data-lucide="wallet" class="w-3.5 h-3.5 inline mr-1"></i>💼 Portfolio Capital <span id="portfolioCapitalDisplay">₹3,00,000</span> ✏️</button></div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm">
             <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">OPEN POSITIONS</span>
@@ -351,20 +352,7 @@
             <table class="w-full text-xs text-left border-collapse">
               <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] uppercase font-bold tracking-wider">
                 <tr>
-                  <th class="py-2.5 px-3">Symbol</th>
-                  <th class="py-2.5 px-2">First Entry</th>
-                  <th class="py-2.5 px-2 text-right">Initial Qty</th>
-                  <th class="py-2.5 px-2 text-right">Remaining Qty</th>
-                  <th class="py-2.5 px-2 text-right">Avg Entry</th>
-                  <th class="py-2.5 px-2 text-right">LTP (₹)</th>
-                  <th class="py-2.5 px-2 text-right">Stop Loss</th>
-                  <th class="py-2.5 px-2 text-right">Invested</th>
-                  <th class="py-2.5 px-2 text-right">Risk %</th>
-                  <th class="py-2.5 px-2 text-right">R:R Multiple</th>
-                  <th class="py-2.5 px-2 text-right">Floating MTM</th>
-                  <th class="py-2.5 px-2 text-center">Partial Exits</th>
-                  <th class="py-2.5 px-2 text-center">Pyramid</th>
-                  <th class="py-2.5 px-3 text-center">Desk Actions</th>
+                  <th class="py-2.5 px-3">Stock</th><th class="py-2.5 px-2">Opened</th><th class="py-2.5 px-2 text-right">Qty</th><th class="py-2.5 px-2 text-right">Avg Buy</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL / TSL</th><th class="py-2.5 px-2 text-right">Invested</th><th class="py-2.5 px-2 text-right">Open Risk</th><th class="py-2.5 px-2 text-right">R-Multiple</th><th class="py-2.5 px-2 text-right">Unrealised P&amp;L</th><th class="py-2.5 px-2 text-right" title="Enter target profit to estimate sell quantity at latest LTP">Sell Qty ⓘ</th><th class="py-2.5 px-3 text-center">Actions ⓘ</th>
                 </tr>
               </thead>
               <tbody id="positionsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
@@ -394,6 +382,7 @@
             <button onclick="exportCSV()" class="ml-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1 font-semibold">
               <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
             </button>
+            <button onclick="computeMFEMAEForTrades()" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1 font-bold shadow-sm" title="Recalculate stored MFE/MAE analytics"><i data-lucide="activity" class="w-3.5 h-3.5"></i> Compute MFE/MAE</button>
             <button onclick="openImportModal()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 font-bold shadow-sm">
               <i data-lucide="file-up" class="w-3.5 h-3.5"></i> Import Broker Report
             </button>
@@ -441,27 +430,7 @@
             <table class="w-full text-xs text-left border-collapse">
               <thead class="text-slate-400 border-b border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 text-[10px] uppercase font-bold tracking-wider">
                 <tr>
-                  <th class="py-2.5 px-3">Symbol</th>
-                  <th class="py-2.5 px-2">Type</th>
-                  <th class="py-2.5 px-2">Dir</th>
-                  <th class="py-2.5 px-2 text-right">Entry</th>
-                  <th class="py-2.5 px-2 text-right">Exit</th>
-                  <th class="py-2.5 px-2 text-right">Qty</th>
-                  <th class="py-2.5 px-2 text-right">Entry Amount</th>
-                  <th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('edate')">Entry Date ⇅</th>
-                  <th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('xdate')">Exit Date ⇅</th>
-                  <th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('pnl')">Net P&amp;L ⇅</th>
-                  <th class="py-2.5 px-2 text-right">Return %</th>
-                  <th class="py-2.5 px-2 text-right">R:R</th>
-                  <th class="py-2.5 px-2 text-center">Status</th>
-                  <th class="py-2.5 px-2 text-right">MFE %</th>
-                  <th class="py-2.5 px-2 text-right">MAE %</th>
-                  <th class="py-2.5 px-2 text-right">Trailing SL</th>
-                  <th class="py-2.5 px-2 text-right">Partial Exit</th>
-                  <th class="py-2.5 px-2">Setup / Pattern</th>
-                  <th class="py-2.5 px-3">Notes</th>
-                  <th class="py-2.5 px-2 text-center">Chart</th>
-                  <th class="py-2.5 px-3 text-center">Actions</th>
+                  <th class="py-2.5 px-3">Symbol</th><th class="py-2.5 px-2">Type</th><th class="py-2.5 px-2">Dir</th><th class="py-2.5 px-2 text-right">Entry ₹</th><th class="py-2.5 px-2 text-right">Exit ₹</th><th class="py-2.5 px-2 text-right">Qty</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('edate')">Entry Date ⇅</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('xdate')">Exit Date ↑</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('pnl')">Net P&amp;L ⇅</th><th class="py-2.5 px-2 text-right">Return % ⇅</th><th class="py-2.5 px-2 text-right">R:R Ratio ⇅</th><th class="py-2.5 px-2 text-right">Port. Risk %</th><th class="py-2.5 px-2 text-center">Outcome</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL ₹</th><th class="py-2.5 px-2 text-right">Target ₹</th><th class="py-2.5 px-2 text-right">MFE %</th><th class="py-2.5 px-2 text-right">MAE %</th><th class="py-2.5 px-2 text-right">MFE+</th><th class="py-2.5 px-2">Notes</th><th class="py-2.5 px-2 text-center">Chart</th><th class="py-2.5 px-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody id="tradesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
@@ -474,6 +443,7 @@
 
       <!-- ================= 3. TAB: PERFORMANCE METRICS ================= -->
       <section id="pane-performance" class="tab-pane hidden space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-xl p-3"><span class="text-xs font-bold text-slate-500">PERFORMANCE TIMEFRAME</span><div class="flex flex-wrap gap-1"><button onclick="setAnalyticsTimeframe('1M')" data-timeframe="1M" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">1M</button><button onclick="setAnalyticsTimeframe('3M')" data-timeframe="3M" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">3M</button><button onclick="setAnalyticsTimeframe('1Y')" data-timeframe="1Y" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">1Y</button><button onclick="setAnalyticsTimeframe('YTD')" data-timeframe="YTD" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">YTD</button><button onclick="setAnalyticsTimeframe('All')" data-timeframe="All" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">All</button></div></div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">WIN RATE</span><div class="text-xl font-black font-mono-num text-emerald-500 mt-1" id="perf-wr">0.0%</div><p class="text-[10px] text-slate-400 mt-0.5" id="perf-wr-sub">0 Wins / 0 Losses</p></div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm"><span class="text-[10px] font-extrabold uppercase text-slate-400">PROFIT FACTOR</span><div class="text-xl font-black font-mono-num text-amber-500 mt-1" id="perf-pf">0.00</div><p class="text-[10px] text-slate-400 mt-0.5">Gross Win ÷ Gross Loss</p></div>
@@ -517,6 +487,7 @@
 
       <!-- ================= 4. TAB: ANALYTICS & MFE/MAE ================= -->
       <section id="pane-analytics" class="tab-pane hidden space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-xl p-3"><span class="text-xs font-bold text-slate-500">ANALYTICS TIMEFRAME</span><div class="flex flex-wrap gap-1"><button onclick="setAnalyticsTimeframe('1M')" data-timeframe="1M" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">1M</button><button onclick="setAnalyticsTimeframe('3M')" data-timeframe="3M" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">3M</button><button onclick="setAnalyticsTimeframe('1Y')" data-timeframe="1Y" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">1Y</button><button onclick="setAnalyticsTimeframe('YTD')" data-timeframe="YTD" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">YTD</button><button onclick="setAnalyticsTimeframe('All')" data-timeframe="All" class="timeframe-btn px-3 py-1.5 rounded-lg border text-xs font-bold">All</button></div></div>
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3"><div><h3 class="font-extrabold text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">Analytics &amp; MFE / MAE</h3><p class="text-xs text-slate-400 mt-0.5">Portfolio growth, drawdown, time-of-day patterns, setup impact and trade-quality diagnostics.</p></div><button onclick="computeMFEMAE()" id="btnComputeMFE" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalculate</button></div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
@@ -812,6 +783,12 @@
   <script>
     const BROKERAGE = 40;
     let PORTFOLIO_CAPITAL = 300000;
+    let analyticsTimeframe = "All";
+    function editPortfolioCapital(){ const current=PORTFOLIO_CAPITAL; const raw=prompt("Enter total portfolio capital (₹). This is used for portfolio risk and return calculations:",String(current)); if(raw===null)return; const n=Number(String(raw).replace(/[,₹\s]/g,"")); if(!Number.isFinite(n)||n<=0){showToast("Enter a valid capital amount greater than zero.",true);return;} PORTFOLIO_CAPITAL=n; const uid=window.journalUser?.uid||"guest"; try{localStorage.setItem("mickkk_portfolio_capital_"+uid,String(n));}catch(e){} updateCapitalDisplay(); renderPositionsTable();renderPerformanceMetrics();renderAnalyticsView();showToast("Portfolio capital updated.");}
+    function updateCapitalDisplay(){const e=document.getElementById("portfolioCapitalDisplay");if(e)e.textContent="₹"+PORTFOLIO_CAPITAL.toLocaleString("en-IN",{maximumFractionDigits:0});}
+    function setAnalyticsTimeframe(tf){analyticsTimeframe=tf;document.querySelectorAll(".timeframe-btn").forEach(b=>{const on=b.dataset.timeframe===tf;b.classList.toggle("bg-emerald-500",on);b.classList.toggle("text-white",on);b.classList.toggle("border-emerald-500",on);});renderPerformanceMetrics();renderAnalyticsView();}
+    function timeframeTrades(list){const now=new Date();let start=null;if(analyticsTimeframe==="1M")start=new Date(now.getFullYear(),now.getMonth()-1,now.getDate());else if(analyticsTimeframe==="3M")start=new Date(now.getFullYear(),now.getMonth()-3,now.getDate());else if(analyticsTimeframe==="1Y")start=new Date(now.getFullYear()-1,now.getMonth(),now.getDate());else if(analyticsTimeframe==="YTD")start=new Date(now.getFullYear(),0,1);if(!start)return list;return list.filter(t=>{const d=new Date(isoDate(t.xdate||t.edate)+"T12:00:00");return !isNaN(d)&&d>=start;});}
+    function computeMFEMAEForTrades(){computeMFEMAE();renderAnalyticsCharts();showToast("MFE/MAE analytics recalculated from values currently saved in the journal. Historical High/Low values are not fetched by this button.");}
     
     // In-Memory Stores
     let trades = [];
@@ -1133,6 +1110,7 @@
 
     // Positions Dashboard
     function renderPositionsTable() {
+      try { const uid=window.journalUser?.uid; const saved=uid&&localStorage.getItem("mickkk_portfolio_capital_"+uid); if(saved&&Number(saved)>0)PORTFOLIO_CAPITAL=Number(saved); } catch(e){} updateCapitalDisplay();
       const open = trades.filter(t => outcome(t) === 'OPEN');
       const closed = trades.filter(t => outcome(t) !== 'OPEN');
 
@@ -1175,36 +1153,31 @@
       }
 
       tbody.innerHTML = open.map(t => {
-        const rawLtp = ltpCache[String(t.symbol || "").toUpperCase()];
-        const ltp = Number(rawLtp);
-        const hasLtp = Number.isFinite(ltp) && ltp > 0;
-        const rem = remainingQty(t);
-        const investedVal = safeNum(t.entry) * rem;
-        const unreal = hasLtp ? (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) * rem : null;
-        const activeSL = safeNum(t.trailingSL || t.sl);
-        const riskVal = activeSL ? Math.abs(safeNum(t.entry) - activeSL) * rem : null;
-        const riskPct = riskVal ? (riskVal / PORTFOLIO_CAPITAL) * 100 : null;
-        const rr = (activeSL && t.target) ? Math.abs(safeNum(t.target)-safeNum(t.entry))/Math.abs(safeNum(t.entry)-activeSL) : null;
-        const pe = getPartialExits(t);
+        const rawLtp=ltpCache[String(t.symbol||"").toUpperCase()], ltp=Number(rawLtp), hasLtp=Number.isFinite(ltp)&&ltp>0;
+        const rem=remainingQty(t), investedVal=safeNum(t.entry)*rem, unreal=hasLtp?(t.dir==='B'?ltp-safeNum(t.entry):safeNum(t.entry)-ltp)*rem:null;
+        const activeSL=safeNum(t.trailingSL||t.sl), riskVal=activeSL?Math.abs(safeNum(t.entry)-activeSL)*rem:null, riskPct=riskVal!==null?(riskVal/PORTFOLIO_CAPITAL)*100:null;
+        const rr=(activeSL&&t.target&&safeNum(t.entry)!==activeSL)?Math.abs(safeNum(t.target)-safeNum(t.entry))/Math.abs(safeNum(t.entry)-activeSL):null;
+        const targetProfit=Number(window.sellProfitTargets?.[t.id]||0), perShare=hasLtp?(t.dir==='B'?ltp-safeNum(t.entry):safeNum(t.entry)-ltp):0;
+        const sellQty=targetProfit>0&&perShare>0?Math.min(rem,Math.ceil(targetProfit/perShare)):0;
         return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-          <td class="py-2.5 px-3"><span class="font-bold text-blue-600 dark:text-blue-400 font-mono-num">${t.symbol}</span><span class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded ${t.dir==='B'?'bg-emerald-50 text-emerald-500':'bg-rose-50 text-rose-500'}">${t.dir==='B'?'BUY':'SHORT'}</span></td>
-          <td class="py-2.5 px-2 text-slate-400">${formatDate(t.edate)}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${rem.toLocaleString()}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num font-bold" title="${hasLtp && ltpLastUpdated ? 'Fetched '+ltpLastUpdated.toLocaleString() : 'Click Refresh LTP to fetch quote'}">${hasLtp?'₹'+ltp.toFixed(2):'—'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num text-amber-500">${activeSL?'₹'+activeSL.toFixed(2):'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">₹${investedVal.toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${riskPct!==null?riskPct.toFixed(2)+'%':'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'-'}</td>
+          <td class="py-2.5 px-3"><span class="font-bold text-blue-600 dark:text-blue-400">${t.symbol}</span><span class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded ${t.dir==='B'?'bg-emerald-50 text-emerald-500':'bg-rose-50 text-rose-500'}">${t.dir==='B'?'LONG':'SHORT'}</span></td>
+          <td class="py-2.5 px-2 text-slate-400">${formatDate(t.edate)}</td><td class="py-2.5 px-2 text-right font-mono-num">${rem.toLocaleString()}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td><td class="py-2.5 px-2 text-right font-mono-num font-bold" title="${hasLtp&&ltpLastUpdated?'Fetched '+ltpLastUpdated.toLocaleString():'Refresh LTP to fetch quote'}">${hasLtp?'₹'+ltp.toFixed(2):'—'}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num text-amber-500">${activeSL?'₹'+activeSL.toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">₹${investedVal.toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num" title="Estimated loss if active SL is hit">${riskPct!==null?riskPct.toFixed(2)+'%':'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'—'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num font-bold ${unreal===null?'text-slate-400':unreal>=0?'text-emerald-500':'text-rose-500'}">${unreal===null?'—':`${unreal>=0?'+':''}₹${unreal.toFixed(0)}`}</td>
-          <td class="py-2.5 px-2 text-center text-[10px]">${pe.length?`✓ ${pe.length} exit${pe.length>1?'s':''}`:'—'}</td>
-          <td class="py-2.5 px-2 text-center text-[10px] font-bold">${t.pyramidGroup?`${t.pyramidGroup}${t.pyramidLeg?' · L'+t.pyramidLeg:''}`:'—'}</td>
-          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
+          <td class="py-2.5 px-2 text-right" title="Enter the profit amount you want to book. Estimated quantity uses latest LTP and average entry; this does not place a broker order."><input type="number" min="0" step="100" value="${targetProfit||''}" placeholder="₹ profit" onchange="setSellProfitTarget('${t.id}',this.value)" class="w-20 p-1 rounded bg-transparent border border-slate-200 dark:border-borderDark text-right"/><div class="text-[10px] text-slate-400" title="Estimated sell quantity to book target profit">${sellQty?`${sellQty} qty`:(hasLtp&&perShare<=0?'No profit per share':'—')}</div></td>
+          <td class="py-2.5 px-3 text-center"><div class="flex flex-wrap justify-center gap-1"><button onclick="editTrade('${t.id}')" class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Edit trade"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="trailStopLoss('${t.id}')" class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Trail SL — update stop loss"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i></button><button onclick="pyramidPosition('${t.id}')" class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Pyramid — add another entry leg"><i data-lucide="layers" class="w-3.5 h-3.5"></i></button><button onclick="partialExitPosition('${t.id}')" class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Partial exit — record a sell/cover"><i data-lucide="split" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1.5 rounded hover:text-rose-500" title="Delete trade"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
         </tr>`;
       }).join('');
       if (window.lucide) lucide.createIcons();
     }
+
+    window.sellProfitTargets = window.sellProfitTargets || {};
+    function setSellProfitTarget(id,value){const n=Number(value);if(!Number.isFinite(n)||n<0){showToast("Enter a valid target profit amount.",true);return;}window.sellProfitTargets[id]=n;renderPositionsTable();}
+    async function trailStopLoss(id){const t=trades.find(x=>String(x.id)===String(id));if(!t)return;const current=safeNum(t.trailingSL||t.sl);const raw=prompt("Enter new trailing stop-loss price (₹):",current||"");if(raw===null)return;const n=Number(raw);if(!Number.isFinite(n)||n<=0){showToast("Enter a valid stop-loss price.",true);return;}if(t.dir==='B'&&current&&n<current){if(!confirm("New stop is below current SL. Continue?"))return;}if(t.dir!=='B'&&current&&n>current){if(!confirm("New stop is above current SL. Continue?"))return;}const old={...t};t.trailingSL=n;try{await window.journalStore.saveTrade(t);renderPositionsTable();renderTradesTable();showToast("Trailing SL saved.");}catch(e){Object.assign(t,old);showToast("Could not save trailing SL: "+(e.message||e),true);}}
+    function pyramidPosition(id){const t=trades.find(x=>String(x.id)===String(id));if(!t)return;openTradeModal();document.getElementById("fSym").value=t.symbol;document.getElementById("fDir").value=t.dir||"B";document.getElementById("fType").value=t.type||"Swing";document.getElementById("fPyramidGroup").value=t.pyramidGroup||("PYR_"+t.symbol+"_"+Date.now());document.getElementById("fPyramidLeg").value=(safeNum(t.pyramidLeg)||1)+1;document.getElementById("tradeModalTitle").innerText="Add Pyramid Leg (new trade)";document.getElementById("fTradeId").value="";document.getElementById("fNotes").value="Pyramid add-on for "+t.symbol+". "+(t.notes||"");showToast("Enter add-on quantity and entry price, then save as a separate leg.");}
+    async function partialExitPosition(id){const t=trades.find(x=>String(x.id)===String(id));if(!t)return;const rem=remainingQty(t),rawQ=prompt("Remaining quantity: "+rem+"\nEnter quantity to partially exit:");if(rawQ===null)return;const q=Number(rawQ);if(!Number.isInteger(q)||q<=0||q>rem){showToast("Enter a whole quantity between 1 and "+rem,true);return;}const rawP=prompt("Enter actual exit price (₹):",ltpCache[String(t.symbol).toUpperCase()]||"");if(rawP===null)return;const price=Number(rawP);if(!Number.isFinite(price)||price<=0){showToast("Enter a valid exit price.",true);return;}const old={...t,partialExits:getPartialExits(t).slice()};t.partialExits=[...getPartialExits(t),{qty:q,price,date:new Date().toISOString().slice(0,10)}];if(remainingQty(t)===0){t.exit=price;t.xdate=new Date().toISOString().slice(0,10);}try{await window.journalStore.saveTrade(t);renderPositionsTable();renderTradesTable();renderPerformanceMetrics();renderAnalyticsView();showToast("Partial exit recorded in journal.");}catch(e){Object.assign(t,old);showToast("Could not save partial exit: "+(e.message||e),true);}}
 
     function tradeMatchesSearch(t, search) {
       const hay = [t.symbol,t.notes,t.setup,t.pattern,t.pyramidGroup,t.type,t.dir].join(' ').toLowerCase();
@@ -1234,47 +1207,28 @@
 
     function renderTradesTable() {
       const search=(document.getElementById("tradeSearchInput")?.value||"").toLowerCase().trim();
-      let list=trades.filter(t=>{
-        const stat=outcome(t);
-        return tradeMatchesSearch(t,search) && !(activeFilter==='open'&&stat!=='OPEN') && !(activeFilter==='win'&&stat!=='WIN') && !(activeFilter==='loss'&&stat!=='LOSS');
-      });
-      list.sort((a,b)=>{
-        const av=sortField==='pnl'?(calcPnL(a)||0):(sortField==='xdate'?isoDate(a.xdate||''):(sortField==='edate'?isoDate(a.edate||''):isoDate(a.edate||'')));
-        const bv=sortField==='pnl'?(calcPnL(b)||0):(sortField==='xdate'?isoDate(b.xdate||''):(sortField==='edate'?isoDate(b.edate||''):isoDate(b.edate||'')));
-        return sortAsc ? String(av).localeCompare(String(bv),undefined,{numeric:true}) : String(bv).localeCompare(String(av),undefined,{numeric:true});
-      });
+      let list=trades.filter(t=>{const stat=outcome(t);return tradeMatchesSearch(t,search)&&!(activeFilter==='open'&&stat!=='OPEN')&&!(activeFilter==='win'&&stat!=='WIN')&&!(activeFilter==='loss'&&stat!=='LOSS');});
+      list.sort((a,b)=>{const val=t=>sortField==='pnl'?(calcPnL(t)||0):isoDate(sortField==='xdate'?(t.xdate||''):(t.edate||''));const av=val(a),bv=val(b);return sortAsc?String(av).localeCompare(String(bv),undefined,{numeric:true}):String(bv).localeCompare(String(av),undefined,{numeric:true});});
       const tbody=document.getElementById("tradesTbody");
-      if(!list.length){tbody.innerHTML=`<tr><td colspan="20" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
+      if(!list.length){tbody.innerHTML=`<tr><td colspan="22" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
       tbody.innerHTML=list.map(t=>{
-        const pnl=calcPnL(t), stat=outcome(t), ret=(safeNum(t.entry)&&pnl!==null)?pnl/(safeNum(t.entry)*safeNum(t.qty))*100:null;
-        const activeSL=safeNum(t.trailingSL||t.sl), rr=(activeSL&&t.target)?Math.abs(safeNum(t.target)-safeNum(t.entry))/Math.abs(safeNum(t.entry)-activeSL):null;
-        const partials=getPartialExits(t), rem=remainingQty(t);
+        const pnl=calcPnL(t),stat=outcome(t),ret=(safeNum(t.entry)&&pnl!==null)?pnl/(safeNum(t.entry)*safeNum(t.qty))*100:null;
+        const activeSL=safeNum(t.trailingSL||t.sl),rr=(activeSL&&t.target&&safeNum(t.entry)!==activeSL)?Math.abs(safeNum(t.target)-safeNum(t.entry))/Math.abs(safeNum(t.entry)-activeSL):null;
+        const risk=plannedRiskAmount(t),ltp=Number(ltpCache[String(t.symbol||'').toUpperCase()]),hasLtp=Number.isFinite(ltp)&&ltp>0;
+        const mfePlus=safeNum(t.mfe)>0&&pnl!==null&&safeNum(t.entry)*safeNum(t.qty)>0?((pnl/(safeNum(t.entry)*safeNum(t.qty)))/safeNum(t.mfe))*100:null;
         return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-          <td class="py-2.5 px-3 font-bold text-blue-600 dark:text-blue-400 font-mono-num">${t.symbol||'-'}</td>
-          <td class="py-2.5 px-2 text-slate-400">${t.type||'Swing'}</td>
-          <td class="py-2.5 px-2 font-bold ${t.dir==='B'?'text-emerald-500':'text-rose-500'}">${t.dir==='B'?'BUY':'SELL'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${t.exit?'₹'+safeNum(t.exit).toFixed(2):'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">₹${(safeNum(t.entry)*safeNum(t.qty)).toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
-          <td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.edate)}</td>
-          <td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.xdate)}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num font-bold ${pnl!==null?(pnl>=0?'text-emerald-500':'text-rose-500'):'text-slate-400'}">${pnl!==null?(pnl>=0?'+₹':'-₹')+Math.abs(pnl).toFixed(0):'Float'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${ret!==null?(ret>=0?'+':'')+ret.toFixed(2)+'%':'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'-'}</td>
-          <td class="py-2.5 px-2 text-center"><span class="text-[9px] font-black px-1.5 py-0.5 rounded ${stat==='WIN'?'bg-emerald-50 text-emerald-600':stat==='LOSS'?'bg-rose-50 text-rose-600':'bg-slate-100 text-slate-500'}">${stat}</span></td>
-          <td class="py-2.5 px-2 text-right font-mono-num text-emerald-500">${t.mfe!==undefined&&t.mfe!==''?safeNum(t.mfe).toFixed(1)+'%':'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num text-rose-500">${t.mae!==undefined&&t.mae!==''?safeNum(t.mae).toFixed(1)+'%':'-'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num text-amber-500">${activeSL?'₹'+activeSL.toFixed(2):'-'}</td>
-          <td class="py-2.5 px-2 text-right">${partials.length?`${partials.length} (${rem.toLocaleString()} rem)`:'-'}</td>
-          <td class="py-2.5 px-2 max-w-[120px] truncate text-slate-400" title="${t.setup||''}">${t.setup||'No Pattern'}</td>
-          <td class="py-2.5 px-3 max-w-[140px] truncate text-slate-400" title="${t.notes||''}">${t.notes||'-'}</td>
-          <td class="py-2.5 px-2 text-center">${t.chartLink?`<a href="${t.chartLink}" target="_blank" rel="noopener" class="text-blue-500 hover:underline">📈</a>`:'-'}</td>
-          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
-        </tr>`;
+          <td class="py-2.5 px-3 font-bold text-blue-600 dark:text-blue-400">${t.symbol||'-'}</td><td class="py-2.5 px-2 text-slate-400">${t.type||'Swing'}</td><td class="py-2.5 px-2 font-bold ${t.dir==='B'?'text-emerald-500':'text-rose-500'}">${t.dir==='B'?'BUY':'SELL'}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.exit?'₹'+safeNum(t.exit).toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td>
+          <td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.edate)}</td><td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.xdate)}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num font-bold ${pnl!==null?(pnl>=0?'text-emerald-500':'text-rose-500'):'text-slate-400'}">${pnl!==null?(pnl>=0?'+₹':'-₹')+Math.abs(pnl).toFixed(0):'Open'}</td><td class="py-2.5 px-2 text-right font-mono-num">${ret!==null?(ret>=0?'+':'')+ret.toFixed(2)+'%':'—'}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${PORTFOLIO_CAPITAL?((risk/PORTFOLIO_CAPITAL)*100).toFixed(2)+'%':'—'}</td>
+          <td class="py-2.5 px-2 text-center"><span class="text-[9px] font-black px-1.5 py-0.5 rounded ${stat==='WIN'?'bg-emerald-50 text-emerald-600':stat==='LOSS'?'bg-rose-50 text-rose-600':'bg-slate-100 text-slate-500'}">${stat}</span></td><td class="py-2.5 px-2 text-right font-mono-num">${hasLtp?'₹'+ltp.toFixed(2):'—'}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">${activeSL?'₹'+activeSL.toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.target)?'₹'+safeNum(t.target).toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.mfe!==''&&t.mfe!==undefined?safeNum(t.mfe).toFixed(2)+'%':'—'}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">${t.mae!==''&&t.mae!==undefined?safeNum(t.mae).toFixed(2)+'%':'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${mfePlus!==null?mfePlus.toFixed(1)+'%':'—'}</td>
+          <td class="py-2.5 px-2 max-w-xs truncate" title="${String(t.notes||'').replace(/"/g,'&quot;')}">${t.notes||'—'}</td><td class="py-2.5 px-2 text-center">${t.chartLink?`<a href="${t.chartLink}" target="_blank" rel="noopener" title="Open chart" class="text-blue-500 hover:underline">📈</a>`:'—'}</td>
+          <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td></tr>`;
       }).join('');
-      renderTradeSummary();
-      if(window.lucide)lucide.createIcons();
+      renderTradeSummary();if(window.lucide)lucide.createIcons();
     }
 
     function setTradeFilter(f,btn){
@@ -1663,7 +1617,7 @@
 
     // -------------------- Performance Metrics --------------------
     function renderPerformanceMetrics(){
-      const closed=trades.filter(t=>outcome(t)!=='OPEN'),wins=closed.filter(t=>outcome(t)==='WIN'),losses=closed.filter(t=>outcome(t)==='LOSS');
+      const closed=timeframeTrades(trades.filter(t=>outcome(t)!=='OPEN')),wins=closed.filter(t=>outcome(t)==='WIN'),losses=closed.filter(t=>outcome(t)==='LOSS');
       const grossWin=wins.reduce((s,t)=>s+(calcPnL(t)||0),0),grossLoss=Math.abs(losses.reduce((s,t)=>s+(calcPnL(t)||0),0));
       const pf=grossLoss?grossWin/grossLoss:(grossWin>0?Infinity:0),avgWin=wins.length?grossWin/wins.length:0,avgLoss=losses.length?grossLoss/losses.length:0;
       const wr=closed.length?wins.length/closed.length*100:0,payoff=avgLoss?avgWin/avgLoss:0,net=closed.reduce((s,t)=>s+(calcPnL(t)||0),0),ret=net/PORTFOLIO_CAPITAL*100;
@@ -1691,7 +1645,7 @@
 
     function renderPerformanceCharts(){
       if(typeof Chart==='undefined')return;
-      const closed=trades.filter(t=>outcome(t)!=='OPEN').sort((a,b)=>isoDate(a.xdate||a.edate).localeCompare(isoDate(b.xdate||b.edate)));
+      const closed=timeframeTrades(trades.filter(t=>outcome(t)!=='OPEN')).sort((a,b)=>isoDate(a.xdate||a.edate).localeCompare(isoDate(b.xdate||b.edate)));
       let cum=0;const labels=closed.map(t=>formatDate(t.xdate||t.edate)),cumData=closed.map(t=>cum+=calcPnL(t)||0);
       makeChart('chartEquity','equity','line',labels,[lineDataset('Cumulative Net P&L',cumData,'#10b981','rgba(16,185,129,.08)')]);
       const monthly={};closed.forEach(t=>monthly[monthKey(t)]=(monthly[monthKey(t)]||0)+(calcPnL(t)||0));const mk=Object.keys(monthly).sort();
@@ -1724,7 +1678,7 @@
 
     function renderAnalyticsCharts(){
       if(typeof Chart==='undefined')return;
-      const closed=trades.filter(t=>outcome(t)!=='OPEN').sort((a,b)=>isoDate(a.xdate||a.edate).localeCompare(isoDate(b.xdate||b.edate)));
+      const closed=timeframeTrades(trades.filter(t=>outcome(t)!=='OPEN')).sort((a,b)=>isoDate(a.xdate||a.edate).localeCompare(isoDate(b.xdate||b.edate)));
       const labels=closed.map(t=>formatDate(t.xdate||t.edate));
       let cum=0,peak=PORTFOLIO_CAPITAL;const capital=closed.map(t=>{cum+=calcPnL(t)||0;return PORTFOLIO_CAPITAL+cum;}),dd=capital.map(v=>{peak=Math.max(peak,v);return peak?((v-peak)/peak)*100:0;});
       makeChart('chartCapitalGrowth','capitalGrowth','line',labels,[lineDataset('Capital',capital,'#10b981','rgba(16,185,129,.06)')]);
@@ -1870,6 +1824,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       syncThemeIcons(document.documentElement.classList.contains("dark"));
       populateNSETickerList();
+      try { const uid=window.journalUser?.uid; const saved=uid&&localStorage.getItem("mickkk_portfolio_capital_"+uid); if(saved&&Number(saved)>0)PORTFOLIO_CAPITAL=Number(saved); } catch(e){} updateCapitalDisplay();
       updateUserHeaderBadge();
       loadTrades();
       loadWatchlist();
