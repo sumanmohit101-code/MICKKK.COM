@@ -67,9 +67,15 @@
     .trade-ledger td { padding-top: .55rem !important; padding-bottom: .55rem !important; vertical-align: middle; }
     .trade-ledger td.trade-notes { width: 165px; min-width: 165px; max-width: 165px; }
     .trade-ledger td.trade-qty-amount { min-width: 88px; }
-    #tradeModal { overscroll-behavior: contain; }
-    #tradeModal > div { min-height: 0; }
-    @media (max-height: 650px) { #tradeModal > div { max-height: 96dvh; } }
+    /* Trade modal: keep actions inside the card; only the form body scrolls. */
+    #tradeModal { overscroll-behavior: contain; box-sizing: border-box; }
+    #tradeModal > .trade-modal-card { min-height: 0; width: min(100%, 640px); max-height: min(90dvh, 900px); box-sizing: border-box; display: flex; flex-direction: column; }
+    #tradeModal .trade-modal-body { min-height: 0; flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; }
+    #tradeModal .trade-modal-footer { position: relative; z-index: 2; display: flex; flex: 0 0 auto; justify-content: flex-end; align-items: center; gap: .625rem; width: 100%; box-sizing: border-box; padding: .75rem 1.25rem; margin: 0; border-top: 1px solid var(--modal-footer-border, #e2e8f0); background: inherit; }
+    .dark #tradeModal .trade-modal-footer { --modal-footer-border: #1e293b; }
+    #tradeModal .trade-modal-footer button { box-sizing: border-box; min-height: 40px; white-space: nowrap; }
+    @media (max-width: 480px) { #tradeModal { padding: .5rem; } #tradeModal > .trade-modal-card { max-height: 96dvh; } #tradeModal .trade-modal-footer { padding: .65rem .85rem; } }
+    @media (max-height: 650px) { #tradeModal > .trade-modal-card { max-height: 96dvh; } }
 
     /* Mickkk Logo System */
     :root { 
@@ -654,13 +660,13 @@
 
   <!-- ================= LOG TRADE MODAL ================= -->
   <div id="tradeModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-xl max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden">
+    <div class="trade-modal-card bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl max-h-[90dvh] shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-200 dark:border-borderDark flex items-center justify-between">
         <h3 id="tradeModalTitle" class="font-extrabold text-sm">Add New Trade Log</h3>
         <button onclick="closeTradeModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div class="p-5 sm:p-6 overflow-y-auto custom-scroll space-y-4 text-xs min-h-0 flex-1">
+      <div class="trade-modal-body p-5 sm:p-6 custom-scroll space-y-4 text-xs">
         <input type="hidden" id="fTradeId">
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
@@ -710,7 +716,7 @@
           <input type="hidden" id="fMae" value="">
         </div>
 
-        <div id="partialExitRows" class="hidden"></div>
+        <div id="partialExitRows" class="hidden" aria-hidden="true"></div>
           <div>
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Entry Date</label>
             <input type="date" id="fEdate" class="w-full p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-borderDark">
@@ -743,7 +749,7 @@
         </div>
       </div>
 
-      <div class="px-5 sm:px-6 py-3 border-t border-slate-200 dark:border-borderDark flex justify-end gap-2 flex-shrink-0 bg-white dark:bg-cardDark">
+      <div class="trade-modal-footer bg-white dark:bg-cardDark">
         <button onclick="closeTradeModal()" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-borderDark text-xs font-bold">Cancel</button>
         <button onclick="saveTradeLog()" id="btnSaveTrade" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20">Save Trade</button>
       </div>
