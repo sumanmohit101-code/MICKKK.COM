@@ -3,6 +3,7 @@ let PORTFOLIO_CAPITAL = 300000;
 let analyticsTimeframe = "1M";
 
 window.journalUserRole = window.journalUserRole || 'free';
+window.sellProfitTargets = window.sellProfitTargets || {};
 
 // -------------------- Capital Management --------------------
 function editPortfolioCapital(){ 
@@ -26,7 +27,7 @@ function updateCapitalDisplay(){
   if(e) e.textContent = "₹" + PORTFOLIO_CAPITAL.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-// -------------------- Performance Timeframe --------------------
+// -------------------- Performance Timeframe (Free Lock) --------------------
 function handlePerformanceTimeframe(tf) {
   if (window.journalUserRole !== 'pro' && tf !== '1M') {
     openProModal();
@@ -111,7 +112,7 @@ function requestHistoricalExcursion(t){
   });
 }
 
-// -------------------- Stores --------------------
+// -------------------- Stores & Globals --------------------
 let trades = [];
 let watchlist = [];
 let ltpCache = {};
@@ -504,7 +505,7 @@ async function loadWatchlist() {
   renderWatchlist();
 }
 
-// -------------------- Positions Dashboard --------------------
+// -------------------- Positions Dashboard (Restored Actions) --------------------
 function renderPositionsTable() {
   try { 
     const uid = window.journalUser?.uid; 
@@ -585,6 +586,9 @@ function renderPositionsTable() {
       <td class="py-2.5 px-3 text-center">
         <div class="flex items-center justify-center gap-1">
           <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+          <button onclick="trailStopLoss('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-amber-500" title="Trail SL"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i></button>
+          <button onclick="pyramidPosition('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-500" title="Pyramid Add-on"><i data-lucide="layers" class="w-3.5 h-3.5"></i></button>
+          <button onclick="partialExitPosition('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-purple-500" title="Partial Exit"><i data-lucide="split" class="w-3.5 h-3.5"></i></button>
           <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </div>
       </td>
@@ -593,14 +597,82 @@ function renderPositionsTable() {
   if (window.lucide) lucide.createIcons();
 }
 
-window.sellProfitTargets = window.sellProfitTargets || {};
-function setSellProfitTarget(id,value){
+function setSellProfitTarget(id, value){
   const n = Number(value);
   if(!Number.isFinite(n) || n < 0){ showToast("Enter a valid target profit amount.", true); return; }
   window.sellProfitTargets[id] = n;
   renderPositionsTable();
 }
 
+// Quick Position Actions (Restored)
+async function trailStopLoss(id){
+  const t = trades.find(x => String(x.id) === String(id));
+  if(!t) return;
+  const current = safeNum(t.trailingSL || t.sl);
+  const raw = prompt("Enter new trailing stop-loss price (₹):", current || "");
+  if(raw === null) return;
+  const n = Number(raw);
+  if(!Number.isFinite(n) || n <= 0){ showToast("Enter a valid stop-loss price.", true); return; }
+  const old = { ...t };
+  t.trailingSL = n;
+  try {
+    await window.journalStore.saveTrade(t);
+    renderPositionsTable();
+    renderTradesTable();
+    showToast("Trailing SL saved successfully!");
+  } catch(e){
+    Object.assign(t, old);
+    showToast("Could not save trailing SL.", true);
+  }
+}
+
+function pyramidPosition(id){
+  const t = trades.find(x => String(x.id) === String(id));
+  if(!t) return;
+  openTradeModal();
+  document.getElementById("fSym").value = t.symbol;
+  document.getElementById("fDir").value = t.dir || "B";
+  document.getElementById("fType").value = t.type || "Swing";
+  document.getElementById("fPyramidGroup").value = t.pyramidGroup || ("PYR_" + t.symbol + "_" + Date.now());
+  document.getElementById("fPyramidLeg").value = (safeNum(t.pyramidLeg) || 1) + 1;
+  document.getElementById("tradeModalTitle").innerText = "Add Pyramid Leg";
+  document.getElementById("fTradeId").value = "";
+  document.getElementById("fNotes").value = "Pyramid leg for " + t.symbol + ". " + (t.notes || "");
+  showToast("Enter quantity and entry price, then save pyramid leg.");
+}
+
+async function partialExitPosition(id){
+  const t = trades.find(x => String(x.id) === String(id));
+  if(!t) return;
+  const rem = remainingQty(t);
+  const rawQ = prompt("Remaining quantity: " + rem + "\nEnter quantity to exit:", "");
+  if(rawQ === null) return;
+  const q = Number(rawQ);
+  if(!Number.isInteger(q) || q <= 0 || q > rem){ showToast("Enter quantity between 1 and " + rem, true); return; }
+  const rawP = prompt("Enter actual exit price (₹):", ltpCache[String(t.symbol).toUpperCase()] || "");
+  if(rawP === null) return;
+  const price = Number(rawP);
+  if(!Number.isFinite(price) || price <= 0){ showToast("Enter a valid exit price.", true); return; }
+  const old = { ...t, partialExits: getPartialExits(t).slice() };
+  t.partialExits = [...getPartialExits(t), { qty: q, price, date: new Date().toISOString().slice(0, 10) }];
+  if(remainingQty(t) === 0){
+    t.exit = price;
+    t.xdate = new Date().toISOString().slice(0, 10);
+  }
+  try {
+    await window.journalStore.saveTrade(t);
+    renderPositionsTable();
+    renderTradesTable();
+    renderPerformanceMetrics();
+    renderAnalyticsView();
+    showToast("Partial exit recorded in journal.");
+  } catch(e){
+    Object.assign(t, old);
+    showToast("Could not save partial exit.", true);
+  }
+}
+
+// -------------------- Trades Log (Clean Alignment & Formatting) --------------------
 function tradeMatchesSearch(t, search) {
   const hay = [t.symbol, t.notes, t.setup, t.pattern, t.pyramidGroup, t.type, t.dir].join(' ').toLowerCase();
   return hay.includes(search);
@@ -879,7 +951,10 @@ async function saveTradeLog(){
   if(existingIdx >= 0) trades[existingIdx] = tradeObj; else trades.unshift(tradeObj);
   
   closeTradeModal(); 
-  renderPositionsTable(); renderTradesTable(); renderPerformanceMetrics(); renderAnalyticsView();
+  renderPositionsTable(); 
+  renderTradesTable(); 
+  renderPerformanceMetrics(); 
+  renderAnalyticsView();
   
   try {
     await window.journalStore.saveTrade(tradeObj);
@@ -1083,6 +1158,21 @@ function renderPerformanceCharts(){
   
   const counts = [closed.filter(t => outcome(t) === 'WIN').length, closed.filter(t => outcome(t) === 'LOSS').length, closed.filter(t => outcome(t) === 'BE').length];
   makeChart('chartOutcomePie', 'outcomePie', 'doughnut', ['Wins', 'Losses', 'Break-even'], [{ data: counts, backgroundColor: ['#10b981', '#ef4444', '#94a3b8'], borderWidth: 0 }], { plugins: { legend: { position: 'bottom' } } });
+
+  let w = 0;
+  const wr = closed.map((t,i) => { if (outcome(t) === 'WIN') w++; return w / (i + 1) * 100; });
+  makeChart('chartWinRateRunning', 'winRateRunning', 'line', labels, [lineDataset('Running Win Rate %', wr, '#8b5cf6', 'rgba(139,92,246,.07)')], { scales: { y: { min: 0, max: 100 } } });
+
+  const winPnl = closed.filter(t => outcome(t) === 'WIN').reduce((s,t) => s + calcPnL(t), 0);
+  const winCount = closed.filter(t => outcome(t) === 'WIN').length;
+  const lossPnl = Math.abs(closed.filter(t => outcome(t) === 'LOSS').reduce((s,t) => s + calcPnL(t), 0));
+  const lossCount = closed.filter(t => outcome(t) === 'LOSS').length;
+  makeChart('chartAvgWinLoss', 'avgWinLoss', 'bar', ['Average Win', 'Average Loss'], [{ data: [winCount ? winPnl / winCount : 0, lossCount ? lossPnl / lossCount : 0], backgroundColor: ['#10b981', '#ef4444'], borderRadius: 4 }], { plugins: { legend: { display: false } } });
+  makeChart('chartWinLossCount', 'winLossCount', 'bar', ['Wins', 'Losses'], [{ data: counts.slice(0, 2), backgroundColor: ['#10b981', '#ef4444'], borderRadius: 4 }], { plugins: { legend: { display: false } } });
+
+  let riskRun = 0;
+  const riskAvg = closed.map((t,i) => { riskRun += plannedRiskAmount(t); return riskRun / (i + 1); });
+  makeChart('chartAvgRiskRunning', 'avgRiskRunning', 'line', labels, [lineDataset('Avg Planned Risk', riskAvg, '#f59e0b', 'rgba(245,158,11,.07)')]);
 }
 
 // -------------------- Analytics Diagnostics --------------------
@@ -1120,6 +1210,59 @@ function renderAnalyticsCharts(){
   
   makeChart('chartCapitalGrowth', 'capitalGrowth', 'line', labels, [lineDataset('Capital', capital, '#10b981', 'rgba(16,185,129,.06)')]);
   makeChart('chartDrawdown', 'dd', 'line', labels, [lineDataset('Drawdown %', dd, '#ef4444', 'rgba(239,68,68,.08)')], { scales: { y: { ticks: { callback: v => v + '%' } } } });
+
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dowCounts = days.map(d => closed.filter(t => weekdayLabel(t) === d).length);
+  const dowAvg = days.map(d => { const a = closed.filter(t => weekdayLabel(t) === d); return a.length ? a.reduce((s,t) => s + calcPnL(t), 0) / a.length : 0; });
+  makeChart('chartTradesDow', 'tradesDow', 'bar', days, [{ data: dowCounts, backgroundColor: '#06b6d4', borderRadius: 4 }], { plugins: { legend: { display: false } } });
+  makeChart('chartAvgDow', 'avgDow', 'bar', days, [barDataset('Avg P&L', dowAvg)], { plugins: { legend: { display: false } } });
+
+  const pats = [...new Set(closed.map(patternOf))].sort();
+  const pnlPat = pats.map(p => closed.filter(t => patternOf(t) === p).reduce((s,t) => s + calcPnL(t), 0));
+  const cntPat = pats.map(p => closed.filter(t => patternOf(t) === p).length);
+  makeChart('chartPatternImpact', 'patternImpact', 'bar', pats, [barDataset('Net P&L', pnlPat)], { plugins: { legend: { display: false } } });
+  makeChart('chartTradesPattern', 'tradesPattern', 'bar', pats, [{ data: cntPat, backgroundColor: '#8b5cf6', borderRadius: 4 }], { plugins: { legend: { display: false } } });
+
+  makeChart('chartTradeQuality', 'tradeQuality', 'scatter', [], [{ label: 'MFE vs MAE', data: closed.filter(t => t.mfe !== '' && t.mae !== '').map(t => ({ x: safeNum(t.mfe), y: safeNum(t.mae) })), backgroundColor: '#8b5cf6', pointRadius: 4 }], { scales: { x: { title: { display: true, text: 'MFE %' } }, y: { title: { display: true, text: 'MAE %' } } } });
+
+  const hist = (vals, bins) => {
+    const histLabels = [], histData = [];
+    if (!vals.length) return { labels: histLabels, data: histData };
+    const min = Math.min(...vals), max = Math.max(...vals), step = (max - min || 1) / bins;
+    for (let i = 0; i < bins; i++) {
+      const lo = min + i * step, hi = (i === bins - 1) ? max + 1 : lo + step;
+      histLabels.push(`${lo.toFixed(1)}–${hi.toFixed(1)}`);
+      histData.push(vals.filter(v => v >= lo && v < hi).length);
+    }
+    return { labels: histLabels, data: histData };
+  };
+
+  const mh = hist(closed.map(t => safeNum(t.mfe)).filter(v => v !== 0), 8);
+  const ah = hist(closed.map(t => safeNum(t.mae)).filter(v => v !== 0), 8);
+  makeChart('chartMfeDist', 'mfeDist', 'bar', mh.labels, [{ data: mh.data, backgroundColor: '#10b981', borderRadius: 3 }], { plugins: { legend: { display: false } } });
+  makeChart('chartMaeDist', 'maeDist', 'bar', ah.labels, [{ data: ah.data, backgroundColor: '#ef4444', borderRadius: 3 }], { plugins: { legend: { display: false } } });
+
+  const eff = closed.map(t => {
+    const mfePct = safeNum(t.mfe);
+    const pnlPct = safeNum(t.entry) && safeNum(t.qty) ? (calcPnL(t) / (safeNum(t.entry) * safeNum(t.qty))) * 100 : 0;
+    return mfePct ? pnlPct / mfePct * 100 : 0;
+  });
+  makeChart('chartExitEfficiency', 'exitEfficiency', 'line', labels, [lineDataset('Exit Efficiency %', eff, '#06b6d4', 'rgba(6,182,212,.06)')]);
+
+  const heat = closed.map(t => {
+    const risk = plannedRiskAmount(t);
+    const maePct = safeNum(t.mae);
+    const maeAmt = safeNum(t.entry) && safeNum(t.qty) ? (maePct / 100) * safeNum(t.entry) * safeNum(t.qty) : 0;
+    return risk ? maeAmt / risk * 100 : 0;
+  });
+  makeChart('chartHeat', 'heat', 'line', labels, [lineDataset('MAE ÷ Planned Risk %', heat, '#f59e0b', 'rgba(245,158,11,.06)')]);
+
+  makeChart('chartMfeHolding', 'mfeHolding', 'scatter', [], [{ label: 'MFE vs Holding Days', data: closed.map(t => ({ x: holdingDays(t), y: safeNum(t.mfe) })), backgroundColor: '#10b981', pointRadius: 4 }], { scales: { x: { title: { display: true, text: 'Holding Days' } }, y: { title: { display: true, text: 'MFE %' } } } });
+
+  const rs = closed.map(rMultiple).filter(v => v !== null);
+  const rh = hist(rs, 10);
+  makeChart('chartRDistribution', 'rDistribution', 'bar', rh.labels, [{ data: rh.data, backgroundColor: '#8b5cf6', borderRadius: 3 }], { plugins: { legend: { display: false } } });
+  makeChart('chartMaeHolding', 'maeHolding', 'scatter', [], [{ label: 'MAE vs Holding Days', data: closed.map(t => ({ x: holdingDays(t), y: safeNum(t.mae) })), backgroundColor: '#ef4444', pointRadius: 4 }], { scales: { x: { title: { display: true, text: 'Holding Days' } }, y: { title: { display: true, text: 'MAE %' } } } });
 }
 
 // -------------------- Tools Calculations --------------------
@@ -1472,6 +1615,10 @@ window.closeTradeModal = closeTradeModal;
 window.saveTradeLog = saveTradeLog;
 window.editTrade = editTrade;
 window.deleteTrade = deleteTrade;
+window.trailStopLoss = trailStopLoss;
+window.pyramidPosition = pyramidPosition;
+window.partialExitPosition = partialExitPosition;
+window.setSellProfitTarget = setSellProfitTarget;
 window.switchTab = switchTab;
 window.toggleSidebar = toggleSidebar;
 window.toggleTheme = toggleTheme;
@@ -1489,7 +1636,6 @@ window.sortTrades = sortTrades;
 window.changeTradePage = changeTradePage;
 window.addPartialExitRow = addPartialExitRow;
 window.removePartialExitRow = removePartialExitRow;
-window.setSellProfitTarget = setSellProfitTarget;
 window.signOutJournal = signOutJournal;
 
 document.addEventListener("DOMContentLoaded", () => {
