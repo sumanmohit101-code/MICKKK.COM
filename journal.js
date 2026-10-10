@@ -1,8 +1,7 @@
 const BROKERAGE = 40;
 let PORTFOLIO_CAPITAL = 300000;
-let analyticsTimeframe = "1M"; // Default 1M for Free
+let analyticsTimeframe = "1M";
 
-// Global Role Tracker ('free' vs 'pro')
 window.journalUserRole = window.journalUserRole || 'free';
 
 // -------------------- Capital Management --------------------
@@ -27,7 +26,7 @@ function updateCapitalDisplay(){
   if(e) e.textContent = "₹" + PORTFOLIO_CAPITAL.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-// -------------------- Performance Timeframe (Free Lock) --------------------
+// -------------------- Performance Timeframe --------------------
 function handlePerformanceTimeframe(tf) {
   if (window.journalUserRole !== 'pro' && tf !== '1M') {
     openProModal();
@@ -72,7 +71,7 @@ function handleComputeMFEMAE() {
 
 async function computeMFEMAEForTrades(){
   const eligible = trades.filter(t => outcome(t) !== 'OPEN' && t.symbol && safeNum(t.entry) > 0 && isoDate(t.edate) && isoDate(t.xdate));
-  if(!eligible.length){ showToast('Closed trades with symbol, entry price, entry date and exit date are required.', true); return; }
+  if(!eligible.length){ showToast('Closed trades with symbol, entry price, entry date and exit date required.', true); return; }
   const btns = [...document.querySelectorAll('button[onclick="handleComputeMFEMAE()"], #btnComputeMFEToolbar')];
   btns.forEach(b => { b.disabled = true; b.dataset.oldText = b.innerText; b.innerText = 'Computing…'; });
   let updated = 0, failed = 0;
@@ -112,7 +111,7 @@ function requestHistoricalExcursion(t){
   });
 }
 
-// -------------------- In-Memory Stores --------------------
+// -------------------- Stores --------------------
 let trades = [];
 let watchlist = [];
 let ltpCache = {};
@@ -144,26 +143,20 @@ function showToast(msg, isError = false) {
   const icon = document.getElementById("toastIcon");
   const text = document.getElementById("toastMsg");
   if (!toast) return;
-
   text.innerText = msg;
   icon.setAttribute("data-lucide", isError ? "alert-triangle" : "check-circle");
   icon.className = `w-4 h-4 ${isError ? 'text-rose-400' : 'text-emerald-400'}`;
   toast.classList.remove("translate-y-20", "opacity-0");
   if (window.lucide) lucide.createIcons();
-
-  setTimeout(() => {
-    toast.classList.add("translate-y-20", "opacity-0");
-  }, 3500);
+  setTimeout(() => { toast.classList.add("translate-y-20", "opacity-0"); }, 3500);
 }
 
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const mainContent = document.getElementById("mainContent");
   const arrow = document.getElementById("collapseArrow");
-
   sidebar.classList.toggle("sidebar-collapsed");
   const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
-
   if (isCollapsed) {
     mainContent.classList.remove("ml-60");
     mainContent.classList.add("ml-[4.2rem]");
@@ -189,7 +182,6 @@ function syncThemeIcons(isDark) {
   const moonIconSide = document.getElementById("moonIconSide");
   const sunIconMini = document.getElementById("sunIconMini");
   const moonIconMini = document.getElementById("moonIconMini");
-
   if (sunIconSide) sunIconSide.classList.toggle("hidden", isDark);
   if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
   if (sunIconMini) sunIconMini.classList.toggle("hidden", isDark);
@@ -220,21 +212,34 @@ function switchTab(tabId) {
 
 function updateUserHeaderBadge() {
   const user = window.journalUser || null;
-  const email = user?.email || "Trader";
-  const display = user?.displayName || email.split("@")[0] || "Trader";
+  if (!user) return;
+  const email = user.email || "";
+  const display = user.displayName || (email ? email.split("@")[0] : "Trader");
   
   const btnLabel = document.getElementById("btnAccountEmail");
   const userNameLabel = document.getElementById("userNameLabel");
   const badge = document.getElementById("userInitialBadge");
   const avatarMini = document.getElementById("sideUserAvatarMini");
 
-  if (btnLabel) btnLabel.innerText = email;
+  if (btnLabel) btnLabel.innerText = email || display;
   if (userNameLabel) userNameLabel.innerText = display;
-  if (badge) badge.innerText = display.charAt(0).toUpperCase();
-  if (avatarMini) avatarMini.innerText = display.charAt(0).toUpperCase();
+  if (badge) {
+    if (user.photoURL) {
+      badge.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
+    } else {
+      badge.innerText = display.charAt(0).toUpperCase();
+    }
+  }
+  if (avatarMini) {
+    if (user.photoURL) {
+      avatarMini.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
+    } else {
+      avatarMini.innerText = display.charAt(0).toUpperCase();
+    }
+  }
 }
 
-// -------------------- Pro vs Free Role Visual Rules --------------------
+// -------------------- Pro vs Free Visual Rules --------------------
 function applyJournalRoleRules(role) {
   window.journalUserRole = role || 'free';
   const isPro = (window.journalUserRole === 'pro');
@@ -499,7 +504,7 @@ async function loadWatchlist() {
   renderWatchlist();
 }
 
-// -------------------- Positions Dashboard (Clean Centered Data) --------------------
+// -------------------- Positions Dashboard --------------------
 function renderPositionsTable() {
   try { 
     const uid = window.journalUser?.uid; 
@@ -511,18 +516,19 @@ function renderPositionsTable() {
   const open = trades.filter(t => outcome(t) === 'OPEN');
   const closed = trades.filter(t => outcome(t) !== 'OPEN');
 
-  document.getElementById("kpi-open-count").innerText = open.length;
-  document.getElementById("kpi-lots-count").innerText = `${open.length} Active Lots`;
+  const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  setKpi("kpi-open-count", open.length);
+  setKpi("kpi-lots-count", `${open.length} Active Lots`);
 
   const riskFreeCount = open.filter(t => {
     const sl = safeNum(t.trailingSL || t.sl);
     return sl && (t.dir === 'B' ? sl >= safeNum(t.entry) : sl <= safeNum(t.entry));
   }).length;
-  document.getElementById("kpi-riskfree-count").innerText = riskFreeCount;
+  setKpi("kpi-riskfree-count", riskFreeCount);
 
   const invested = open.reduce((sum,t) => sum + safeNum(t.entry) * remainingQty(t), 0);
-  document.getElementById("kpi-cap-invested").innerText = `${((invested / PORTFOLIO_CAPITAL) * 100).toFixed(1)}%`;
-  document.getElementById("kpi-cap-deployed-val").innerText = `₹${invested.toLocaleString('en-IN',{maximumFractionDigits:0})} deployed`;
+  setKpi("kpi-cap-invested", `${((invested / PORTFOLIO_CAPITAL) * 100).toFixed(1)}%`);
+  setKpi("kpi-cap-deployed-val", `₹${invested.toLocaleString('en-IN',{maximumFractionDigits:0})} deployed`);
 
   let totalUnreal = 0, pricedPositions = 0;
   open.forEach(t => {
@@ -534,15 +540,20 @@ function renderPositionsTable() {
     }
   });
   const unrealEl = document.getElementById("kpi-unreal-pnl");
-  unrealEl.innerText = open.length && !pricedPositions ? "—" : `${totalUnreal >= 0 ? '+₹' : '-₹'}${Math.abs(totalUnreal).toFixed(0)}${pricedPositions < open.length ? ' *' : ''}`;
-  unrealEl.className = `text-xl font-black font-mono-num mt-1 ${totalUnreal >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  if (unrealEl) {
+    unrealEl.innerText = open.length && !pricedPositions ? "—" : `${totalUnreal >= 0 ? '+₹' : '-₹'}${Math.abs(totalUnreal).toFixed(0)}`;
+    unrealEl.className = `text-xl font-black font-mono-num mt-1 ${totalUnreal >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  }
 
   const realGain = closed.reduce((sum,t) => sum + (calcPnL(t) || 0), 0);
   const realEl = document.getElementById("kpi-real-pnl");
-  realEl.innerText = `${realGain >= 0 ? '+₹' : '-₹'}${Math.abs(realGain).toFixed(0)}`;
-  realEl.className = `text-xl font-black font-mono-num mt-1 ${realGain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  if (realEl) {
+    realEl.innerText = `${realGain >= 0 ? '+₹' : '-₹'}${Math.abs(realGain).toFixed(0)}`;
+    realEl.className = `text-xl font-black font-mono-num mt-1 ${realGain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  }
 
   const tbody = document.getElementById("positionsTbody");
+  if (!tbody) return;
   if (!open.length) {
     tbody.innerHTML = `<tr><td colspan="12" class="py-8 text-center text-slate-400">No open positions. Click "Log Trade" above to deploy capital.</td></tr>`;
     return;
@@ -573,8 +584,8 @@ function renderPositionsTable() {
       </td>
       <td class="py-2.5 px-3 text-center">
         <div class="flex items-center justify-center gap-1">
-          <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500 cursor-pointer" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-          <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400 cursor-pointer" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+          <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </div>
       </td>
     </tr>`;
@@ -617,7 +628,6 @@ function renderTradeSummary() {
   set('sum-avg-r', `${avgR >= 0 ? '+' : ''}${avgR.toFixed(2)}R`);
 }
 
-// -------------------- Clean & Polished Trades Table (Issue 3 & 5 Fixed) --------------------
 function renderTradesTable() {
   const search = (document.getElementById("tradeSearchInput")?.value || "").toLowerCase().trim();
   let list = trades.filter(t => {
@@ -632,6 +642,7 @@ function renderTradesTable() {
   });
 
   const tbody = document.getElementById("tradesTbody");
+  if(!tbody) return;
   if(!list.length){
     tbody.innerHTML = `<tr><td colspan="23" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;
     renderTradeSummary();
@@ -651,7 +662,6 @@ function renderTradesTable() {
     const risk = plannedRiskAmount(t), ltp = Number(ltpCache[String(t.symbol||'').toUpperCase()]), hasLtp = Number.isFinite(ltp) && ltp > 0;
     const mfePlus = safeNum(t.mfe) > 0 && pnl !== null && safeNum(t.entry) * safeNum(t.qty) > 0 ? ((pnl / (safeNum(t.entry) * safeNum(t.qty))) / safeNum(t.mfe)) * 100 : null;
 
-    // Free users blur MFE/MAE columns
     const mfeCell = isPro 
       ? `<td class="py-2.5 px-2 text-right font-mono-num text-emerald-500">${t.mfe !== '' && t.mfe !== undefined ? safeNum(t.mfe).toFixed(2) + '%' : '—'}</td>`
       : `<td class="py-2.5 px-2 text-right font-mono-num text-slate-400 row-locked-blur">🔒 0.0%</td>`;
@@ -731,7 +741,7 @@ function sortTrades(field){
   renderTradesTable();
 }
 
-// -------------------- Partial Exit Editor --------------------
+// -------------------- Partial Exits --------------------
 let partialExitDraft = [];
 function renderPartialExitRows(){
   const box = document.getElementById('partialExitRows');
@@ -768,7 +778,7 @@ function removePartialExitRow(i){
   renderPartialExitRows();
 }
 
-// -------------------- Modal Controllers (Issue 1 Fixed) --------------------
+// -------------------- Modal Actions --------------------
 function openTradeModal(id = null){
   document.getElementById("tradeModalTitle").innerText = id ? "Edit Trade Log" : "Add New Trade Log";
   document.getElementById("fTradeId").value = id || "";
@@ -869,10 +879,7 @@ async function saveTradeLog(){
   if(existingIdx >= 0) trades[existingIdx] = tradeObj; else trades.unshift(tradeObj);
   
   closeTradeModal(); 
-  renderPositionsTable(); 
-  renderTradesTable(); 
-  renderPerformanceMetrics(); 
-  renderAnalyticsView();
+  renderPositionsTable(); renderTradesTable(); renderPerformanceMetrics(); renderAnalyticsView();
   
   try {
     await window.journalStore.saveTrade(tradeObj);
@@ -906,7 +913,7 @@ async function deleteTrade(id){
   }
 }
 
-// -------------------- Real-time Prices (LTP) --------------------
+// -------------------- LTP Real-Time Price Fetch --------------------
 async function refreshLTP(){
   const buttonLabel = document.getElementById("ltpButtonLabel");
   const spinner = document.getElementById("ltpSpinner");
@@ -919,7 +926,7 @@ async function refreshLTP(){
     ...watchlist.map(w => String(w.ticker || "").trim().toUpperCase())
   ].filter(s => /^[A-Z0-9&_-]{1,30}$/.test(s)))];
   
-  if (!symbols.length) { showToast("No open positions or watchlist stocks to fetch prices for.", true); return; }
+  if (!symbols.length) { showToast("No open positions or watchlist stocks to fetch quotes for.", true); return; }
   
   window.__ltpRefreshInProgress = true;
   buttons.forEach(b => b.disabled = true);
@@ -977,7 +984,7 @@ function requestLTPBatch_(symbols) {
   });
 }
 
-// -------------------- Performance Metrics --------------------
+// -------------------- Performance Metrics Calculation --------------------
 function renderPerformanceMetrics(){
   const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'));
   const wins = closed.filter(t => outcome(t) === 'WIN'), losses = closed.filter(t => outcome(t) === 'LOSS');
@@ -991,15 +998,20 @@ function renderPerformanceMetrics(){
   const net = closed.reduce((s,t) => s + (calcPnL(t) || 0), 0);
   const ret = net / PORTFOLIO_CAPITAL * 100;
 
-  document.getElementById("perf-wr").innerText = wr.toFixed(1) + "%";
-  document.getElementById("perf-wr-sub").innerText = `${wins.length} Wins / ${losses.length} Losses`;
-  document.getElementById("perf-pf").innerText = Number.isFinite(pf) ? pf.toFixed(2) : "∞";
-  document.getElementById("perf-avg-win").innerText = `₹${avgWin.toFixed(0)}`;
-  document.getElementById("perf-avg-loss").innerText = `₹${avgLoss.toFixed(0)}`;
-  document.getElementById("perf-payoff").innerText = payoff.toFixed(2) + "x";
-  document.getElementById("perf-total-return").innerText = `${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%`;
-  document.getElementById("perf-total-return").className = `text-xl font-black font-mono-num mt-1 ${ret >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
-  document.getElementById("perf-capital-label").innerText = `Base: ₹${PORTFOLIO_CAPITAL.toLocaleString('en-IN')}`;
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  setEl("perf-wr", wr.toFixed(1) + "%");
+  setEl("perf-wr-sub", `${wins.length} Wins / ${losses.length} Losses`);
+  setEl("perf-pf", Number.isFinite(pf) ? pf.toFixed(2) : "∞");
+  setEl("perf-avg-win", `₹${avgWin.toFixed(0)}`);
+  setEl("perf-avg-loss", `₹${avgLoss.toFixed(0)}`);
+  setEl("perf-payoff", payoff.toFixed(2) + "x");
+  
+  const retEl = document.getElementById("perf-total-return");
+  if (retEl) {
+    retEl.innerText = `${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%`;
+    retEl.className = `text-xl font-black font-mono-num mt-1 ${ret >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  }
+  setEl("perf-capital-label", `Base: ₹${PORTFOLIO_CAPITAL.toLocaleString('en-IN')}`);
 
   const sorted = [...wins].sort((a,b) => (calcPnL(b) || 0) - (calcPnL(a) || 0));
   const sortedLosers = [...losses].sort((a,b) => (calcPnL(a) || 0) - (calcPnL(b) || 0));
@@ -1024,7 +1036,8 @@ function renderPerformanceMetrics(){
     ['Best Trade', wins.length ? `₹${Math.max(...wins.map(t => calcPnL(t))).toFixed(0)}` : '₹0'],
     ['Worst Trade', losses.length ? `₹${Math.min(...losses.map(t => calcPnL(t))).toFixed(0)}` : '₹0']
   ];
-  document.getElementById('pnlStatsTable').innerHTML = pnlRows.map(r => `<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
+  const pnlStats = document.getElementById('pnlStatsTable');
+  if (pnlStats) pnlStats.innerHTML = pnlRows.map(r => `<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
 
   const rs = closed.map(rMultiple).filter(v => v !== null);
   const avgRisk = closed.length ? closed.reduce((s,t) => s + plannedRiskAmount(t), 0) / closed.length : 0;
@@ -1036,14 +1049,18 @@ function renderPerformanceMetrics(){
     ['Average R-Multiple', `${rs.length ? (rs.reduce((a,b) => a + b, 0) / rs.length).toFixed(2) : '0.00'}R`],
     ['Best R-Multiple', `${maxRisk.toFixed(2)}R`]
   ];
-  document.getElementById('riskAnalysisTable').innerHTML = riskRows.map(r => `<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
+  const riskTable = document.getElementById('riskAnalysisTable');
+  if (riskTable) riskTable.innerHTML = riskRows.map(r => `<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
 
   const mm = {};
   closed.forEach(t => { const k = monthKey(t); if(!mm[k]) mm[k] = {n:0, w:0, l:0, p:0}; mm[k].n++; if(outcome(t) === 'WIN') mm[k].w++; if(outcome(t) === 'LOSS') mm[k].l++; mm[k].p += calcPnL(t) || 0; });
-  document.getElementById('monthlyBreakdownTable').innerHTML = Object.keys(mm).sort().map(k => {
-    const m = mm[k];
-    return `<tr><td class="py-2 font-bold">${monthLabel(k)}</td><td class="py-2 text-right">${m.n}</td><td class="py-2 text-right text-emerald-500">${m.w}</td><td class="py-2 text-right text-rose-500">${m.l}</td><td class="py-2 text-right">${m.n ? (m.w / m.n * 100).toFixed(1) : '0.0'}%</td><td class="py-2 text-right font-mono-num font-bold ${m.p >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${m.p >= 0 ? '+' : '-'}₹${Math.abs(m.p).toFixed(0)}</td><td class="py-2 text-right font-mono-num">${m.n ? '₹' + (m.p / m.n).toFixed(0) : '₹0'}</td></tr>`;
-  }).join('') || '<tr><td colspan="7" class="py-4 text-center text-slate-400">No closed trades.</td></tr>';
+  const monthlyTable = document.getElementById('monthlyBreakdownTable');
+  if (monthlyTable) {
+    monthlyTable.innerHTML = Object.keys(mm).sort().map(k => {
+      const m = mm[k];
+      return `<tr><td class="py-2 font-bold">${monthLabel(k)}</td><td class="py-2 text-right">${m.n}</td><td class="py-2 text-right text-emerald-500">${m.w}</td><td class="py-2 text-right text-rose-500">${m.l}</td><td class="py-2 text-right">${m.n ? (m.w / m.n * 100).toFixed(1) : '0.0'}%</td><td class="py-2 text-right font-mono-num font-bold ${m.p >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${m.p >= 0 ? '+' : '-'}₹${Math.abs(m.p).toFixed(0)}</td><td class="py-2 text-right font-mono-num">${m.n ? '₹' + (m.p / m.n).toFixed(0) : '₹0'}</td></tr>`;
+    }).join('') || '<tr><td colspan="7" class="py-4 text-center text-slate-400">No closed trades.</td></tr>';
+  }
 
   renderPerformanceCharts();
 }
@@ -1068,7 +1085,7 @@ function renderPerformanceCharts(){
   makeChart('chartOutcomePie', 'outcomePie', 'doughnut', ['Wins', 'Losses', 'Break-even'], [{ data: counts, backgroundColor: ['#10b981', '#ef4444', '#94a3b8'], borderWidth: 0 }], { plugins: { legend: { position: 'bottom' } } });
 }
 
-// -------------------- Analytics & MFE/MAE --------------------
+// -------------------- Analytics Diagnostics --------------------
 function computeMFEMAE(){
   const closed = trades.filter(t => outcome(t) !== 'OPEN');
   const mfes = closed.map(t => safeNum(t.mfe)).filter(v => v !== 0);
@@ -1081,10 +1098,11 @@ function computeMFEMAE(){
   }).filter(v => v !== null);
   const expectancy = closed.length ? closed.reduce((s,t) => s + (rMultiple(t) || 0), 0) / closed.length : 0;
 
-  document.getElementById('stat-avg-mfe').innerText = mfes.length ? avgMFE.toFixed(2) + '%' : '--';
-  document.getElementById('stat-avg-mae').innerText = maes.length ? avgMAE.toFixed(2) + '%' : '--';
-  document.getElementById('stat-exit-eff').innerText = eff.length ? (eff.reduce((a,b) => a + b, 0) / eff.length * 100).toFixed(1) + '%' : '--';
-  document.getElementById('stat-expectancy').innerText = expectancy.toFixed(2) + 'R';
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  setEl('stat-avg-mfe', mfes.length ? avgMFE.toFixed(2) + '%' : '--');
+  setEl('stat-avg-mae', maes.length ? avgMAE.toFixed(2) + '%' : '--');
+  setEl('stat-exit-eff', eff.length ? (eff.reduce((a,b) => a + b, 0) / eff.length * 100).toFixed(1) + '%' : '--');
+  setEl('stat-expectancy', expectancy.toFixed(2) + 'R');
 }
 
 function renderAnalyticsView(){
@@ -1104,12 +1122,12 @@ function renderAnalyticsCharts(){
   makeChart('chartDrawdown', 'dd', 'line', labels, [lineDataset('Drawdown %', dd, '#ef4444', 'rgba(239,68,68,.08)')], { scales: { y: { ticks: { callback: v => v + '%' } } } });
 }
 
-// -------------------- Tools Sizing Calculator --------------------
+// -------------------- Tools Calculations --------------------
 function runSizingCalc() {
-  const cap = parseFloat(document.getElementById("toolCap").value) || 0;
-  const riskPct = parseFloat(document.getElementById("toolRiskPct").value) || 0;
-  const entry = parseFloat(document.getElementById("toolEntry").value) || 0;
-  const sl = parseFloat(document.getElementById("toolSL").value) || 0;
+  const cap = parseFloat(document.getElementById("toolCap")?.value) || 0;
+  const riskPct = parseFloat(document.getElementById("toolRiskPct")?.value) || 0;
+  const entry = parseFloat(document.getElementById("toolEntry")?.value) || 0;
+  const sl = parseFloat(document.getElementById("toolSL")?.value) || 0;
 
   if (!entry || !sl || entry === sl) return;
 
@@ -1119,17 +1137,18 @@ function runSizingCalc() {
   const posVal = qty * entry;
   const exposure = (posVal / cap) * 100;
 
-  document.getElementById("resRiskAmt").innerText = `₹${riskAmt.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
-  document.getElementById("resRiskPerShare").innerText = `₹${riskPerShare.toFixed(2)}`;
-  document.getElementById("resQty").innerText = `${qty.toLocaleString()} Shares`;
-  document.getElementById("resPosValue").innerText = `₹${posVal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-  document.getElementById("resExposure").innerText = `${exposure.toFixed(1)}% of Capital`;
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  setEl("resRiskAmt", `₹${riskAmt.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`);
+  setEl("resRiskPerShare", `₹${riskPerShare.toFixed(2)}`);
+  setEl("resQty", `${qty.toLocaleString()} Shares`);
+  setEl("resPosValue", `₹${posVal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`);
+  setEl("resExposure", `${exposure.toFixed(1)}% of Capital`);
 }
 
 function runRLadder() {
-  const entry = parseFloat(document.getElementById("rEntry").value) || 0;
-  const sl = parseFloat(document.getElementById("rSL").value) || 0;
-  const cur = parseFloat(document.getElementById("rCurrent").value) || entry;
+  const entry = parseFloat(document.getElementById("rEntry")?.value) || 0;
+  const sl = parseFloat(document.getElementById("rSL")?.value) || 0;
+  const cur = parseFloat(document.getElementById("rCurrent")?.value) || entry;
   const tbody = document.getElementById("rLadderTbody");
   if (!entry || !sl || entry === sl || !tbody) return;
 
@@ -1162,7 +1181,7 @@ function renderWatchlist() {
     <div class="py-3 flex justify-between items-center">
       <div>
         <span class="font-bold font-mono-num text-blue-500">${w.ticker}</span>
-        <span class="ml-2 text-slate-400">${w.setup || 'Setup'}</span>
+        <span class="ml-2 text-slate-400 font-semibold">${w.setup || 'Setup'}</span>
         <div class="text-[11px] text-slate-400 mt-0.5">Entry ₹${w.entry} | SL ₹${w.sl} | Target ₹${w.target}</div>
       </div>
       <button onclick="removeWatchItem(${idx})" class="text-rose-500 p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
@@ -1172,17 +1191,17 @@ function renderWatchlist() {
 }
 
 async function addWatchItem() {
-  const ticker = document.getElementById("w-ticker").value.trim().toUpperCase();
+  const ticker = document.getElementById("w-ticker")?.value.trim().toUpperCase();
   if (!ticker) return;
   const item = {
     id: "W_" + Date.now(),
     ticker,
     companyName: tickerCompanyName(ticker),
-    setup: document.getElementById("w-setup").value,
-    entry: document.getElementById("w-entry").value,
-    sl: document.getElementById("w-sl").value,
-    target: document.getElementById("w-target").value,
-    notes: document.getElementById("w-notes").value
+    setup: document.getElementById("w-setup")?.value || "",
+    entry: document.getElementById("w-entry")?.value || "",
+    sl: document.getElementById("w-sl")?.value || "",
+    target: document.getElementById("w-target")?.value || "",
+    notes: document.getElementById("w-notes")?.value || ""
   };
   try {
     await window.journalStore.saveWatchlistItem(item);
@@ -1245,17 +1264,21 @@ let pendingBrokerImport = null;
 function openImportModal() {
   pendingBrokerImport = null;
   const modal = document.getElementById('brokerImportModal');
-  modal.classList.remove('hidden'); modal.classList.add('flex');
-  document.getElementById('brokerImportFile').value = '';
-  document.getElementById('brokerImportStatus').textContent = 'Choose a Zerodha or Groww report to preview its trades.';
-  document.getElementById('brokerImportPreviewWrap').classList.add('hidden');
-  document.getElementById('brokerImportConfirmBtn').disabled = true;
+  if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+  const fileInput = document.getElementById('brokerImportFile');
+  if (fileInput) fileInput.value = '';
+  const status = document.getElementById('brokerImportStatus');
+  if (status) status.textContent = 'Choose a Zerodha or Groww report to preview its trades.';
+  const wrap = document.getElementById('brokerImportPreviewWrap');
+  if (wrap) wrap.classList.add('hidden');
+  const confirm = document.getElementById('brokerImportConfirmBtn');
+  if (confirm) confirm.disabled = true;
   if (window.lucide) lucide.createIcons();
 }
 
 function closeImportModal() {
   const modal = document.getElementById('brokerImportModal');
-  modal.classList.add('hidden'); modal.classList.remove('flex');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
   pendingBrokerImport = null;
 }
 
@@ -1299,7 +1322,7 @@ function importFindHeader(rows) {
     if (keys.includes('symbol') && keys.includes('tradetype') && keys.includes('quantity') && keys.includes('price')) return { row: i, broker: 'Zerodha', keys };
     if (keys.includes('stockname') && keys.includes('symbol') && keys.includes('type') && keys.includes('quantity') && keys.includes('value')) return { row: i, broker: 'Groww', keys };
   }
-  throw new Error('Report format not recognized. Please use a Zerodha tradebook or Groww stock order-history report.');
+  throw new Error('Report format not recognized. Use Zerodha tradebook or Groww stock order-history.');
 }
 
 function importBrokerRows(rows, forcedBroker) {
@@ -1371,14 +1394,15 @@ function importBrokerRows(rows, forcedBroker) {
 
 async function previewBrokerImport() {
   pendingBrokerImport = null;
-  const file = document.getElementById('brokerImportFile').files[0];
+  const file = document.getElementById('brokerImportFile')?.files[0];
   const status = document.getElementById('brokerImportStatus');
   const wrap = document.getElementById('brokerImportPreviewWrap');
   const confirm = document.getElementById('brokerImportConfirmBtn');
-  wrap.classList.add('hidden'); confirm.disabled = true;
+  if (wrap) wrap.classList.add('hidden'); 
+  if (confirm) confirm.disabled = true;
   if (!file) return;
   try {
-    status.textContent = 'Reading report and matching executions…';
+    if (status) status.textContent = 'Reading report and matching executions…';
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
     const rows = [];
@@ -1386,18 +1410,25 @@ async function previewBrokerImport() {
       const sheetRows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, raw: true, defval: '' });
       if (sheetRows.some(r => r.some(c => ['tradetype','stockname'].includes(importHeaderKey(c))))) rows.push(...sheetRows);
     });
-    const result = importBrokerRows(rows, document.getElementById('brokerImportSelect').value);
+    const result = importBrokerRows(rows, document.getElementById('brokerImportSelect')?.value || 'auto');
     await window.journalStoreReady;
     const existingIds = new Set(trades.map(t => String(t.id)));
     const duplicates = result.trades.filter(t => existingIds.has(t.id)).length;
     pendingBrokerImport = { ...result, fileName: file.name, duplicates };
-    document.getElementById('brokerImportSummary').textContent = `${result.broker} · ${result.fills.length} grouped orders · ${result.trades.length} matched/open trade rows · ${duplicates} already imported · ${result.skipped} rows skipped`;
+    
+    const summary = document.getElementById('brokerImportSummary');
+    if (summary) summary.textContent = `${result.broker} · ${result.fills.length} grouped orders · ${result.trades.length} matched/open trade rows · ${duplicates} already imported · ${result.skipped} rows skipped`;
+    
     const shown = result.trades.slice(0, 60);
-    document.getElementById('brokerImportPreviewBody').innerHTML = shown.map(t => `<tr><td class="p-2 font-bold">${escapeImportHtml(t.symbol)}</td><td class="p-2">${t.dir === 'B' ? 'BUY' : 'SELL'}</td><td class="p-2 text-right font-mono-num">${t.qty}</td><td class="p-2 text-right font-mono-num">₹${t.entry.toFixed(2)}</td><td class="p-2 text-right font-mono-num">${t.exit ? '₹'+t.exit.toFixed(2) : '—'}</td><td class="p-2 text-center">${t.edate}</td><td class="p-2 text-center">${t.xdate || '—'}</td><td class="p-2 text-center ${t.importState==='OPEN'?'text-amber-500':'text-emerald-500'} font-bold">${t.importState}</td></tr>`).join('');
-    wrap.classList.remove('hidden'); confirm.disabled = false;
-    status.textContent = 'Review preview above, then confirm import.';
+    const body = document.getElementById('brokerImportPreviewBody');
+    if (body) {
+      body.innerHTML = shown.map(t => `<tr><td class="p-2 font-bold">${escapeImportHtml(t.symbol)}</td><td class="p-2">${t.dir === 'B' ? 'BUY' : 'SELL'}</td><td class="p-2 text-right font-mono-num">${t.qty}</td><td class="p-2 text-right font-mono-num">₹${t.entry.toFixed(2)}</td><td class="p-2 text-right font-mono-num">${t.exit ? '₹'+t.exit.toFixed(2) : '—'}</td><td class="p-2 text-center">${t.edate}</td><td class="p-2 text-center">${t.xdate || '—'}</td><td class="p-2 text-center ${t.importState==='OPEN'?'text-amber-500':'text-emerald-500'} font-bold">${t.importState}</td></tr>`).join('');
+    }
+    if (wrap) wrap.classList.remove('hidden'); 
+    if (confirm) confirm.disabled = false;
+    if (status) status.textContent = 'Review preview above, then confirm import.';
   } catch (err) {
-    status.textContent = err.message || 'Could not read report.';
+    if (status) status.textContent = err.message || 'Could not read report.';
     showToast(err.message, true);
   }
 }
@@ -1409,7 +1440,7 @@ function escapeImportHtml(v) {
 async function confirmBrokerImport() {
   if (!pendingBrokerImport) return;
   const btn = document.getElementById('brokerImportConfirmBtn');
-  btn.disabled = true; btn.textContent = 'Importing…';
+  if (btn) { btn.disabled = true; btn.textContent = 'Importing…'; }
   try {
     await window.journalStoreReady;
     const result = pendingBrokerImport;
@@ -1422,13 +1453,12 @@ async function confirmBrokerImport() {
   } catch (err) {
     showToast(err.message || 'Import failed.', true);
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Import to Trade Log';
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Import to Trade Log'; }
     if (window.lucide) lucide.createIcons();
   }
 }
 
-// -------------------- Global Window Exports --------------------
+// -------------------- Window Exports --------------------
 window.openProModal = openProModal;
 window.closeProModal = closeProModal;
 window.openWhatsAppTrialModal = openWhatsAppTrialModal;
