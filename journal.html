@@ -7,6 +7,7 @@
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
 
+  <!-- Instant Theme Execution -->
   <script>
     (function() {
       try {
@@ -47,70 +48,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
-
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
-    .tagline-font { font-family: 'Montserrat', sans-serif; }
-    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
-
-    :root { 
-      --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
-      --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; 
-    }
-    .dark { 
-      --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
-      --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; 
-    }
-    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
-    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
-               background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
-    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
-    .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
-
-    /* Collapsed Sidebar */
-    .sidebar-collapsed { width: 4.2rem !important; }
-    .sidebar-collapsed .brand-text,
-    .sidebar-collapsed .nav-text,
-    .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
-    .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
-    .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-
-    .sidebar-collapsed .nav-item:hover::after,
-    .sidebar-collapsed .side-collapsed-user:hover::after {
-      content: attr(data-title);
-      position: absolute;
-      left: 4.2rem;
-      background: #0f172a;
-      color: #fff;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 6px;
-      white-space: nowrap;
-      z-index: 100;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      border: 1px solid #1e293b;
-    }
-
-    .collapse-float-btn { position: absolute; right: -12px; top: 22px; z-index: 60; }
-    .metric-strip-card { position:relative; overflow:hidden; }
-    .metric-strip-card::after { content:""; position:absolute; inset:auto -30px -35px auto; width:90px; height:90px; border-radius:999px; background:currentColor; opacity:.035; }
-    .chart-card { min-height:300px; }
-    .summary-accent { border-left-width:3px; }
-
-    /* Blur Lock Utility */
-    .row-locked-blur {
-      filter: blur(4px);
-      user-select: none;
-      pointer-events: none;
-      opacity: 0.4;
-    }
-  </style>
+  <link rel="stylesheet" href="./journal.css">
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
 
@@ -185,7 +123,6 @@
         <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
         </a>
-        <!-- ACTIVE: Trading Journal -->
         <a href="journal.html" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="book-open" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Trading Journal</span>
         </a>
@@ -248,7 +185,7 @@
   <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
     <main class="p-5 md:p-7 space-y-6 w-full">
 
-      <!-- Top Banner & Action Controls -->
+      <!-- Top Banner -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-borderDark">
         <div>
           <div class="flex items-center gap-2.5">
@@ -276,7 +213,7 @@
         </div>
       </div>
 
-      <!-- Modern Navigation Tab Strip -->
+      <!-- Navigation Tab Strip -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scroll text-xs font-bold">
         <button onclick="switchTab('positions')" id="tab-btn-positions" class="tab-btn px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-500 flex items-center gap-2 transition-all">
           <i data-lucide="layout-grid" class="w-4 h-4"></i> Positions Dashboard
@@ -312,7 +249,7 @@
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
             <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">OPEN POSITIONS</span>
             <div class="text-xl font-black font-mono-num mt-1" id="kpi-open-count">0</div>
-            <p class="text-[10px] text-slate-400 mt-0.5" id="kpi-lots-count">0 Active Lots</p>
+            <p class="text-[10px] text-slate-400 mt-0.5" id="kpi-lots-count">0 Lots Deployed</p>
           </div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
             <span class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">RISK-FREE POSITIONS</span>
@@ -341,7 +278,7 @@
           </div>
         </div>
 
-        <!-- Open Positions Table -->
+        <!-- Open Positions Table (Removed PYRAMID BLENDED) -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-5 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -387,6 +324,7 @@
             </div>
           </div>
 
+          <!-- Quick Filters -->
           <div class="flex items-center gap-1.5 flex-wrap font-bold">
             <button onclick="setTradeFilter('all', this)" class="trade-filter-btn px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-500">All</button>
             <button onclick="setTradeFilter('open', this)" class="trade-filter-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800">⏳ Open</button>
@@ -480,7 +418,6 @@
 
       <!-- ================= 3. TAB: PERFORMANCE METRICS ================= -->
       <section id="pane-performance" class="tab-pane hidden space-y-6">
-        <!-- Performance Timeframe Selector -->
         <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-xl p-3 shadow-sm">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">PERFORMANCE TIMEFRAME</span>
@@ -495,7 +432,6 @@
           </div>
         </div>
 
-        <!-- 6 Performance Cards (CENTERED) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center"><span class="text-[10px] font-extrabold uppercase text-slate-400">WIN RATE</span><div class="text-xl font-black font-mono-num text-emerald-500 mt-1" id="perf-wr">0.0%</div><p class="text-[10px] text-slate-400 mt-0.5" id="perf-wr-sub">0 Wins / 0 Losses</p></div>
           <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center"><span class="text-[10px] font-extrabold uppercase text-slate-400">PROFIT FACTOR</span><div class="text-xl font-black font-mono-num text-amber-500 mt-1" id="perf-pf">0.00</div><p class="text-[10px] text-slate-400 mt-0.5">Gross Win ÷ Loss</p></div>
@@ -685,11 +621,10 @@
     </main>
   </div>
 
-  <!-- ================= REDESIGNED TRADE LOG MODAL (MATCHES SCREENSHOT 2) ================= -->
+  <!-- ================= TRADE MODAL (SCREENSHOT 2 STYLE) ================= -->
   <div id="tradeModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
     <div class="bg-white dark:bg-[#0b1325] border border-slate-200 dark:border-borderDark rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
       
-      <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-slate-100 dark:border-borderDark flex items-center justify-between shrink-0">
         <h3 id="tradeModalTitle" class="font-extrabold text-sm text-slate-900 dark:text-white">Add New Trade Log</h3>
         <button onclick="closeTradeModal()" class="text-slate-400 hover:text-rose-500 cursor-pointer">
@@ -697,11 +632,9 @@
         </button>
       </div>
 
-      <!-- Modal Body (Clean 2-Column Grid Matching Screenshot 2) -->
       <div class="p-6 overflow-y-auto custom-scroll space-y-4 text-xs">
         <input type="hidden" id="fTradeId">
 
-        <!-- Row 1: Symbol & Type -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">SYMBOL *</label>
@@ -717,7 +650,6 @@
           </div>
         </div>
 
-        <!-- Row 2: Direction & Quantity -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">DIRECTION</label>
@@ -732,7 +664,6 @@
           </div>
         </div>
 
-        <!-- Row 3: Entry Price & Exit Price -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">ENTRY PRICE ₹ *</label>
@@ -744,7 +675,6 @@
           </div>
         </div>
 
-        <!-- Row 4: Stop Loss & Target -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">STOP LOSS ₹</label>
@@ -756,7 +686,6 @@
           </div>
         </div>
 
-        <!-- Row 5: Entry Date & Exit Date -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">ENTRY DATE</label>
@@ -768,7 +697,6 @@
           </div>
         </div>
 
-        <!-- Row 6: Setup & Chart URL -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">SETUP / PATTERN</label>
@@ -823,6 +751,7 @@
               </div>
             </div>
 
+            <!-- Partial Exits List -->
             <div class="p-2.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-slate-900">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] font-bold uppercase text-slate-400">Scale-Out Partial Exits</span>
@@ -833,14 +762,14 @@
           </div>
         </details>
 
-        <!-- Row 7: Notes -->
+        <!-- Notes -->
         <div>
           <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">NOTES</label>
           <textarea id="fNotes" rows="3" placeholder="Trade rationale, lessons, mistakes..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070e1b] border border-slate-200 dark:border-borderDark text-slate-800 dark:text-white outline-none focus:border-cyan-500 transition-colors"></textarea>
         </div>
       </div>
 
-      <!-- Modal Footer (Matching Screenshot 2) -->
+      <!-- Footer Buttons -->
       <div class="px-6 py-4 border-t border-slate-100 dark:border-borderDark flex items-center justify-end gap-3 shrink-0 bg-white dark:bg-[#0b1325]">
         <button onclick="closeTradeModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-borderDark text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
           Cancel
@@ -911,9 +840,10 @@
     <span id="toastMsg">Status message</span>
   </div>
 
+  <!-- Scripts in proper matching lowercase names -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="./tickers.js"></script>
-  <script src="./Journal.js"></script>
+  <script src="./journal.js"></script>
   <script type="module" src="./firebase.js"></script>
 </body>
 </html>
