@@ -1,6 +1,8 @@
 const BROKERAGE = 40;
 let PORTFOLIO_CAPITAL = 300000;
 let analyticsTimeframe = "1M";
+let perfCustomDates = null;
+let analyticsCustomDates = null;
 
 window.journalUserRole = window.journalUserRole || 'free';
 window.sellProfitTargets = window.sellProfitTargets || {};
@@ -27,12 +29,13 @@ function updateCapitalDisplay(){
   if(e) e.textContent = "₹" + PORTFOLIO_CAPITAL.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-// -------------------- Performance Timeframe (Free Lock) --------------------
+// -------------------- Performance Timeframe & Filters --------------------
 function handlePerformanceTimeframe(tf) {
   if (window.journalUserRole !== 'pro' && tf !== '1M') {
     openProModal();
     return;
   }
+  perfCustomDates = null;
   setAnalyticsTimeframe(tf);
 }
 
@@ -44,11 +47,74 @@ function setAnalyticsTimeframe(tf){
     b.classList.toggle("text-white", on);
     b.classList.toggle("border-emerald-500", on);
   });
+  const badge = document.getElementById("perfTimeframeBadge");
+  if(badge) badge.innerText = `${tf} (${window.journalUserRole === 'pro' ? 'Pro' : 'Free'})`;
   renderPerformanceMetrics();
+}
+
+function applyPerformanceDateFilter() {
+  const from = document.getElementById("perf-date-from")?.value;
+  const to = document.getElementById("perf-date-to")?.value;
+  if (!from || !to) { showToast("Select both From and To dates.", true); return; }
+  if (window.journalUserRole !== 'pro') {
+    openProModal();
+    return;
+  }
+  perfCustomDates = { from, to };
+  document.querySelectorAll(".timeframe-btn").forEach(b => {
+    b.classList.remove("bg-emerald-500", "text-white", "border-emerald-500");
+  });
+  const badge = document.getElementById("perfTimeframeBadge");
+  if(badge) badge.innerText = `Custom (${from} to ${to})`;
+  renderPerformanceMetrics();
+  showToast("Custom performance date filter applied!");
+}
+
+function handleAnalyticsTimeframe(tf) {
+  if (window.journalUserRole !== 'pro') {
+    openProModal();
+    return;
+  }
+  analyticsCustomDates = null;
+  document.querySelectorAll(".atimeframe-btn").forEach(b => {
+    const on = b.dataset.atimeframe === tf;
+    b.classList.toggle("bg-purple-600", on);
+    b.classList.toggle("text-white", on);
+    b.classList.toggle("border-purple-600", on);
+  });
+  const badge = document.getElementById("analyticsTimeframeBadge");
+  if(badge) badge.innerText = `${tf} (Pro Active)`;
   renderAnalyticsView();
 }
 
-function timeframeTrades(list){
+function applyAnalyticsDateFilter() {
+  const from = document.getElementById("analytics-date-from")?.value;
+  const to = document.getElementById("analytics-date-to")?.value;
+  if (!from || !to) { showToast("Select both From and To dates.", true); return; }
+  if (window.journalUserRole !== 'pro') {
+    openProModal();
+    return;
+  }
+  analyticsCustomDates = { from, to };
+  document.querySelectorAll(".atimeframe-btn").forEach(b => {
+    b.classList.remove("bg-purple-600", "text-white", "border-purple-600");
+  });
+  const badge = document.getElementById("analyticsTimeframeBadge");
+  if(badge) badge.innerText = `Custom (${from} to ${to})`;
+  renderAnalyticsView();
+  showToast("Custom analytics date filter applied!");
+}
+
+function timeframeTrades(list, customRange = null){
+  if (customRange && customRange.from && customRange.to) {
+    const start = new Date(customRange.from + "T00:00:00");
+    const end = new Date(customRange.to + "T23:59:59");
+    return list.filter(t => {
+      const d = new Date(isoDate(t.xdate || t.edate) + "T12:00:00");
+      return !isNaN(d) && d >= start && d <= end;
+    });
+  }
+
   const now = new Date();
   let start = null;
   if(analyticsTimeframe === "1M") start = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
@@ -56,6 +122,7 @@ function timeframeTrades(list){
   else if(analyticsTimeframe === "1Y") start = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
   else if(analyticsTimeframe === "YTD") start = new Date(now.getFullYear(), 0, 1);
   if(!start) return list;
+
   return list.filter(t => {
     const d = new Date(isoDate(t.xdate || t.edate) + "T12:00:00");
     return !isNaN(d) && d >= start;
@@ -72,7 +139,7 @@ function handleComputeMFEMAE() {
 
 async function computeMFEMAEForTrades(){
   const eligible = trades.filter(t => outcome(t) !== 'OPEN' && t.symbol && safeNum(t.entry) > 0 && isoDate(t.edate) && isoDate(t.xdate));
-  if(!eligible.length){ showToast('Closed trades with symbol, entry price, entry date and exit date required.', true); return; }
+  if(!eligible.length){ showToast('Closed trades with symbol, entry price, entry date and exit date are required.', true); return; }
   const btns = [...document.querySelectorAll('button[onclick="handleComputeMFEMAE()"], #btnComputeMFEToolbar')];
   btns.forEach(b => { b.disabled = true; b.dataset.oldText = b.innerText; b.innerText = 'Computing…'; });
   let updated = 0, failed = 0;
@@ -112,7 +179,7 @@ function requestHistoricalExcursion(t){
   });
 }
 
-// -------------------- Stores & Globals --------------------
+// -------------------- Stores & Data Caches --------------------
 let trades = [];
 let watchlist = [];
 let ltpCache = {};
@@ -251,6 +318,7 @@ function applyJournalRoleRules(role) {
   const sideCollapsedWrap = document.getElementById('sideCollapsedUserWrap');
   const sidePlanDotMini = document.getElementById('sidePlanDotMini');
   const perfChartsOverlay = document.getElementById('perfChartsLockOverlay');
+  const perfChartsContainer = document.getElementById('perfChartsContainer');
   const analyticsOverlay = document.getElementById('analyticsLockOverlay');
   const analyticsWrap = document.getElementById('analyticsContentWrap');
   const proIcons = document.querySelectorAll('.pro-lock-icon');
@@ -271,8 +339,10 @@ function applyJournalRoleRules(role) {
     if (sidePlanDotMini) sidePlanDotMini.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1';
 
     if (perfChartsOverlay) perfChartsOverlay.style.display = 'none';
+    if (perfChartsContainer) perfChartsContainer.classList.remove('locked-blur');
     if (analyticsOverlay) analyticsOverlay.style.display = 'none';
-    if (analyticsWrap) analyticsWrap.classList.remove('row-locked-blur');
+    if (analyticsWrap) analyticsWrap.classList.remove('locked-blur');
+    
     proIcons.forEach(ic => ic.style.display = 'none');
     proColLocks.forEach(l => l.style.display = 'none');
     if (computeLockBadge) computeLockBadge.style.display = 'none';
@@ -290,8 +360,10 @@ function applyJournalRoleRules(role) {
     if (sidePlanDotMini) sidePlanDotMini.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1';
 
     if (perfChartsOverlay) perfChartsOverlay.style.display = 'flex';
+    if (perfChartsContainer) perfChartsContainer.classList.add('locked-blur');
     if (analyticsOverlay) analyticsOverlay.style.display = 'flex';
-    if (analyticsWrap) analyticsWrap.classList.add('row-locked-blur');
+    if (analyticsWrap) analyticsWrap.classList.add('locked-blur');
+    
     proIcons.forEach(ic => ic.style.display = 'inline');
     proColLocks.forEach(l => l.style.display = 'inline');
     if (computeLockBadge) computeLockBadge.style.display = 'inline';
@@ -505,7 +577,7 @@ async function loadWatchlist() {
   renderWatchlist();
 }
 
-// -------------------- Positions Dashboard (Restored Actions) --------------------
+// -------------------- Positions Dashboard (With Auto Sell Qty) --------------------
 function renderPositionsTable() {
   try { 
     const uid = window.journalUser?.uid; 
@@ -553,6 +625,11 @@ function renderPositionsTable() {
     realEl.className = `text-xl font-black font-mono-num mt-1 ${realGain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
   }
 
+  // Calculate Average Winning Trade P&L as auto target benchmark
+  const wins = closed.filter(t => outcome(t) === 'WIN');
+  const grossWin = wins.reduce((s,t) => s + (calcPnL(t) || 0), 0);
+  const avgWinPnl = wins.length ? Math.round(grossWin / wins.length) : 2000;
+
   const tbody = document.getElementById("positionsTbody");
   if (!tbody) return;
   if (!open.length) {
@@ -565,7 +642,10 @@ function renderPositionsTable() {
     const rem = remainingQty(t), investedVal = safeNum(t.entry) * rem, unreal = hasLtp ? (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) * rem : null;
     const activeSL = safeNum(t.trailingSL || t.sl), riskVal = activeSL ? Math.abs(safeNum(t.entry) - activeSL) * rem : null, riskPct = riskVal !== null ? (riskVal / PORTFOLIO_CAPITAL) * 100 : null;
     const rr = (activeSL && t.target && safeNum(t.entry) !== activeSL) ? Math.abs(safeNum(t.target) - safeNum(t.entry)) / Math.abs(safeNum(t.entry) - activeSL) : null;
-    const targetProfit = Number(window.sellProfitTargets?.[t.id] || 0), perShare = hasLtp ? (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) : 0;
+    
+    // Auto calculate Sell Qty based on Avg P&L/Trade or User target
+    const targetProfit = Number(window.sellProfitTargets?.[t.id] || avgWinPnl);
+    const perShare = hasLtp ? (t.dir === 'B' ? ltp - safeNum(t.entry) : safeNum(t.entry) - ltp) : 0;
     const sellQty = targetProfit > 0 && perShare > 0 ? Math.min(rem, Math.ceil(targetProfit / perShare)) : 0;
 
     return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
@@ -580,16 +660,16 @@ function renderPositionsTable() {
       <td class="py-2.5 px-2 text-right font-mono-num">${rr ? rr.toFixed(2) + 'R' : '—'}</td>
       <td class="py-2.5 px-2 text-right font-mono-num font-bold ${unreal === null ? 'text-slate-400' : unreal >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${unreal === null ? '—' : `${unreal >= 0 ? '+' : ''}₹${unreal.toFixed(0)}`}</td>
       <td class="py-2.5 px-2 text-right">
-        <input type="number" min="0" step="100" value="${targetProfit || ''}" placeholder="₹ profit" onchange="setSellProfitTarget('${t.id}',this.value)" class="w-20 p-1 rounded bg-transparent border border-slate-200 dark:border-borderDark text-right text-[11px] font-mono-num"/>
-        <div class="text-[10px] text-slate-400">${sellQty ? `${sellQty} qty` : '—'}</div>
+        <input type="number" min="0" step="100" value="${window.sellProfitTargets?.[t.id] || ''}" placeholder="₹ ${avgWinPnl}" onchange="setSellProfitTarget('${t.id}',this.value)" class="w-20 p-1 rounded bg-transparent border border-slate-200 dark:border-borderDark text-right text-[11px] font-mono-num" title="Enter target profit amount in ₹ to auto-calculate sell quantity at latest LTP"/>
+        <div class="text-[10px] text-slate-400 font-bold" title="Sell quantity calculated at current LTP">${sellQty ? `${sellQty} qty` : (hasLtp && perShare <= 0 ? 'No Profit' : '—')}</div>
       </td>
       <td class="py-2.5 px-3 text-center">
         <div class="flex items-center justify-center gap-1">
-          <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-          <button onclick="trailStopLoss('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-amber-500" title="Trail SL"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i></button>
-          <button onclick="pyramidPosition('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-500" title="Pyramid Add-on"><i data-lucide="layers" class="w-3.5 h-3.5"></i></button>
-          <button onclick="partialExitPosition('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-purple-500" title="Partial Exit"><i data-lucide="split" class="w-3.5 h-3.5"></i></button>
-          <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500 cursor-pointer" title="Edit Trade"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+          <button onclick="trailStopLoss('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-amber-500 cursor-pointer" title="Trail Stop Loss"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i></button>
+          <button onclick="pyramidPosition('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-500 cursor-pointer" title="Pyramid Add-on"><i data-lucide="layers" class="w-3.5 h-3.5"></i></button>
+          <button onclick="partialExitPosition('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-purple-500 cursor-pointer" title="Partial Exit / Scale-Out"><i data-lucide="split" class="w-3.5 h-3.5"></i></button>
+          <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400 cursor-pointer" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </div>
       </td>
     </tr>`;
@@ -599,12 +679,12 @@ function renderPositionsTable() {
 
 function setSellProfitTarget(id, value){
   const n = Number(value);
-  if(!Number.isFinite(n) || n < 0){ showToast("Enter a valid target profit amount.", true); return; }
+  if(!Number.isFinite(n) || n < 0){ showToast("Enter a valid profit target.", true); return; }
   window.sellProfitTargets[id] = n;
   renderPositionsTable();
 }
 
-// Quick Position Actions (Restored)
+// -------------------- Quick Position Actions --------------------
 async function trailStopLoss(id){
   const t = trades.find(x => String(x.id) === String(id));
   if(!t) return;
@@ -672,7 +752,7 @@ async function partialExitPosition(id){
   }
 }
 
-// -------------------- Trades Log (Clean Alignment & Formatting) --------------------
+// -------------------- Trades Log --------------------
 function tradeMatchesSearch(t, search) {
   const hay = [t.symbol, t.notes, t.setup, t.pattern, t.pyramidGroup, t.type, t.dir].join(' ').toLowerCase();
   return hay.includes(search);
@@ -850,7 +930,7 @@ function removePartialExitRow(i){
   renderPartialExitRows();
 }
 
-// -------------------- Modal Actions --------------------
+// -------------------- Trade Modal Actions --------------------
 function openTradeModal(id = null){
   document.getElementById("tradeModalTitle").innerText = id ? "Edit Trade Log" : "Add New Trade Log";
   document.getElementById("fTradeId").value = id || "";
@@ -988,7 +1068,7 @@ async function deleteTrade(id){
   }
 }
 
-// -------------------- LTP Real-Time Price Fetch --------------------
+// -------------------- Real-Time Quotes (LTP) --------------------
 async function refreshLTP(){
   const buttonLabel = document.getElementById("ltpButtonLabel");
   const spinner = document.getElementById("ltpSpinner");
@@ -1059,35 +1139,61 @@ function requestLTPBatch_(symbols) {
   });
 }
 
-// -------------------- Performance Metrics Calculation --------------------
+// -------------------- Performance 13 Metrics (Centered Math) --------------------
 function renderPerformanceMetrics(){
-  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'));
-  const wins = closed.filter(t => outcome(t) === 'WIN'), losses = closed.filter(t => outcome(t) === 'LOSS');
+  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'), perfCustomDates);
+  const wins = closed.filter(t => outcome(t) === 'WIN');
+  const losses = closed.filter(t => outcome(t) === 'LOSS');
+  const be = closed.filter(t => outcome(t) === 'BE');
+  
   const grossWin = wins.reduce((s,t) => s + (calcPnL(t) || 0), 0);
   const grossLoss = Math.abs(losses.reduce((s,t) => s + (calcPnL(t) || 0), 0));
   const pf = grossLoss ? grossWin / grossLoss : (grossWin > 0 ? Infinity : 0);
   const avgWin = wins.length ? grossWin / wins.length : 0;
   const avgLoss = losses.length ? grossLoss / losses.length : 0;
-  const wr = closed.length ? wins.length / closed.length * 100 : 0;
-  const payoff = avgLoss ? avgWin / avgLoss : 0;
+  const wr = closed.length ? (wins.length / closed.length) * 100 : 0;
   const net = closed.reduce((s,t) => s + (calcPnL(t) || 0), 0);
-  const ret = net / PORTFOLIO_CAPITAL * 100;
+  const avgPnl = closed.length ? net / closed.length : 0;
+  const ret = (net / PORTFOLIO_CAPITAL) * 100;
+  
+  const rs = closed.map(rMultiple).filter(v => v !== null);
+  const avgR = rs.length ? rs.reduce((a,b) => a + b, 0) / rs.length : 0;
+  const avgRisk = closed.length ? closed.reduce((s,t) => s + plannedRiskAmount(t), 0) / closed.length : 0;
 
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  setEl("perf-total-count", closed.length);
+  setEl("perf-win-count", wins.length);
+  setEl("perf-loss-count", losses.length);
+  setEl("perf-be-count", be.length);
   setEl("perf-wr", wr.toFixed(1) + "%");
-  setEl("perf-wr-sub", `${wins.length} Wins / ${losses.length} Losses`);
+  setEl("perf-wr-sub", `${wins.length} W / ${losses.length} L`);
   setEl("perf-pf", Number.isFinite(pf) ? pf.toFixed(2) : "∞");
+
+  const netEl = document.getElementById("perf-net-pnl");
+  if(netEl) {
+    netEl.innerText = `${net >= 0 ? '+₹' : '-₹'}${Math.abs(net).toFixed(0)}`;
+    netEl.className = `text-lg font-black font-mono-num mt-0.5 ${net >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  }
+  
+  const avgPnlEl = document.getElementById("perf-avg-pnl");
+  if(avgPnlEl) {
+    avgPnlEl.innerText = `${avgPnl >= 0 ? '+₹' : '-₹'}${Math.abs(avgPnl).toFixed(0)}`;
+    avgPnlEl.className = `text-lg font-black font-mono-num mt-0.5 ${avgPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+  }
+
   setEl("perf-avg-win", `₹${avgWin.toFixed(0)}`);
   setEl("perf-avg-loss", `₹${avgLoss.toFixed(0)}`);
-  setEl("perf-payoff", payoff.toFixed(2) + "x");
-  
+  setEl("perf-avg-rr", `${avgR >= 0 ? '+' : ''}${avgR.toFixed(2)}R`);
+
   const retEl = document.getElementById("perf-total-return");
   if (retEl) {
     retEl.innerText = `${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%`;
-    retEl.className = `text-xl font-black font-mono-num mt-1 ${ret >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
+    retEl.className = `text-lg font-black font-mono-num mt-0.5 ${ret >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
   }
-  setEl("perf-capital-label", `Base: ₹${PORTFOLIO_CAPITAL.toLocaleString('en-IN')}`);
+  setEl("perf-capital-label", `Base: ₹${(PORTFOLIO_CAPITAL / 100000).toFixed(1)}L`);
+  setEl("perf-avg-risk", `₹${avgRisk.toFixed(0)}`);
 
+  // Lists
   const sorted = [...wins].sort((a,b) => (calcPnL(b) || 0) - (calcPnL(a) || 0));
   const sortedLosers = [...losses].sort((a,b) => (calcPnL(a) || 0) - (calcPnL(b) || 0));
   
@@ -1107,21 +1213,18 @@ function renderPerformanceMetrics(){
     ['Net P&L', `₹${net.toFixed(0)}`],
     ['Gross Profit', `₹${grossWin.toFixed(0)}`],
     ['Gross Loss', `₹${grossLoss.toFixed(0)}`],
-    ['Average P&L / Trade', `₹${closed.length ? (net / closed.length).toFixed(0) : '0'}`],
+    ['Average P&L / Trade', `₹${closed.length ? avgPnl.toFixed(0) : '0'}`],
     ['Best Trade', wins.length ? `₹${Math.max(...wins.map(t => calcPnL(t))).toFixed(0)}` : '₹0'],
     ['Worst Trade', losses.length ? `₹${Math.min(...losses.map(t => calcPnL(t))).toFixed(0)}` : '₹0']
   ];
   const pnlStats = document.getElementById('pnlStatsTable');
   if (pnlStats) pnlStats.innerHTML = pnlRows.map(r => `<tr><td class="py-2 text-slate-400">${r[0]}</td><td class="py-2 text-right font-mono-num font-bold">${r[1]}</td></tr>`).join('');
 
-  const rs = closed.map(rMultiple).filter(v => v !== null);
-  const avgRisk = closed.length ? closed.reduce((s,t) => s + plannedRiskAmount(t), 0) / closed.length : 0;
   const maxRisk = rs.length ? Math.max(...rs) : 0;
-  
   const riskRows = [
     ['Average Planned Risk', `₹${avgRisk.toFixed(0)}`],
     ['Max Planned Risk', `₹${Math.max(0, ...closed.map(plannedRiskAmount)).toFixed(0)}`],
-    ['Average R-Multiple', `${rs.length ? (rs.reduce((a,b) => a + b, 0) / rs.length).toFixed(2) : '0.00'}R`],
+    ['Average R-Multiple', `${avgR.toFixed(2)}R`],
     ['Best R-Multiple', `${maxRisk.toFixed(2)}R`]
   ];
   const riskTable = document.getElementById('riskAnalysisTable');
@@ -1142,7 +1245,7 @@ function renderPerformanceMetrics(){
 
 function renderPerformanceCharts(){
   if(typeof Chart === 'undefined') return;
-  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN')).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
+  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'), perfCustomDates).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
   let cum = 0;
   const labels = closed.map(t => formatDate(t.xdate || t.edate)), cumData = closed.map(t => cum += calcPnL(t) || 0);
   makeChart('chartEquity', 'equity', 'line', labels, [lineDataset('Cumulative Net P&L', cumData, '#10b981', 'rgba(16,185,129,.08)')]);
@@ -1175,22 +1278,33 @@ function renderPerformanceCharts(){
   makeChart('chartAvgRiskRunning', 'avgRiskRunning', 'line', labels, [lineDataset('Avg Planned Risk', riskAvg, '#f59e0b', 'rgba(245,158,11,.07)')]);
 }
 
-// -------------------- Analytics Diagnostics --------------------
+// -------------------- Analytics Diagnostics (With Avg Heat %) --------------------
 function computeMFEMAE(){
   const closed = trades.filter(t => outcome(t) !== 'OPEN');
   const mfes = closed.map(t => safeNum(t.mfe)).filter(v => v !== 0);
   const maes = closed.map(t => safeNum(t.mae)).filter(v => v !== 0);
   const avgMFE = mfes.length ? mfes.reduce((a,b) => a + b, 0) / mfes.length : 0;
   const avgMAE = maes.length ? maes.reduce((a,b) => a + b, 0) / maes.length : 0;
+  
+  // Calculate Avg Heat % (MAE / Planned Risk %)
+  const heats = closed.map(t => {
+    const risk = plannedRiskAmount(t);
+    const maePct = safeNum(t.mae);
+    const maeAmt = safeNum(t.entry) && safeNum(t.qty) ? (maePct / 100) * safeNum(t.entry) * safeNum(t.qty) : 0;
+    return risk ? (maeAmt / risk) * 100 : null;
+  }).filter(v => v !== null && Number.isFinite(v));
+  const avgHeat = heats.length ? heats.reduce((a,b) => a + b, 0) / heats.length : 0;
+
   const eff = closed.map(t => {
     const mfe = Math.abs(safeNum(t.mfe));
-    return mfe > 0 && calcPnL(t) !== null ? Math.max(0, (calcPnL(t) / safeNum(t.entry) / safeNum(t.qty)) * 100) / mfe : null;
+    return mfe > 0 && calcPnL(t) !== null ? Math.max(0, (calcPnL(t) / (safeNum(t.entry) * safeNum(t.qty))) * 100) / mfe : null;
   }).filter(v => v !== null);
   const expectancy = closed.length ? closed.reduce((s,t) => s + (rMultiple(t) || 0), 0) / closed.length : 0;
 
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
   setEl('stat-avg-mfe', mfes.length ? avgMFE.toFixed(2) + '%' : '--');
   setEl('stat-avg-mae', maes.length ? avgMAE.toFixed(2) + '%' : '--');
+  setEl('stat-avg-heat', heats.length ? avgHeat.toFixed(1) + '%' : '--');
   setEl('stat-exit-eff', eff.length ? (eff.reduce((a,b) => a + b, 0) / eff.length * 100).toFixed(1) + '%' : '--');
   setEl('stat-expectancy', expectancy.toFixed(2) + 'R');
 }
@@ -1202,7 +1316,7 @@ function renderAnalyticsView(){
 
 function renderAnalyticsCharts(){
   if(typeof Chart === 'undefined') return;
-  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN')).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
+  const closed = timeframeTrades(trades.filter(t => outcome(t) !== 'OPEN'), analyticsCustomDates).sort((a,b) => isoDate(a.xdate || a.edate).localeCompare(isoDate(b.xdate || b.edate)));
   const labels = closed.map(t => formatDate(t.xdate || t.edate));
   let cum = 0, peak = PORTFOLIO_CAPITAL;
   const capital = closed.map(t => { cum += calcPnL(t) || 0; return PORTFOLIO_CAPITAL + cum; });
@@ -1245,7 +1359,7 @@ function renderAnalyticsCharts(){
   const eff = closed.map(t => {
     const mfePct = safeNum(t.mfe);
     const pnlPct = safeNum(t.entry) && safeNum(t.qty) ? (calcPnL(t) / (safeNum(t.entry) * safeNum(t.qty))) * 100 : 0;
-    return mfePct ? pnlPct / mfePct * 100 : 0;
+    return mfePct ? (pnlPct / mfePct) * 100 : 0;
   });
   makeChart('chartExitEfficiency', 'exitEfficiency', 'line', labels, [lineDataset('Exit Efficiency %', eff, '#06b6d4', 'rgba(6,182,212,.06)')]);
 
@@ -1253,7 +1367,7 @@ function renderAnalyticsCharts(){
     const risk = plannedRiskAmount(t);
     const maePct = safeNum(t.mae);
     const maeAmt = safeNum(t.entry) && safeNum(t.qty) ? (maePct / 100) * safeNum(t.entry) * safeNum(t.qty) : 0;
-    return risk ? maeAmt / risk * 100 : 0;
+    return risk ? (maeAmt / risk) * 100 : 0;
   });
   makeChart('chartHeat', 'heat', 'line', labels, [lineDataset('MAE ÷ Planned Risk %', heat, '#f59e0b', 'rgba(245,158,11,.06)')]);
 
@@ -1312,24 +1426,39 @@ function runRLadder() {
   }).join('');
 }
 
-// -------------------- Watchlist --------------------
+// -------------------- Watchlist (With Paper Test Exit & Return) --------------------
 function renderWatchlist() {
   const container = document.getElementById("watchListContainer");
   if (!container) return;
   if (!watchlist.length) {
-    container.innerHTML = '<p class="py-4 text-slate-400">No stocks in watchlist.</p>';
+    container.innerHTML = '<p class="py-4 text-slate-400">No setups in watchlist.</p>';
     return;
   }
-  container.innerHTML = watchlist.map((w, idx) => `
-    <div class="py-3 flex justify-between items-center">
-      <div>
-        <span class="font-bold font-mono-num text-blue-500">${w.ticker}</span>
-        <span class="ml-2 text-slate-400 font-semibold">${w.setup || 'Setup'}</span>
-        <div class="text-[11px] text-slate-400 mt-0.5">Entry ₹${w.entry} | SL ₹${w.sl} | Target ₹${w.target}</div>
+  container.innerHTML = watchlist.map((w, idx) => {
+    const entry = safeNum(w.entry);
+    const exit = safeNum(w.exit);
+    const hasPaperTest = exit > 0 && entry > 0;
+    const paperGain = hasPaperTest ? ((exit - entry) / entry) * 100 : null;
+
+    return `
+      <div class="py-3 flex justify-between items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold font-mono-num text-blue-500">${w.ticker}</span>
+            <span class="text-slate-400 font-semibold">${w.setup || 'Setup'}</span>
+            ${w.date ? `<span class="text-[10px] text-slate-400 font-mono-num">(${formatDate(w.date)})</span>` : ''}
+            ${hasPaperTest ? `<span class="text-[10px] font-black px-2 py-0.5 rounded ${paperGain >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">Paper Test: ${paperGain >= 0 ? '+' : ''}${paperGain.toFixed(2)}%</span>` : ''}
+          </div>
+          <div class="text-[11px] text-slate-400 mt-0.5">
+            Entry ₹${w.entry} | SL ₹${w.sl || '-'} | Target ₹${w.target || '-'}
+            ${hasPaperTest ? ` | <strong class="text-slate-700 dark:text-slate-200">Exit ₹${w.exit}</strong> (${formatDate(w.xdate)})` : ''}
+          </div>
+          ${w.notes ? `<p class="text-[10px] text-slate-500 mt-0.5 italic">${w.notes}</p>` : ''}
+        </div>
+        <button onclick="removeWatchItem(${idx})" class="text-rose-500 p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
       </div>
-      <button onclick="removeWatchItem(${idx})" class="text-rose-500 p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
   if (window.lucide) lucide.createIcons();
 }
 
@@ -1340,10 +1469,13 @@ async function addWatchItem() {
     id: "W_" + Date.now(),
     ticker,
     companyName: tickerCompanyName(ticker),
+    date: document.getElementById("w-date")?.value || new Date().toISOString().slice(0,10),
     setup: document.getElementById("w-setup")?.value || "",
     entry: document.getElementById("w-entry")?.value || "",
     sl: document.getElementById("w-sl")?.value || "",
     target: document.getElementById("w-target")?.value || "",
+    exit: document.getElementById("w-exit")?.value || "",
+    xdate: document.getElementById("w-xdate")?.value || "",
     notes: document.getElementById("w-notes")?.value || ""
   };
   try {
@@ -1356,6 +1488,8 @@ async function addWatchItem() {
     document.getElementById("w-entry").value = "";
     document.getElementById("w-sl").value = "";
     document.getElementById("w-target").value = "";
+    document.getElementById("w-exit").value = "";
+    document.getElementById("w-xdate").value = "";
     document.getElementById("w-notes").value = "";
     showToast("Watchlist setup saved!");
   } catch (err) {
@@ -1465,7 +1599,7 @@ function importFindHeader(rows) {
     if (keys.includes('symbol') && keys.includes('tradetype') && keys.includes('quantity') && keys.includes('price')) return { row: i, broker: 'Zerodha', keys };
     if (keys.includes('stockname') && keys.includes('symbol') && keys.includes('type') && keys.includes('quantity') && keys.includes('value')) return { row: i, broker: 'Groww', keys };
   }
-  throw new Error('Report format not recognized. Use Zerodha tradebook or Groww stock order-history.');
+  throw new Error('Report format not recognized.');
 }
 
 function importBrokerRows(rows, forcedBroker) {
@@ -1560,7 +1694,7 @@ async function previewBrokerImport() {
     pendingBrokerImport = { ...result, fileName: file.name, duplicates };
     
     const summary = document.getElementById('brokerImportSummary');
-    if (summary) summary.textContent = `${result.broker} · ${result.fills.length} grouped orders · ${result.trades.length} matched/open trade rows · ${duplicates} already imported · ${result.skipped} rows skipped`;
+    if (summary) summary.textContent = `${result.broker} · ${result.fills.length} orders · ${result.trades.length} trade rows · ${duplicates} existing · ${result.skipped} skipped`;
     
     const shown = result.trades.slice(0, 60);
     const body = document.getElementById('brokerImportPreviewBody');
@@ -1607,7 +1741,11 @@ window.closeProModal = closeProModal;
 window.openWhatsAppTrialModal = openWhatsAppTrialModal;
 window.applyJournalRoleRules = applyJournalRoleRules;
 window.handlePerformanceTimeframe = handlePerformanceTimeframe;
+window.applyPerformanceDateFilter = applyPerformanceDateFilter;
+window.handleAnalyticsTimeframe = handleAnalyticsTimeframe;
+window.applyAnalyticsDateFilter = applyAnalyticsDateFilter;
 window.handleComputeMFEMAE = handleComputeMFEMAE;
+window.computeMFEMAEForTrades = computeMFEMAEForTrades;
 window.editPortfolioCapital = editPortfolioCapital;
 window.refreshLTP = refreshLTP;
 window.openTradeModal = openTradeModal;
