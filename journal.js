@@ -2,9 +2,10 @@ const BROKERAGE = 40;
 let PORTFOLIO_CAPITAL = 300000;
 let analyticsTimeframe = "1M"; // Default 1M for Free
 
-// Role Tracker ('free' vs 'pro')
-window.journalUserRole = 'free';
+// Global Role Tracker ('free' vs 'pro')
+window.journalUserRole = window.journalUserRole || 'free';
 
+// -------------------- Capital Management --------------------
 function editPortfolioCapital(){ 
   const current = PORTFOLIO_CAPITAL; 
   const raw = prompt("Enter total portfolio capital (₹):", String(current)); 
@@ -15,7 +16,9 @@ function editPortfolioCapital(){
   const uid = window.journalUser?.uid || "guest"; 
   try { localStorage.setItem("mickkk_portfolio_capital_" + uid, String(n)); } catch(e){} 
   updateCapitalDisplay(); 
-  renderPositionsTable(); renderPerformanceMetrics(); renderAnalyticsView(); 
+  renderPositionsTable(); 
+  renderPerformanceMetrics(); 
+  renderAnalyticsView(); 
   showToast("Portfolio capital updated.");
 }
 
@@ -24,7 +27,7 @@ function updateCapitalDisplay(){
   if(e) e.textContent = "₹" + PORTFOLIO_CAPITAL.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-// Performance Timeframe Handler with Free Lock
+// -------------------- Performance Timeframe (Free Lock) --------------------
 function handlePerformanceTimeframe(tf) {
   if (window.journalUserRole !== 'pro' && tf !== '1M') {
     openProModal();
@@ -109,7 +112,7 @@ function requestHistoricalExcursion(t){
   });
 }
 
-// In-Memory Stores
+// -------------------- In-Memory Stores --------------------
 let trades = [];
 let watchlist = [];
 let ltpCache = {};
@@ -231,7 +234,7 @@ function updateUserHeaderBadge() {
   if (avatarMini) avatarMini.innerText = display.charAt(0).toUpperCase();
 }
 
-// Pro vs Free Role Visual Rules
+// -------------------- Pro vs Free Role Visual Rules --------------------
 function applyJournalRoleRules(role) {
   window.journalUserRole = role || 'free';
   const isPro = (window.journalUserRole === 'pro');
@@ -273,7 +276,7 @@ function applyJournalRoleRules(role) {
       tierBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
     }
     if (sidePlanBadge) {
-      sidePlanBadge.innerText = 'Free Plan';
+      sidePlanBadge.innerText = 'Starter • Free';
       sidePlanBadge.className = 'text-[9px] font-bold text-amber-500 truncate';
     }
     if (sideUpgradeLink) sideUpgradeLink.style.display = 'inline';
@@ -496,9 +499,15 @@ async function loadWatchlist() {
   renderWatchlist();
 }
 
-// Positions Dashboard (Clean Centered Data)
+// -------------------- Positions Dashboard (Clean Centered Data) --------------------
 function renderPositionsTable() {
-  try { const uid=window.journalUser?.uid; const saved=uid&&localStorage.getItem("mickkk_portfolio_capital_"+uid); if(saved&&Number(saved)>0)PORTFOLIO_CAPITAL=Number(saved); } catch(e){} updateCapitalDisplay();
+  try { 
+    const uid = window.journalUser?.uid; 
+    const saved = uid && localStorage.getItem("mickkk_portfolio_capital_" + uid); 
+    if(saved && Number(saved) > 0) PORTFOLIO_CAPITAL = Number(saved); 
+  } catch(e){} 
+  updateCapitalDisplay();
+
   const open = trades.filter(t => outcome(t) === 'OPEN');
   const closed = trades.filter(t => outcome(t) !== 'OPEN');
 
@@ -564,8 +573,8 @@ function renderPositionsTable() {
       </td>
       <td class="py-2.5 px-3 text-center">
         <div class="flex items-center justify-center gap-1">
-          <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-          <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button onclick="editTrade('${t.id}')" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500 cursor-pointer" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+          <button onclick="deleteTrade('${t.id}')" class="p-1 rounded hover:text-rose-500 text-slate-400 cursor-pointer" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </div>
       </td>
     </tr>`;
@@ -608,7 +617,7 @@ function renderTradeSummary() {
   set('sum-avg-r', `${avgR >= 0 ? '+' : ''}${avgR.toFixed(2)}R`);
 }
 
-// Clean & Polished Trades Table Rendering (Fixed Misalignments + MFE/MAE Lock)
+// -------------------- Clean & Polished Trades Table (Issue 3 & 5 Fixed) --------------------
 function renderTradesTable() {
   const search = (document.getElementById("tradeSearchInput")?.value || "").toLowerCase().trim();
   let list = trades.filter(t => {
@@ -722,7 +731,7 @@ function sortTrades(field){
   renderTradesTable();
 }
 
-// Partial Exit Editor
+// -------------------- Partial Exit Editor --------------------
 let partialExitDraft = [];
 function renderPartialExitRows(){
   const box = document.getElementById('partialExitRows');
@@ -759,6 +768,7 @@ function removePartialExitRow(i){
   renderPartialExitRows();
 }
 
+// -------------------- Modal Controllers (Issue 1 Fixed) --------------------
 function openTradeModal(id = null){
   document.getElementById("tradeModalTitle").innerText = id ? "Edit Trade Log" : "Add New Trade Log";
   document.getElementById("fTradeId").value = id || "";
@@ -859,12 +869,15 @@ async function saveTradeLog(){
   if(existingIdx >= 0) trades[existingIdx] = tradeObj; else trades.unshift(tradeObj);
   
   closeTradeModal(); 
-  renderPositionsTable(); renderTradesTable(); renderPerformanceMetrics(); renderAnalyticsView();
+  renderPositionsTable(); 
+  renderTradesTable(); 
+  renderPerformanceMetrics(); 
+  renderAnalyticsView();
   
   try {
     await window.journalStore.saveTrade(tradeObj);
     cacheTrades();
-    showToast("✓ Trade saved securely to your Mickkk account!");
+    showToast("✓ Trade saved securely to your account!");
   } catch(err) {
     console.error("Firestore save failed:", err); 
     trades = previousTrades;
@@ -884,7 +897,7 @@ async function deleteTrade(id){
   try {
     await window.journalStore.deleteTrade(id);
     cacheTrades();
-    showToast("✓ Trade deleted from your account.");
+    showToast("✓ Trade deleted.");
   } catch(e) {
     console.error("Firestore delete failed:", e); 
     trades = backup;
@@ -893,6 +906,7 @@ async function deleteTrade(id){
   }
 }
 
+// -------------------- Real-time Prices (LTP) --------------------
 async function refreshLTP(){
   const buttonLabel = document.getElementById("ltpButtonLabel");
   const spinner = document.getElementById("ltpSpinner");
@@ -905,7 +919,7 @@ async function refreshLTP(){
     ...watchlist.map(w => String(w.ticker || "").trim().toUpperCase())
   ].filter(s => /^[A-Z0-9&_-]{1,30}$/.test(s)))];
   
-  if (!symbols.length) { showToast("No open positions or watchlist to fetch prices for.", true); return; }
+  if (!symbols.length) { showToast("No open positions or watchlist stocks to fetch prices for.", true); return; }
   
   window.__ltpRefreshInProgress = true;
   buttons.forEach(b => b.disabled = true);
@@ -1414,7 +1428,7 @@ async function confirmBrokerImport() {
   }
 }
 
-// Global Exports
+// -------------------- Global Window Exports --------------------
 window.openProModal = openProModal;
 window.closeProModal = closeProModal;
 window.openWhatsAppTrialModal = openWhatsAppTrialModal;
