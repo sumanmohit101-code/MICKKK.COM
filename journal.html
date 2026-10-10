@@ -430,7 +430,7 @@
             <table class="w-full text-xs text-left border-collapse">
               <thead class="text-slate-400 border-b border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900 text-[10px] uppercase font-bold tracking-wider">
                 <tr>
-                  <th class="py-2.5 px-3">Symbol</th><th class="py-2.5 px-2">Type</th><th class="py-2.5 px-2">Dir</th><th class="py-2.5 px-2 text-right">Entry ₹</th><th class="py-2.5 px-2 text-right">Exit ₹</th><th class="py-2.5 px-2 text-right">Qty</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('edate')">Entry Date ⇅</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('xdate')">Exit Date ↑</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('pnl')">Net P&amp;L ⇅</th><th class="py-2.5 px-2 text-right">Return % ⇅</th><th class="py-2.5 px-2 text-right">R:R Ratio ⇅</th><th class="py-2.5 px-2 text-right">Port. Risk %</th><th class="py-2.5 px-2 text-center">Outcome</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL ₹</th><th class="py-2.5 px-2 text-right">Target ₹</th><th class="py-2.5 px-2 text-right">MFE %</th><th class="py-2.5 px-2 text-right">MAE %</th><th class="py-2.5 px-2 text-right">MFE+</th><th class="py-2.5 px-2">Notes</th><th class="py-2.5 px-2 text-center">Chart</th><th class="py-2.5 px-3 text-center">Actions</th>
+                  <th class="py-2.5 px-3">Symbol</th><th class="py-2.5 px-2">Type</th><th class="py-2.5 px-2">Dir</th><th class="py-2.5 px-2 text-right">Entry ₹</th><th class="py-2.5 px-2 text-right">Exit ₹</th><th class="py-2.5 px-2 text-right">Qty</th><th class="py-2.5 px-2 text-right" title="Entry price × quantity">Amount ₹</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('edate')">Entry Date ⇅</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('xdate')">Exit Date ↑</th><th class="py-2.5 px-2 text-right cursor-pointer" onclick="sortTrades('pnl')">Net P&amp;L ⇅</th><th class="py-2.5 px-2 text-right">Return % ⇅</th><th class="py-2.5 px-2 text-right">R:R Ratio ⇅</th><th class="py-2.5 px-2 text-right">Port. Risk %</th><th class="py-2.5 px-2 text-center">Outcome</th><th class="py-2.5 px-2 text-right">LTP</th><th class="py-2.5 px-2 text-right">SL ₹</th><th class="py-2.5 px-2 text-right">Target ₹</th><th class="py-2.5 px-2 text-right">MFE %</th><th class="py-2.5 px-2 text-right">MAE %</th><th class="py-2.5 px-2 text-right">MFE+</th><th class="py-2.5 px-2">Notes</th><th class="py-2.5 px-2 text-center">Chart</th><th class="py-2.5 px-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody id="tradesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
@@ -788,7 +788,35 @@
     function updateCapitalDisplay(){const e=document.getElementById("portfolioCapitalDisplay");if(e)e.textContent="₹"+PORTFOLIO_CAPITAL.toLocaleString("en-IN",{maximumFractionDigits:0});}
     function setAnalyticsTimeframe(tf){analyticsTimeframe=tf;document.querySelectorAll(".timeframe-btn").forEach(b=>{const on=b.dataset.timeframe===tf;b.classList.toggle("bg-emerald-500",on);b.classList.toggle("text-white",on);b.classList.toggle("border-emerald-500",on);});renderPerformanceMetrics();renderAnalyticsView();}
     function timeframeTrades(list){const now=new Date();let start=null;if(analyticsTimeframe==="1M")start=new Date(now.getFullYear(),now.getMonth()-1,now.getDate());else if(analyticsTimeframe==="3M")start=new Date(now.getFullYear(),now.getMonth()-3,now.getDate());else if(analyticsTimeframe==="1Y")start=new Date(now.getFullYear()-1,now.getMonth(),now.getDate());else if(analyticsTimeframe==="YTD")start=new Date(now.getFullYear(),0,1);if(!start)return list;return list.filter(t=>{const d=new Date(isoDate(t.xdate||t.edate)+"T12:00:00");return !isNaN(d)&&d>=start;});}
-    function computeMFEMAEForTrades(){computeMFEMAE();renderAnalyticsCharts();showToast("MFE/MAE analytics recalculated from values currently saved in the journal. Historical High/Low values are not fetched by this button.");}
+    async function computeMFEMAEForTrades(){
+      const eligible=trades.filter(t=>outcome(t)!=='OPEN'&&t.symbol&&safeNum(t.entry)>0&&isoDate(t.edate)&&isoDate(t.xdate));
+      if(!eligible.length){showToast('Closed trades with symbol, entry price, entry date and exit date are required.',true);return;}
+      const btns=[...document.querySelectorAll('button[onclick="computeMFEMAEForTrades()"]')];btns.forEach(b=>{b.disabled=true;b.dataset.oldText=b.innerText;b.innerText='Computing…';});
+      let updated=0,failed=0;
+      try{
+        for(let i=0;i<eligible.length;i++){
+          const t=eligible[i];
+          try{
+            const result=await requestHistoricalExcursion(t);
+            if(result&&result.success&&Number.isFinite(Number(result.mfePct))&&Number.isFinite(Number(result.maePct))){
+              t.mfe=Number(result.mfePct).toFixed(2);t.mae=Number(result.maePct).toFixed(2);
+              await window.journalStore.saveTrade(t);updated++;
+            }else failed++;
+          }catch(e){failed++;console.warn('MFE/MAE failed for',t.symbol,e);}
+        }
+        renderTradesTable();computeMFEMAE();renderAnalyticsCharts();
+        showToast(`MFE/MAE updated for ${updated} trades${failed?`; ${failed} unavailable`:''}.` ,failed>0&&updated===0);
+      }finally{btns.forEach(b=>{b.disabled=false;b.innerText=b.dataset.oldText||'Compute MFE/MAE';});}
+    }
+    function requestHistoricalExcursion(t){return new Promise((resolve,reject)=>{
+      if(!LTP_WEB_APP_URL) return reject(new Error('Apps Script URL missing'));
+      const callback='mfeCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+      const params=new URLSearchParams({action:'mfe',symbol:String(t.symbol).toUpperCase(),entry:String(safeNum(t.entry)),direction:t.dir||'B',entryDate:isoDate(t.edate),exitDate:isoDate(t.xdate),callback});
+      const script=document.createElement('script');let finished=false;
+      const cleanup=()=>{if(finished)return;finished=true;clearTimeout(timer);delete window[callback];script.remove();};
+      const timer=setTimeout(()=>{cleanup();reject(new Error('Apps Script timeout'));},45000);
+      window[callback]=data=>{cleanup();resolve(data);};script.onerror=()=>{cleanup();reject(new Error('Apps Script request failed'));};script.src=LTP_WEB_APP_URL+'?'+params.toString();document.head.appendChild(script);
+    });}
     
     // In-Memory Stores
     let trades = [];
@@ -799,7 +827,7 @@
     let sortField = 'edate';
     let sortAsc = false;
     let currentPage = 1;
-    const PAGE_SIZE = 30;
+    const PAGE_SIZE = 50;
     const LTP_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTO-Cu6ZFADy0HS563bj73xXuV49dFQo5leiOVQcUahGU0AYIZv0TMdfk9Fh6qlLdumQ/exec";
     let ltpLastUpdated = null;
 
@@ -1210,15 +1238,16 @@
       let list=trades.filter(t=>{const stat=outcome(t);return tradeMatchesSearch(t,search)&&!(activeFilter==='open'&&stat!=='OPEN')&&!(activeFilter==='win'&&stat!=='WIN')&&!(activeFilter==='loss'&&stat!=='LOSS');});
       list.sort((a,b)=>{const val=t=>sortField==='pnl'?(calcPnL(t)||0):isoDate(sortField==='xdate'?(t.xdate||''):(t.edate||''));const av=val(a),bv=val(b);return sortAsc?String(av).localeCompare(String(bv),undefined,{numeric:true}):String(bv).localeCompare(String(av),undefined,{numeric:true});});
       const tbody=document.getElementById("tradesTbody");
-      if(!list.length){tbody.innerHTML=`<tr><td colspan="22" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
-      tbody.innerHTML=list.map(t=>{
+      if(!list.length){tbody.innerHTML=`<tr><td colspan="23" class="py-8 text-center text-slate-400">No trades found matching criteria.</td></tr>`;renderTradeSummary();return;}
+      const total=list.length, totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE)); currentPage=Math.min(Math.max(1,currentPage),totalPages); const startIndex=(currentPage-1)*PAGE_SIZE; const pageList=list.slice(startIndex,startIndex+PAGE_SIZE);
+      tbody.innerHTML=pageList.map(t=>{
         const pnl=calcPnL(t),stat=outcome(t),ret=(safeNum(t.entry)&&pnl!==null)?pnl/(safeNum(t.entry)*safeNum(t.qty))*100:null;
         const activeSL=safeNum(t.trailingSL||t.sl),rr=(activeSL&&t.target&&safeNum(t.entry)!==activeSL)?Math.abs(safeNum(t.target)-safeNum(t.entry))/Math.abs(safeNum(t.entry)-activeSL):null;
         const risk=plannedRiskAmount(t),ltp=Number(ltpCache[String(t.symbol||'').toUpperCase()]),hasLtp=Number.isFinite(ltp)&&ltp>0;
         const mfePlus=safeNum(t.mfe)>0&&pnl!==null&&safeNum(t.entry)*safeNum(t.qty)>0?((pnl/(safeNum(t.entry)*safeNum(t.qty)))/safeNum(t.mfe))*100:null;
         return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
           <td class="py-2.5 px-3 font-bold text-blue-600 dark:text-blue-400">${t.symbol||'-'}</td><td class="py-2.5 px-2 text-slate-400">${t.type||'Swing'}</td><td class="py-2.5 px-2 font-bold ${t.dir==='B'?'text-emerald-500':'text-rose-500'}">${t.dir==='B'?'BUY':'SELL'}</td>
-          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.exit?'₹'+safeNum(t.exit).toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td>
+          <td class="py-2.5 px-2 text-right font-mono-num">₹${safeNum(t.entry).toFixed(2)}</td><td class="py-2.5 px-2 text-right font-mono-num">${t.exit?'₹'+safeNum(t.exit).toFixed(2):'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${safeNum(t.qty).toLocaleString()}</td><td class="py-2.5 px-2 text-right font-mono-num text-slate-400">₹${(safeNum(t.entry)*safeNum(t.qty)).toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
           <td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.edate)}</td><td class="py-2.5 px-2 text-right text-slate-400">${formatDate(t.xdate)}</td>
           <td class="py-2.5 px-2 text-right font-mono-num font-bold ${pnl!==null?(pnl>=0?'text-emerald-500':'text-rose-500'):'text-slate-400'}">${pnl!==null?(pnl>=0?'+₹':'-₹')+Math.abs(pnl).toFixed(0):'Open'}</td><td class="py-2.5 px-2 text-right font-mono-num">${ret!==null?(ret>=0?'+':'')+ret.toFixed(2)+'%':'—'}</td>
           <td class="py-2.5 px-2 text-right font-mono-num">${rr?rr.toFixed(2)+'R':'—'}</td><td class="py-2.5 px-2 text-right font-mono-num">${PORTFOLIO_CAPITAL?((risk/PORTFOLIO_CAPITAL)*100).toFixed(2)+'%':'—'}</td>
@@ -1228,18 +1257,21 @@
           <td class="py-2.5 px-2 max-w-xs truncate" title="${String(t.notes||'').replace(/"/g,'&quot;')}">${t.notes||'—'}</td><td class="py-2.5 px-2 text-center">${t.chartLink?`<a href="${t.chartLink}" target="_blank" rel="noopener" title="Open chart" class="text-blue-500 hover:underline">📈</a>`:'—'}</td>
           <td class="py-2.5 px-3 text-center"><div class="flex items-center justify-center gap-1.5"><button onclick="editTrade('${t.id}')" class="p-1 hover:text-emerald-500" title="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteTrade('${t.id}')" class="p-1 hover:text-rose-500" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td></tr>`;
       }).join('');
+      const pager=document.getElementById('tradesPagination'); if(pager){const from=total?startIndex+1:0,to=Math.min(startIndex+PAGE_SIZE,total);pager.innerHTML=`<span>Showing ${from}–${to} of ${total} trades</span><div class="flex items-center gap-3"><button onclick="changeTradePage(-1)" ${currentPage<=1?'disabled':''} class="px-3 py-1.5 rounded border border-slate-200 dark:border-borderDark disabled:opacity-30">‹ Prev</button><span>Page ${currentPage} / ${totalPages}</span><button onclick="changeTradePage(1)" ${currentPage>=totalPages?'disabled':''} class="px-3 py-1.5 rounded border border-slate-200 dark:border-borderDark disabled:opacity-30">Next ›</button></div>`;}
       renderTradeSummary();if(window.lucide)lucide.createIcons();
     }
 
+    function changeTradePage(delta){currentPage=Math.max(1,currentPage+delta);renderTradesTable();}
+
     function setTradeFilter(f,btn){
-      activeFilter=f;
+      currentPage=1; activeFilter=f;
       document.querySelectorAll(".trade-filter-btn").forEach(b=>b.className="trade-filter-btn px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark hover:bg-slate-100 dark:hover:bg-slate-800");
       btn.className="trade-filter-btn px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-500";
       renderTradesTable();
     }
 
     function sortTrades(field){
-      if(sortField===field) sortAsc=!sortAsc; else {sortField=field;sortAsc=true;}
+      currentPage=1; if(sortField===field) sortAsc=!sortAsc; else {sortField=field;sortAsc=true;}
       renderTradesTable();
     }
 
