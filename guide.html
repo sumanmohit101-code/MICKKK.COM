@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Terminal Guide &amp; Knowledge Base — Mickkk.com</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
+
+  <!-- Instant Theme Execution -->
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Montserrat:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#080d1a',
+            sidebarDark: '#0b1329',
+            cardDark: '#0f172a',
+            borderDark: '#1e293b',
+            accentCyan: '#00d4ff',
+            accentGreen: '#10b981',
+            accentRed: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <link rel="stylesheet" href="./journal.css">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    .guide-prose p { margin-bottom: 0.75rem; line-height: 1.65; }
+    .guide-prose h3 { font-size: 1.05rem; font-weight: 800; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    .guide-prose h4 { font-size: 0.9rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.35rem; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Shared Mickkk SVG Icon -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <g clip-path="url(#mkClip)">
+          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
+          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
+          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
+        </g>
+        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
+        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
+        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
+        <g class="mk-glow">
+          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
+          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
+    <button onclick="toggleSidebar()" aria-label="Toggle Navigation Sidebar" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
+      <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
+    </button>
+
+    <div>
+      <a href="index.html" title="Mickkk.com Home" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
+        <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
+        <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
+          <div class="flex items-baseline whitespace-nowrap">
+            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
+            <span class="mk-tag text-[7.5px] tracking-[0.16em]">Trade Smarter</span>
+            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
+          </div>
+        </div>
+      </a>
+
+      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
+
+      <!-- Navigation Links -->
+      <nav class="space-y-1 text-xs font-semibold">
+        <a href="overview.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
+        </a>
+        <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
+        </a>
+        <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="scan" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Stock Screener</span>
+        </a>
+        <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layers" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Index Terminal</span>
+        </a>
+        <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
+        </a>
+        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
+        </a>
+        <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
+        </a>
+        <a href="journal.html" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Trading Journal</span>
+        </a>
+        <!-- ACTIVE: Terminal Guide -->
+        <a href="guide.html" data-title="Journal Guide" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold border-l-4 border-blue-500">
+          <i data-lucide="book-marked" class="w-4 h-4 shrink-0 text-blue-500"></i> <span class="nav-text">Journal Guide</span>
+        </a>
+        <a href="#" data-title="Analytics" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Analytics</span>
+        </a>
+        <a href="#" data-title="Watchlist" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bookmark" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Watchlist</span>
+        </a>
+        <a href="#" data-title="Market Tools" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="wrench" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Tools</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- BOTTOM PANEL -->
+    <div>
+      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-blue-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            </div>
+            <div class="min-w-0 flex flex-col justify-center">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Help &amp; Docs</div>
+              <div class="text-[9px] font-bold text-blue-500 uppercase tracking-wider">Guide Terminal</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-slate-400">
+            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
+              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
+              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+            </button>
+            <a href="journal.html" class="p-1 hover:text-emerald-500 cursor-pointer" title="Back to Journal">
+              <i data-lucide="arrow-left-circle" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
+    <main class="p-5 md:p-7 space-y-6 w-full flex-1">
+
+      <!-- Header Title Banner -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-borderDark">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-xl font-extrabold tracking-tight">Trading Journal &amp; Terminal User Guide</h1>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">Documentation v1.0</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Learn how to log trades, manage portfolio risk, scale out profits, and interpret advanced MFE/MAE institutional analytics.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <a href="journal.html" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 transition-all">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span>Open Journal Terminal →</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Section Anchor Links -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scroll text-xs font-bold">
+        <a href="#section-overview" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors whitespace-nowrap">
+          1. Quick Start
+        </a>
+        <a href="#section-positions" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors whitespace-nowrap">
+          2. Positions Desk &amp; Target Sell
+        </a>
+        <a href="#section-metrics" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors whitespace-nowrap">
+          3. Core Performance Metrics
+        </a>
+        <a href="#section-advanced" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors whitespace-nowrap">
+          4. Advanced Fields (TSL, Pyramid, Exits)
+        </a>
+        <a href="#section-excursions" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors whitespace-nowrap">
+          5. Institutional MFE / MAE
+        </a>
+        <a href="#section-tools" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-slate-600 dark:text-slate-300 hover:border-blue-500 transition-colors whitespace-nowrap">
+          6. Sizing &amp; Target Ladders
+        </a>
+      </div>
+
+      <!-- Content Container -->
+      <div class="space-y-8 max-w-5xl">
+
+        <!-- 1. Quick Start & Logging Trades -->
+        <section id="section-overview" class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark p-6 shadow-sm space-y-4 guide-prose">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-borderDark">
+            <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-sm">01</span>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Getting Started &amp; Logging Trades</h2>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300">
+            A trading journal is not just an accounting record — it is your personal feedback mechanism to measure risk discipline, system expectancy, and emotional mistakes.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-borderDark">
+              <div class="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200 mb-1">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-500"></i>
+                <span>Manual Entry</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Click <strong>Log Trade</strong>, enter the symbol, buy price, quantity, stop-loss, and target. If the trade is still open, leave the <em>Exit Price</em> field empty.</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-borderDark">
+              <div class="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200 mb-1">
+                <i data-lucide="file-up" class="w-4 h-4 text-blue-500"></i>
+                <span>Broker Import</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Click <strong>Import Broker Report</strong> to upload your official Excel/CSV execution trade ledger from Zerodha or Groww. Trades are matched automatically.</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-borderDark">
+              <div class="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200 mb-1">
+                <i data-lucide="wallet" class="w-4 h-4 text-amber-500"></i>
+                <span>Portfolio Capital</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Click <strong>Portfolio Capital</strong> in the top bar anytime to update your total account size. All portfolio risk percentages dynamically recalculate.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Positions Desk & Target Sell Qty -->
+        <section id="section-positions" class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark p-6 shadow-sm space-y-4 guide-prose">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-borderDark">
+            <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-sm">02</span>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Positions Dashboard &amp; The "Target Sell Qty" Metric</h2>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300">
+            The Positions Dashboard gives you real-time visibility into open market risk and float. Click <strong>Refresh LTP</strong> at any time during market hours to sync real-time NSE market prices.
+          </p>
+
+          <div class="space-y-3 pt-1">
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-borderDark bg-slate-50/50 dark:bg-slate-900/40">
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                <span>Risk-Free Positions</span>
+              </h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                A trade is officially classified as <strong>Risk-Free</strong> when your active Stop-Loss or Trailing Stop-Loss has been moved to or above your breakeven entry price. This means you have zero downside financial risk left on the trade.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-950/20">
+              <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                <i data-lucide="target" class="w-4 h-4"></i>
+                <span>Target Sell Qty (Automated Partial Profit Lock)</span>
+              </h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                <strong>What it is:</strong> Instead of guessing how many shares to sell when a stock is surging, the terminal looks at your historical <em>Average Profit per Trade (Avg P&amp;L)</em> benchmark.
+              </p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <strong>How it works:</strong> At the current live LTP, it calculates the exact number of shares needed to lock in that target profit. You can sell that quantity, bank a standard winning trade, and let the remaining balance run completely risk-free!
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Core Performance Metrics -->
+        <section id="section-metrics" class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark p-6 shadow-sm space-y-4 guide-prose">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-borderDark">
+            <span class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold text-sm">03</span>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Core Performance Metrics Explained</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs pt-1">
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-borderDark">
+              <span class="font-extrabold text-emerald-500 uppercase text-[10px] tracking-wider">Win Rate (%)</span>
+              <p class="text-slate-600 dark:text-slate-300 mt-1">Percentage of closed trades that resulted in positive net profit: <code>Wins ÷ (Wins + Losses) × 100</code>.</p>
+            </div>
+
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-borderDark">
+              <span class="font-extrabold text-amber-500 uppercase text-[10px] tracking-wider">Profit Factor</span>
+              <p class="text-slate-600 dark:text-slate-300 mt-1">Total gross winning rupees divided by total gross losing rupees. A factor above <strong>1.50</strong> indicates a solidly profitable trading edge.</p>
+            </div>
+
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-borderDark">
+              <span class="font-extrabold text-cyan-500 uppercase text-[10px] tracking-wider">R-Multiple &amp; R:R</span>
+              <p class="text-slate-600 dark:text-slate-300 mt-1">1R represents your initial planned stop-loss risk. If you risk ₹1,000 to make ₹3,000, that trade realized a <strong>+3.0R</strong> return.</p>
+            </div>
+
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-borderDark">
+              <span class="font-extrabold text-violet-500 uppercase text-[10px] tracking-wider">Avg P&amp;L / Trade</span>
+              <p class="text-slate-600 dark:text-slate-300 mt-1">Your statistical expectancy per trade. It proves whether your edge generates reliable positive expected value over a large sample of executions.</p>
+            </div>
+
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-borderDark">
+              <span class="font-extrabold text-rose-500 uppercase text-[10px] tracking-wider">Avg Win vs Avg Loss</span>
+              <p class="text-slate-600 dark:text-slate-300 mt-1">Compares the average magnitude of your winners against your losers. A great trader keeps average loss small and lets winners run.</p>
+            </div>
+
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-borderDark">
+              <span class="font-extrabold text-blue-500 uppercase text-[10px] tracking-wider">Portfolio Open Risk</span>
+              <p class="text-slate-600 dark:text-slate-300 mt-1">The total amount of your overall account capital that would be lost if every single open position hit its Stop-Loss simultaneously.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Advanced Trade Logging Fields -->
+        <section id="section-advanced" class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark p-6 shadow-sm space-y-4 guide-prose">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-borderDark">
+            <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold text-sm">04</span>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Advanced Trade Fields (TSL, Pyramiding &amp; Scale-Outs)</h2>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300">
+            Inside the Trade Log modal, open the <strong>+ Advanced Fields</strong> section to log institutional position management tactics:
+          </p>
+
+          <div class="space-y-3 pt-1">
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-borderDark">
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">1. Trailing Stop-Loss (Trailing SL ₹)</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                As a stock moves in your favor, you raise your stop-loss price. Entering a <em>Trailing SL</em> overrides the initial SL and updates your Open Risk and Risk-Free badges automatically.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-borderDark">
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">2. Pyramiding Groups &amp; Legs</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                When adding to a winning position as it breaks out of subsequent bases, group the entries together (e.g. Group: <code>RELIANCE-01</code>, Leg: <code>2</code>). This enables you to track base trades and add-ons individually or as an overall campaign.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-borderDark">
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">3. Partial Exits (Scale-Out Batches)</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Professional swing traders rarely sell 100% of a position all at once. Use <strong>+ Add Exit</strong> to record partial sales (e.g., sell 50 shares at ₹520, then remaining 50 at ₹560). The journal computes blended exit prices and exact brokerage accounting automatically.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Institutional MFE / MAE Excursions -->
+        <section id="section-excursions" class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark p-6 shadow-sm space-y-4 guide-prose">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-borderDark">
+            <span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-sm">05</span>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">MFE, MAE &amp; Institutional Execution Diagnostics</h2>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300">
+            Excursion analysis was developed by hedge funds to diagnose whether trade problems stem from <strong>poor entries</strong> or <strong>premature exits</strong>.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="p-4 rounded-xl border border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/20 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <h4 class="font-bold text-xs text-emerald-600 dark:text-emerald-400">MFE (Maximum Favorable Excursion)</h4>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">
+                <strong>What it measures:</strong> The highest unrealized profit percentage the stock reached between the day you bought it and the day you sold it.
+              </p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                <strong>Actionable Insight:</strong> If your average MFE is <strong>+12%</strong> but your average realized gain is only <strong>+3%</strong>, you are exiting far too early out of fear and leaving massive profits on the table.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-rose-500/20 bg-rose-50/20 dark:bg-rose-950/20 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                <h4 class="font-bold text-xs text-rose-600 dark:text-rose-400">MAE (Maximum Adverse Excursion)</h4>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">
+                <strong>What it measures:</strong> The deepest unrealized drawdown percentage the trade dipped into against your entry price before exiting.
+              </p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                <strong>Actionable Insight:</strong> If your winning trades consistently suffer from a <strong>-6% MAE</strong> before turning around, your entry timing is premature (you are buying too early in pullbacks instead of waiting for confirmation).
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-blue-500/20 bg-blue-50/20 dark:bg-blue-950/20 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                <h4 class="font-bold text-xs text-blue-600 dark:text-blue-400">Exit Efficiency (MFE+)</h4>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">
+                <code>Actual Realized Return ÷ MFE %</code>. If a stock moved up +10% and you captured +8%, your exit efficiency is an outstanding <strong>80%</strong>.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-amber-500/20 bg-amber-50/20 dark:bg-amber-950/20 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <h4 class="font-bold text-xs text-amber-600 dark:text-amber-400">Heat Analysis (MAE ÷ Planned Risk)</h4>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">
+                Measures how close the trade came to triggering your Stop-Loss. If trades frequently touch 95% heat, your stop-losses are positioned too close to market noise.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. Position Sizing & Target Ladders -->
+        <section id="section-tools" class="bg-white dark:bg-cardDark rounded-2xl border border-slate-200 dark:border-borderDark p-6 shadow-sm space-y-4 guide-prose">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-borderDark">
+            <span class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-sm">06</span>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Position Sizing Calculator &amp; R-Target Ladders</h2>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300">
+            Never guess position size. Navigate to the <strong>Risk &amp; Sizing Tools</strong> tab before placing any live order:
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 text-xs">
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-borderDark">
+              <h4 class="font-bold text-slate-800 dark:text-slate-200">Position Sizing Formula</h4>
+              <p class="text-slate-500 dark:text-slate-400 mt-1">
+                <code>Shares Quantity = (Portfolio Capital × Risk Tolerance %) ÷ (Entry Price - Stop Loss Price)</code>
+              </p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                This mathematical formula guarantees that regardless of stock volatility, hitting your Stop-Loss will never exceed your predefined risk tolerance (e.g., 1.5% or 2.0% of total capital).
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-borderDark">
+              <h4 class="font-bold text-slate-800 dark:text-slate-200">R-Multiple Target Ladders</h4>
+              <p class="text-slate-500 dark:text-slate-400 mt-1">
+                Generates predetermined profit checkpoints: <strong>+1R, +2R, +3R, +5R</strong> based on the distance between Entry and Stop-Loss.
+              </p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                As the live stock price crosses each level, the terminal flags it as <em>Triggered</em>, reminding you to scale out partial quantity or trail your stop-loss.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- ================= COMPACT FOOTER (MATCHING OVERVIEW & JOURNAL) ================= -->
+    <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500 px-6">
+      <div class="flex items-center gap-2">
+        <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
+        <span class="text-slate-800 dark:text-slate-200 font-extrabold tracking-tight">Mickkk<span class="text-emerald-600 dark:text-[#00f5a0] font-black">.com</span></span>
+        <span class="text-slate-400 text-[11px] hidden sm:inline">• Market Intelligence &amp; Trading Platform</span>
+      </div>
+
+      <div class="flex items-center gap-5 text-[11px]">
+        <a href="index.html" class="hover:text-emerald-500 transition-colors">Home</a>
+        <a href="overview.html" class="hover:text-emerald-500 transition-colors">Market Overview</a>
+        <a href="breadth.html" class="hover:text-emerald-500 transition-colors">Market Breadth</a>
+        <a href="journal.html" class="hover:text-emerald-500 transition-colors">Trading Journal</a>
+        <a href="guide.html" class="hover:text-blue-500 transition-colors text-blue-500 font-bold">Journal Guide</a>
+        <a href="index.html#pricing" class="hover:text-emerald-500 transition-colors">Pricing</a>
+      </div>
+
+      <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+        <span class="ml-1">© 2026 Mickkk.com.</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const arrow = document.getElementById("collapseArrow");
+      sidebar.classList.toggle("sidebar-collapsed");
+      const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
+      if (isCollapsed) {
+        mainContent.classList.remove("ml-60");
+        mainContent.classList.add("ml-[4.2rem]");
+        if (arrow) arrow.setAttribute("data-lucide", "chevron-right");
+      } else {
+        mainContent.classList.remove("ml-[4.2rem]");
+        mainContent.classList.add("ml-60");
+        if (arrow) arrow.setAttribute("data-lucide", "chevron-left");
+      }
+      try { localStorage.setItem("mickkk_sidebar_collapsed", isCollapsed ? "true" : "false"); } catch (e) {}
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle("dark");
+      syncThemeIcons(isDark);
+      try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch (e) {}
+    }
+
+    function syncThemeIcons(isDark) {
+      const sunIconSide = document.getElementById("sunIconSide");
+      const moonIconSide = document.getElementById("moonIconSide");
+      if (sunIconSide) sunIconSide.classList.toggle("hidden", isDark);
+      if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      syncThemeIcons(document.documentElement.classList.contains("dark"));
+      if (localStorage.getItem("mickkk_sidebar_collapsed") === "true") {
+        toggleSidebar();
+      }
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
