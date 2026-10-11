@@ -141,8 +141,9 @@
         <a href="journal.html" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="book-open" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Trading Journal</span>
         </a>
+        <!-- Guide Link in Navigation -->
         <a href="guide.html" data-title="Journal Guide" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="help-circle" class="w-4 h-4 shrink-0 text-blue-500"></i> <span class="nav-text">Journal Guide</span>
+          <i data-lucide="book-marked" class="w-4 h-4 shrink-0 text-blue-500"></i> <span class="nav-text">Journal Guide</span>
         </a>
         <a href="#" data-title="Analytics" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Analytics</span>
@@ -259,8 +260,11 @@
         <button onclick="switchTab('tools')" id="tab-btn-tools" class="tab-btn px-4 py-2 rounded-xl bg-white dark:bg-cardDark text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-borderDark hover:text-emerald-500 flex items-center gap-2 transition-all">
           <i data-lucide="calculator" class="w-4 h-4"></i> Risk &amp; Sizing Tools
         </button>
-        <a href="guide.html" class="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/30 hover:border-blue-500 flex items-center gap-2 transition-all">
-          <i data-lucide="help-circle" class="w-4 h-4"></i> Journal Guide ↗
+        
+        <!-- Quick Guide Tab Link -->
+        <a href="guide.html" target="_self" class="px-3.5 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/30 hover:border-blue-500 flex items-center gap-1.5 transition-all text-xs font-bold shrink-0">
+          <i data-lucide="book-marked" class="w-4 h-4"></i>
+          <span>Journal Guide</span>
         </a>
       </div>
 
@@ -333,7 +337,7 @@
                   <th class="py-2.5 px-2 text-right">Open Risk</th>
                   <th class="py-2.5 px-2 text-right">R-Multiple</th>
                   <th class="py-2.5 px-2 text-right">Unrealised P&amp;L</th>
-                  <th class="py-2.5 px-2 text-right cursor-help" title="LTP par Avg P&L/trade jitna target profit book karne ke liye zaroori shares quantity">
+                  <th class="py-2.5 px-2 text-right cursor-help" title="Shares to sell at current LTP to lock in your historical average trade profit benchmark">
                     Target Sell Qty <span class="text-emerald-500 font-bold">ⓘ</span>
                   </th>
                   <th class="py-2.5 px-3 text-center">Actions</th>
@@ -408,35 +412,35 @@
           </div>
         </div>
 
-        <!-- Ledger Table (WITH HELPFUL SHORT DESCRIPTIONS ON ALL HEADERS) -->
+        <!-- Ledger Table (PURE PROFESSIONAL ENGLISH TOOLTIPS) -->
         <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark overflow-hidden shadow-sm">
           <div class="overflow-x-auto custom-scroll relative">
             <table class="w-full text-[11px] text-left border-collapse table-compact" id="mainTradesTable">
               <thead class="text-slate-400 border-b border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-900/60 text-[9.5px] uppercase font-bold tracking-wider">
                 <tr>
-                  <th class="py-2.5 px-2" title="Company ticker code (NSE symbol)">Symbol</th>
-                  <th class="py-2.5 px-1.5 text-center" title="Trade timeframe: Swing, Positional ya Intraday">Type</th>
-                  <th class="py-2.5 px-1.5 text-center" title="Direction: BUY (Long) ya SELL (Short)">Dir</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Khareed ya short entry price in ₹">Entry ₹</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Bikri ya exit price in ₹">Exit ₹</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Traded shares total quantity">Qty</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Total lagaya gaya capital (Entry × Qty)">Amount ₹</th>
-                  <th class="py-2.5 px-1.5 text-center cursor-pointer select-none" onclick="sortTrades('edate')" title="Position start hone ki date. Click karke sort karein">Entry Date ⇅</th>
-                  <th class="py-2.5 px-1.5 text-center cursor-pointer select-none" onclick="sortTrades('xdate')" title="Position close hone ki date (Default sort). Click to reverse sort">Exit Date ⇅</th>
-                  <th class="py-2.5 px-1.5 text-right cursor-pointer select-none" onclick="sortTrades('pnl')" title="Brokerage ghatane ke baad net munafa ya nuksan. Click to sort">Net P&amp;L ⇅</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Capital par mila percentage return">Return %</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Planned Risk to Reward ratio (SL ke comparison me kitna reward)">R:R</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Total portfolio capital ka kitna percent risk par tha">Port. Risk</th>
-                  <th class="py-2.5 px-1.5 text-center" title="Trade ka result: WIN, LOSS, BREAKEVEN ya OPEN">Outcome</th>
-                  <th class="py-2.5 px-1.5 text-right" title="NSE live market price (LTP)">LTP</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Nuksan rokne ke liye Stop-Loss trigger price">SL ₹</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Profit book karne ka planned target price">Target ₹</th>
-                  <th class="py-2.5 px-1.5 text-right" title="Maximum Favorable Excursion: Trade ke dauran mila highest profit float %">MFE % <span class="pro-col-lock text-amber-500">🔒</span></th>
-                  <th class="py-2.5 px-1.5 text-right" title="Maximum Adverse Excursion: Trade ke dauran dekha gaya deepest dip ya drawdown %">MAE % <span class="pro-col-lock text-amber-500">🔒</span></th>
-                  <th class="py-2.5 px-1.5 text-right" title="Exit Efficiency: Highest profit float me se kitna capture kar paye">MFE+ <span class="pro-col-lock text-amber-500">🔒</span></th>
-                  <th class="py-2.5 px-2 w-32 max-w-[130px]" title="Trade setup, psychology aur mistakes ke notes">Notes</th>
-                  <th class="py-2.5 px-1 text-center" title="TradingView chart ka screenshot ya link">Chart</th>
-                  <th class="py-2.5 px-2 text-center" title="Trade ko edit ya delete karne ke actions">Actions</th>
+                  <th class="py-2.5 px-2" title="Company ticker code (NSE Symbol)">Symbol</th>
+                  <th class="py-2.5 px-1.5 text-center" title="Execution timeframe: Swing, Positional, or Intraday">Type</th>
+                  <th class="py-2.5 px-1.5 text-center" title="Trade direction: Buy (Long) or Sell (Short)">Dir</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Average execution entry price in ₹">Entry ₹</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Final or average execution exit price in ₹">Exit ₹</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Total number of shares purchased or shorted">Qty</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Gross deployed capital (Entry Price × Quantity)">Amount ₹</th>
+                  <th class="py-2.5 px-1.5 text-center cursor-pointer select-none" onclick="sortTrades('edate')" title="Position opening date. Click to sort chronologically">Entry Date ⇅</th>
+                  <th class="py-2.5 px-1.5 text-center cursor-pointer select-none" onclick="sortTrades('xdate')" title="Position closing date (Default sort). Click to reverse sort">Exit Date ⇅</th>
+                  <th class="py-2.5 px-1.5 text-right cursor-pointer select-none" onclick="sortTrades('pnl')" title="Net profit or loss after subtracting all brokerage charges. Click to sort">Net P&amp;L ⇅</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Percentage gain or loss on invested trade capital">Return %</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Planned Risk-to-Reward ratio based on Target vs. Stop Loss distance">R:R</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Percentage of total portfolio capital placed at risk on this trade">Port. Risk</th>
+                  <th class="py-2.5 px-1.5 text-center" title="Execution outcome: WIN, LOSS, BREAKEVEN, or OPEN">Outcome</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Real-time Last Traded Price (LTP) synced from NSE">LTP</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Stop-Loss threshold price to prevent capital drawdown">SL ₹</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Planned target price to book profits">Target ₹</th>
+                  <th class="py-2.5 px-1.5 text-right" title="Maximum Favorable Excursion: Peak floating profit percentage achieved during the trade">MFE % <span class="pro-col-lock text-amber-500">🔒</span></th>
+                  <th class="py-2.5 px-1.5 text-right" title="Maximum Adverse Excursion: Deepest floating drawdown percentage suffered during the trade">MAE % <span class="pro-col-lock text-amber-500">🔒</span></th>
+                  <th class="py-2.5 px-1.5 text-right" title="Exit Efficiency: Percentage of the maximum favorable float captured upon exit">MFE+ <span class="pro-col-lock text-amber-500">🔒</span></th>
+                  <th class="py-2.5 px-2 w-32 max-w-[130px]" title="Psychological notes, setup rationale, and execution observations">Notes</th>
+                  <th class="py-2.5 px-1 text-center" title="TradingView chart analysis link or screenshot">Chart</th>
+                  <th class="py-2.5 px-2 text-center" title="Action controls to edit or remove trade log">Actions</th>
                 </tr>
               </thead>
               <tbody id="tradesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium"></tbody>
@@ -884,7 +888,7 @@
             <input type="number" step="0.05" id="fEntry" placeholder="0.00" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070e1b] border border-slate-200 dark:border-borderDark font-mono-num font-bold text-slate-800 dark:text-white outline-none focus:border-cyan-500 transition-colors">
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">EXIT PRICE ₹</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">EXIT PRICE ₹</label>
             <input type="number" step="0.05" id="fExit" placeholder="Open trade? leave blank" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070e1b] border border-slate-200 dark:border-borderDark font-mono-num text-slate-800 dark:text-white outline-none focus:border-cyan-500 transition-colors">
           </div>
         </div>
