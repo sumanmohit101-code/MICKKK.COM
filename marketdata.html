@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Data — Mickkk.com</title>
+  <title>Market Data Terminal — Mickkk.com</title>
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
 
@@ -55,8 +55,14 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
     .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     .table-compact th, .table-compact td { white-space: nowrap; }
+    .shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
@@ -142,12 +148,14 @@
       </nav>
     </div>
 
-    <!-- BOTTOM USER CARD -->
+    <!-- BOTTOM PANEL: Theme Switcher & User Profile (Matches overview.html) -->
     <div>
       <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
           <div class="flex items-center gap-2 min-w-0">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">M</div>
+            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+              M
+            </div>
             <div class="min-w-0">
               <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Trader Desk</div>
               <div class="text-[9px] font-bold text-emerald-500 uppercase tracking-wider truncate">NSE/BSE Feeds</div>
@@ -172,11 +180,11 @@
   <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
     <main class="p-4 md:p-6 space-y-5 w-full flex-1">
 
-      <!-- TOP HEADER BAR (EXACT SCREENSHOT MATCH) -->
+      <!-- TOP HEADER BAR (Sleek Title + Search + Date + Refresh) -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-borderDark">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <i data-lucide="trending-up" class="w-5 h-5"></i>
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+            <i data-lucide="database" class="w-5 h-5"></i>
           </div>
           <div>
             <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white">Market Data</h1>
@@ -188,505 +196,550 @@
           <!-- Search input -->
           <div class="relative w-64">
             <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
-            <input type="text" id="marketSearch" onkeyup="filterMarketTables()" placeholder="Search stocks, indices, sectors..." class="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark focus:outline-none focus:border-emerald-500 transition-colors">
+            <input type="text" id="marketSearch" onkeyup="filterAllTables()" placeholder="Search stocks, indices, sectors..." class="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark focus:outline-none focus:border-emerald-500 transition-colors">
           </div>
 
-          <!-- Date Selector -->
+          <!-- Date Indicator -->
           <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-xs font-bold text-slate-700 dark:text-slate-300">
             <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
-            <span id="marketDateDisplay">Apr 28, 2025</span>
-            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 ml-1"></i>
+            <span id="marketDateDisplay">Loading Date...</span>
           </div>
 
-          <!-- Live Indicator & Timestamp -->
+          <!-- Last Updated Live Badge -->
           <div class="flex items-center gap-2 text-xs text-slate-400">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <div>
               <span class="text-[10px] text-slate-500 block leading-none">Last Updated</span>
-              <span id="marketLastUpdatedTime" class="font-mono-num font-bold text-slate-700 dark:text-slate-300 text-[11px]">Apr 28, 2025 15:45</span>
+              <span id="marketLastUpdatedTime" class="font-mono-num font-bold text-slate-700 dark:text-slate-300 text-[11px]">Syncing live feed...</span>
             </div>
           </div>
 
-          <!-- Theme & User Quick Icons -->
-          <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-borderDark">
-            <button onclick="toggleTheme()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-cardDark text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer">
-              <i data-lucide="sun" class="w-4 h-4"></i>
-            </button>
-            <button onclick="refreshMarketData(true)" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-cardDark text-slate-400 hover:text-emerald-500 cursor-pointer" title="Refresh Live Data">
-              <i data-lucide="refresh-cw" id="marketRefreshSpin" class="w-4 h-4"></i>
-            </button>
-            <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs ml-1">M</div>
+          <!-- Manual Refresh Button -->
+          <button onclick="fetchMasterMarketData(true)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer">
+            <i data-lucide="refresh-cw" id="marketRefreshSpin" class="w-3.5 h-3.5"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= SECTION 1: INSTITUTIONAL FLOW DESK (FII & DII) ================= -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="landmark" class="w-4 h-4 text-emerald-500"></i>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">⚡ Daily FII &amp; DII Cash Segment Snapshot</h2>
+          </div>
+          <span class="text-[10px] text-slate-400 font-mono-num" id="fiiDiiLatestDate">Trade Date: --</span>
+        </div>
+
+        <!-- 1. Daily FII/DII Snapshot Combined Cards (Row of 7 Metrics) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">FII BUY</span>
+            <div class="text-base font-black font-mono-num mt-1 text-slate-800 dark:text-white" id="fii-buy-val">--</div>
+            <p class="text-[9px] text-slate-400">₹ Crores</p>
+          </div>
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">FII SELL</span>
+            <div class="text-base font-black font-mono-num mt-1 text-slate-800 dark:text-white" id="fii-sell-val">--</div>
+            <p class="text-[9px] text-slate-400">₹ Crores</p>
+          </div>
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center border-l-4 border-l-rose-500">
+            <span class="text-[10px] font-extrabold uppercase text-rose-500">FII NET FLOW</span>
+            <div class="text-base font-black font-mono-num mt-1 text-rose-500" id="fii-net-val">--</div>
+            <p class="text-[9px] text-slate-400">Net Position</p>
+          </div>
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">DII BUY</span>
+            <div class="text-base font-black font-mono-num mt-1 text-slate-800 dark:text-white" id="dii-buy-val">--</div>
+            <p class="text-[9px] text-slate-400">₹ Crores</p>
+          </div>
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">DII SELL</span>
+            <div class="text-base font-black font-mono-num mt-1 text-slate-800 dark:text-white" id="dii-sell-val">--</div>
+            <p class="text-[9px] text-slate-400">₹ Crores</p>
+          </div>
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center border-l-4 border-l-emerald-500">
+            <span class="text-[10px] font-extrabold uppercase text-emerald-500">DII NET FLOW</span>
+            <div class="text-base font-black font-mono-num mt-1 text-emerald-500" id="dii-net-val">--</div>
+            <p class="text-[9px] text-slate-400">Net Position</p>
+          </div>
+          <div class="bg-white dark:bg-cardDark p-3.5 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col items-center justify-center text-center border-l-4 border-l-cyan-500 col-span-2 sm:col-span-1">
+            <span class="text-[10px] font-extrabold uppercase text-cyan-400">TOTAL COMBINED NET</span>
+            <div class="text-base font-black font-mono-num mt-1" id="total-net-val">--</div>
+            <p class="text-[9px] text-slate-400">FII + DII Combined</p>
+          </div>
+        </div>
+
+        <!-- 2. FII & DII 2Y Historical Matrix & Interactive Chart (Line & Bar) -->
+        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="line-chart" class="w-4 h-4 text-cyan-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">🏦 FII &amp; DII 2-Year Rolling Historical Matrix</h3>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Cash Equity Net Institutional Flows (₹ Crores) with interactive Line &amp; Bar mode</p>
+            </div>
+
+            <!-- Chart Controls -->
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 bg-slate-100 dark:bg-cardInnerDark p-1 rounded-lg text-[10px] font-bold">
+                <button onclick="setFiiChartType('line')" id="btn-chart-line" class="px-2.5 py-1 rounded-md bg-emerald-500 text-white cursor-pointer">Line Chart</button>
+                <button onclick="setFiiChartType('bar')" id="btn-chart-bar" class="px-2.5 py-1 rounded-md text-slate-400 cursor-pointer">Bar Chart</button>
+              </div>
+              <button onclick="toggleFiiTableModal()" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-borderDark text-[10px] font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
+                View 2Y Table Data →
+              </button>
+            </div>
+          </div>
+
+          <div class="h-64 relative">
+            <canvas id="fiiDii2YChart"></canvas>
+            <div id="fiiChartLoader" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-cardDark/50 text-xs text-slate-400 font-bold">
+              Loading 2-Year FII/DII Chart Data...
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ================= 1. ROW 1: FOUR TOP KPI CARDS ================= -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- 1. Price Band Changes Today -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex items-center justify-between">
-          <div>
-            <div class="flex items-center gap-2 text-emerald-500">
-              <i data-lucide="tag" class="w-4 h-4"></i>
-              <span class="text-xs font-bold text-slate-900 dark:text-slate-200">Price Band Changes Today</span>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-0.5">NSE Daily Archives</p>
-            <div class="flex items-baseline gap-2 mt-3">
-              <span class="text-3xl font-black font-mono-num text-slate-900 dark:text-white" id="kpi-band-count">12</span>
-              <span class="text-xs text-slate-400 font-bold">Securities</span>
-            </div>
-          </div>
-          <!-- Right Badges -->
-          <div class="flex flex-col gap-1 text-[11px] font-mono-num font-bold min-w-[70px]">
-            <div class="flex items-center justify-between gap-2 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500"><span>2%</span><span>3</span></div>
-            <div class="flex items-center justify-between gap-2 px-2 py-0.5 rounded bg-blue-500/10 text-blue-500"><span>5%</span><span>5</span></div>
-            <div class="flex items-center justify-between gap-2 px-2 py-0.5 rounded bg-amber-500/10 text-amber-500"><span>10%</span><span>3</span></div>
-            <div class="flex items-center justify-between gap-2 px-2 py-0.5 rounded bg-purple-500/10 text-purple-400"><span>20%</span><span>1</span></div>
-          </div>
-        </div>
-
-        <!-- 2. FII Net Flow -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex items-center justify-between">
-          <div>
-            <div class="flex items-center gap-2 text-rose-500">
-              <i data-lucide="target" class="w-4 h-4"></i>
-              <span class="text-xs font-bold text-slate-900 dark:text-slate-200">FII Net Flow (₹ Cr)</span>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-0.5">Cash Equity - 2 Year</p>
-            <div class="mt-3">
-              <div class="text-3xl font-black font-mono-num text-rose-500" id="kpi-fii-ytd">-8,421</div>
-              <span class="text-[10px] text-slate-400 font-bold">YTD Net</span>
-            </div>
-          </div>
-          <!-- Periods -->
-          <div class="text-[11px] font-mono-num space-y-0.5 text-right font-bold text-rose-500">
-            <div><span class="text-slate-400 font-normal mr-2">1D</span>-1,245</div>
-            <div><span class="text-slate-400 font-normal mr-2">1W</span>-3,210</div>
-            <div><span class="text-slate-400 font-normal mr-2">1M</span>-6,432</div>
-            <div><span class="text-slate-400 font-normal mr-2">1Y</span>-12,567</div>
-          </div>
-        </div>
-
-        <!-- 3. DII Net Flow -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex items-center justify-between">
-          <div>
-            <div class="flex items-center gap-2 text-emerald-500">
-              <i data-lucide="landmark" class="w-4 h-4"></i>
-              <span class="text-xs font-bold text-slate-900 dark:text-slate-200">DII Net Flow (₹ Cr)</span>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-0.5">Cash Equity - 2 Year</p>
-            <div class="mt-3">
-              <div class="text-3xl font-black font-mono-num text-emerald-500" id="kpi-dii-ytd">+7,892</div>
-              <span class="text-[10px] text-slate-400 font-bold">YTD Net</span>
-            </div>
-          </div>
-          <!-- Periods -->
-          <div class="text-[11px] font-mono-num space-y-0.5 text-right font-bold text-emerald-500">
-            <div><span class="text-slate-400 font-normal mr-2">1D</span>+1,102</div>
-            <div><span class="text-slate-400 font-normal mr-2">1W</span>+2,984</div>
-            <div><span class="text-slate-400 font-normal mr-2">1M</span>+5,678</div>
-            <div><span class="text-slate-400 font-normal mr-2">1Y</span>+10,432</div>
-          </div>
-        </div>
-
-        <!-- 4. New Highs / Lows (52W) -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 text-emerald-500">
-              <i data-lucide="trending-up" class="w-4 h-4"></i>
-              <span class="text-xs font-bold text-slate-900 dark:text-slate-200">New Highs / Lows (52W)</span>
-            </div>
-            <span class="text-[10px] font-bold text-slate-400">NSE</span>
-          </div>
-          
-          <div class="flex items-baseline justify-between mt-3">
-            <div class="flex items-baseline gap-1 font-mono-num font-black text-2xl">
-              <span class="text-emerald-500">68</span>
-              <span class="text-slate-400">/</span>
-              <span class="text-rose-500">32</span>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] text-slate-400">Breadth Ratio</span>
-              <span class="text-xs font-bold font-mono-num text-slate-800 dark:text-white block">2.13</span>
-            </div>
-          </div>
-
-          <!-- Dual Progress Bar -->
-          <div class="w-full flex h-2 rounded-full overflow-hidden mt-3 bg-slate-200 dark:bg-slate-800">
-            <div class="bg-emerald-500 h-full" style="width: 68%;"></div>
-            <div class="bg-rose-500 h-full" style="width: 32%;"></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ================= 2. ROW 2: THREE MIDDLE CARDS ================= -->
+      <!-- ================= SECTION 2: SURVEILLANCE & MARKET ACTIONS ================= -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-        <!-- Card 1: FII & DII 2-Year Flow Matrix (Col 5) -->
-        <div class="lg:col-span-5 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-4">
+        <!-- 3. 🏷️ Price Band Changes Table (Col 5) -->
+        <div class="lg:col-span-5 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
           <div>
             <div class="flex items-center justify-between mb-1">
               <div class="flex items-center gap-2">
-                <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-500"></i>
-                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">FII &amp; DII 2-Year Flow Matrix</h3>
+                <i data-lucide="tag" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">🏷️ Price Band Changes Today</h3>
               </div>
+              <span id="bandChangesBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0 Changes</span>
             </div>
-            <p class="text-[10px] text-slate-400">Cash Equity Net Buy/Sell (₹ Cr)</p>
+            <p class="text-[10px] text-slate-400">Official daily revisions from NSE Archives</p>
 
-            <!-- Scrollable Matrix Table -->
-            <div class="overflow-x-auto custom-scroll mt-3 border border-slate-100 dark:border-borderDark rounded-lg">
-              <table class="w-full text-[10px] text-center table-compact" id="fiiDiiMatrixTable">
-                <thead class="bg-slate-50 dark:bg-cardInnerDark text-slate-400 border-b border-slate-100 dark:border-borderDark font-bold">
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="p-2 text-left sticky left-0 bg-slate-50 dark:bg-cardInnerDark">Month</th>
-                    <th class="p-2">Apr'23</th><th class="p-2">May'23</th><th class="p-2">Jun'23</th><th class="p-2">Jul'23</th><th class="p-2">Aug'23</th>
-                    <th class="p-2">Sep'23</th><th class="p-2">Oct'23</th><th class="p-2">Nov'23</th><th class="p-2">Dec'23</th><th class="p-2">Jan'24</th>
-                    <th class="p-2">Feb'24</th><th class="p-2">Mar'24</th><th class="p-2">Apr'24</th><th class="p-2">May'24</th><th class="p-2">Jun'24</th>
-                    <th class="p-2">Jul'24</th><th class="p-2">Aug'24</th><th class="p-2">Sep'24</th><th class="p-2">Oct'24</th><th class="p-2">Nov'24</th>
-                    <th class="p-2">Dec'24</th><th class="p-2">Jan'25</th><th class="p-2">Feb'25</th><th class="p-2">Mar'25</th><th class="p-2">Apr'25</th>
+                    <th class="pb-2">Sr. No</th>
+                    <th class="pb-2">Symbol</th>
+                    <th class="pb-2 text-center">Series</th>
+                    <th class="pb-2">Security Name</th>
+                    <th class="pb-2 text-center">From</th>
+                    <th class="pb-2 text-center">To</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num font-bold">
-                  <tr>
-                    <td class="p-2 text-left text-slate-400 font-sans sticky left-0 bg-white dark:bg-cardDark">FII</td>
-                    <td class="p-2 text-emerald-500">1,245</td><td class="p-2 text-emerald-500">823</td><td class="p-2 text-rose-500">-456</td>
-                    <td class="p-2 text-rose-500">-1,230</td><td class="p-2 text-rose-500">-980</td><td class="p-2 text-emerald-500">672</td>
-                    <td class="p-2 text-emerald-500">1,482</td><td class="p-2 text-emerald-500">833</td><td class="p-2 text-emerald-500">621</td>
-                    <td class="p-2 text-rose-500">-340</td><td class="p-2 text-rose-500">-812</td><td class="p-2 text-emerald-500">128</td>
-                    <td class="p-2 text-emerald-500">432</td><td class="p-2 text-rose-500">-620</td><td class="p-2 text-rose-500">-1,245</td>
-                    <td class="p-2 text-emerald-500">915</td><td class="p-2 text-emerald-500">1,203</td><td class="p-2 text-emerald-500">632</td>
-                    <td class="p-2 text-rose-500">-754</td><td class="p-2 text-rose-500">-935</td><td class="p-2 text-rose-500">-1,102</td>
-                    <td class="p-2 text-emerald-500">843</td><td class="p-2 text-emerald-500">1,567</td><td class="p-2 text-emerald-500">924</td>
-                    <td class="p-2 text-rose-500">-1,245</td>
-                  </tr>
-                  <tr>
-                    <td class="p-2 text-left text-slate-400 font-sans sticky left-0 bg-white dark:bg-cardDark">DII</td>
-                    <td class="p-2 text-emerald-500">856</td><td class="p-2 text-emerald-500">1,124</td><td class="p-2 text-emerald-500">1,302</td>
-                    <td class="p-2 text-emerald-500">942</td><td class="p-2 text-emerald-500">1,087</td><td class="p-2 text-emerald-500">1,256</td>
-                    <td class="p-2 text-emerald-500">1,432</td><td class="p-2 text-emerald-500">1,058</td><td class="p-2 text-emerald-500">1,276</td>
-                    <td class="p-2 text-emerald-500">1,542</td><td class="p-2 text-emerald-500">1,387</td><td class="p-2 text-emerald-500">1,221</td>
-                    <td class="p-2 text-emerald-500">963</td><td class="p-2 text-emerald-500">1,245</td><td class="p-2 text-emerald-500">1,385</td>
-                    <td class="p-2 text-emerald-500">1,321</td><td class="p-2 text-emerald-500">1,632</td><td class="p-2 text-emerald-500">1,573</td>
-                    <td class="p-2 text-emerald-500">1,165</td><td class="p-2 text-emerald-500">1,542</td><td class="p-2 text-emerald-500">1,315</td>
-                    <td class="p-2 text-emerald-500">1,287</td><td class="p-2 text-emerald-500">1,076</td><td class="p-2 text-emerald-500">1,198</td>
-                    <td class="p-2 text-emerald-500">1,102</td>
-                  </tr>
+                <tbody id="bandChangesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="6" class="py-10 text-center text-slate-400">Loading band changes feed...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
-
-          <!-- Dual Line Chart -->
-          <div>
-            <div class="flex items-center justify-between text-xs mb-2">
-              <div class="flex items-center gap-3 text-[11px] font-bold">
-                <span class="text-emerald-500">● FII (₹ Cr)</span>
-                <span class="text-blue-500">● DII (₹ Cr)</span>
-              </div>
-              <div class="flex items-center gap-4 text-xs font-mono-num font-bold">
-                <div><span class="text-slate-400 mr-1 text-[10px]">FII YTD</span><span class="text-rose-500">-12,567 Cr</span></div>
-                <div><span class="text-slate-400 mr-1 text-[10px]">DII YTD</span><span class="text-emerald-500">+10,432 Cr</span></div>
-              </div>
-            </div>
-            <div class="h-36">
-              <canvas id="fiiDiiLineChart"></canvas>
-            </div>
-          </div>
+          <span class="text-[9px] text-slate-500">Source: eq_band_changes official NSE feed</span>
         </div>
 
-        <!-- Card 2: Price Bands & Band Changes (Col 3.5) -->
-        <div class="lg:col-span-3 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-4">
+        <!-- 4. 📢 Corporate Actions with Interactive Tabs (Col 7) -->
+        <div class="lg:col-span-7 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
           <div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="tag" class="w-4 h-4 text-emerald-500"></i>
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Price Bands &amp; Band Changes</h3>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-0.5">NSE Daily Archives</p>
-
-            <!-- 4 Band Scrip Pills -->
-            <div class="grid grid-cols-4 gap-2 mt-3 text-center">
-              <div class="p-2 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark">
-                <span class="text-[9.5px] font-bold text-emerald-500 block">2% Band</span>
-                <span class="text-base font-black font-mono-num text-slate-800 dark:text-white">28</span>
-                <span class="text-[8px] text-slate-400 block">Scrips</span>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="megaphone" class="w-4 h-4 text-cyan-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📢 Corporate Actions Live Desk</h3>
               </div>
-              <div class="p-2 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark">
-                <span class="text-[9.5px] font-bold text-blue-500 block">5% Band</span>
-                <span class="text-base font-black font-mono-num text-slate-800 dark:text-white">56</span>
-                <span class="text-[8px] text-slate-400 block">Scrips</span>
-              </div>
-              <div class="p-2 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark">
-                <span class="text-[9.5px] font-bold text-amber-500 block">10% Band</span>
-                <span class="text-base font-black font-mono-num text-slate-800 dark:text-white">142</span>
-                <span class="text-[8px] text-slate-400 block">Scrips</span>
-              </div>
-              <div class="p-2 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark">
-                <span class="text-[9.5px] font-bold text-purple-400 block">20% Band</span>
-                <span class="text-base font-black font-mono-num text-slate-800 dark:text-white">18</span>
-                <span class="text-[8px] text-slate-400 block">Scrips</span>
-              </div>
+              <span id="corpActionsCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono-num">0 Events</span>
             </div>
 
-            <!-- Recent Band Changes Table -->
-            <div class="mt-4">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Recent Band Changes</span>
-              <div class="overflow-x-auto custom-scroll">
-                <table class="w-full text-xs text-left table-compact">
-                  <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold">
-                    <tr><th class="pb-1.5">Symbol</th><th class="pb-1.5 text-center">Previous Band</th><th class="pb-1.5 text-center">New Band</th><th class="pb-1.5 text-right">Effective Date</th></tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]" id="recentBandsTbody">
-                    <tr><td class="py-1.5 font-bold text-blue-500">RELIANCE</td><td class="text-center text-slate-400">5%</td><td class="text-center text-emerald-500 font-bold">10%</td><td class="text-right text-slate-400">28-Apr-2025</td></tr>
-                    <tr><td class="py-1.5 font-bold text-blue-500">TCS</td><td class="text-center text-slate-400">2%</td><td class="text-center text-emerald-500 font-bold">5%</td><td class="text-right text-slate-400">25-Apr-2025</td></tr>
-                    <tr><td class="py-1.5 font-bold text-blue-500">HDFCBANK</td><td class="text-center text-slate-400">5%</td><td class="text-center text-emerald-500 font-bold">10%</td><td class="text-right text-slate-400">24-Apr-2025</td></tr>
-                    <tr><td class="py-1.5 font-bold text-blue-500">INFY</td><td class="text-center text-slate-400">10%</td><td class="text-center text-rose-500 font-bold">20%</td><td class="text-right text-slate-400">23-Apr-2025</td></tr>
-                    <tr><td class="py-1.5 font-bold text-blue-500">ITC</td><td class="text-center text-slate-400">2%</td><td class="text-center text-emerald-500 font-bold">5%</td><td class="text-right text-slate-400">22-Apr-2025</td></tr>
-                  </tbody>
-                </table>
-              </div>
+            <!-- Tabs: Dividends, Bonus, Splits, Rights Issue, Others -->
+            <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
+              <button onclick="filterCorpCategory('all')" id="corp-tab-all" class="corp-tab px-3 py-1 rounded-md bg-emerald-500 text-white cursor-pointer">All Events</button>
+              <button onclick="filterCorpCategory('dividend')" id="corp-tab-dividend" class="corp-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Dividends</button>
+              <button onclick="filterCorpCategory('bonus')" id="corp-tab-bonus" class="corp-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Bonus</button>
+              <button onclick="filterCorpCategory('split')" id="corp-tab-split" class="corp-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Splits</button>
+              <button onclick="filterCorpCategory('rights')" id="corp-tab-rights" class="corp-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Rights Issue</button>
+              <button onclick="filterCorpCategory('others')" id="corp-tab-others" class="corp-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Others / General</button>
+            </div>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Code</th>
+                    <th class="pb-2">Company Name</th>
+                    <th class="pb-2">Purpose / Action Details</th>
+                    <th class="pb-2 text-center">Ex-Date</th>
+                    <th class="pb-2 text-center">Record Date</th>
+                  </tr>
+                </thead>
+                <tbody id="corpActionsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="5" class="py-10 text-center text-slate-400">Loading corporate actions...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <p class="text-[9px] text-slate-500">Source: NSE Daily Archives</p>
+          <span class="text-[9px] text-slate-500">Source: BSE India Official Corporate Actions Feed</span>
         </div>
 
-        <!-- Card 3: Corporate Actions, Results & IPOs (Col 4) -->
+      </div>
+
+      <!-- ================= SECTION 3: UPCOMING RESULTS & PRIMARY MARKET (IPOS) ================= -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- 5. 📅 Upcoming Results Calendar (Col 6) -->
+        <div class="lg:col-span-6 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📅 Upcoming Financial Results Calendar</h3>
+              </div>
+              <span id="resultsCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0 Companies</span>
+            </div>
+
+            <!-- Filter Tabs: Today, Tomorrow, This Week, All -->
+            <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
+              <button onclick="filterResultsTimeframe('all')" id="res-tab-all" class="res-tab px-3 py-1 rounded-md bg-emerald-500 text-white cursor-pointer">All Forthcoming</button>
+              <button onclick="filterResultsTimeframe('today')" id="res-tab-today" class="res-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Today 🔴</button>
+              <button onclick="filterResultsTimeframe('tomorrow')" id="res-tab-tomorrow" class="res-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Tomorrow 🟡</button>
+              <button onclick="filterResultsTimeframe('week')" id="res-tab-week" class="res-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">This Week 🟢</button>
+            </div>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Code</th>
+                    <th class="pb-2">Company Name</th>
+                    <th class="pb-2 text-center">Result Date</th>
+                    <th class="pb-2 text-center">Day</th>
+                    <th class="pb-2">Purpose</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsCalendarTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="5" class="py-10 text-center text-slate-400">Loading results calendar...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <span class="text-[9px] text-slate-500">Source: BSE India Official Forthcoming Results</span>
+        </div>
+
+        <!-- 6. 🚀 IPO & Public Issues with Classified Tabs (Col 6) -->
+        <div class="lg:col-span-6 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="rocket" class="w-4 h-4 text-blue-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">🚀 Live &amp; Upcoming IPO / Public Issues</h3>
+              </div>
+              <span id="ipoCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono-num">0 Issues</span>
+            </div>
+
+            <!-- Tabs: Mainboard, SME, Debt, Buyback/Others -->
+            <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
+              <button onclick="filterIpoCategory('all')" id="ipo-tab-all" class="ipo-tab px-3 py-1 rounded-md bg-blue-500 text-white cursor-pointer">All Issues</button>
+              <button onclick="filterIpoCategory('mainboard')" id="ipo-tab-mainboard" class="ipo-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Mainboard</button>
+              <button onclick="filterIpoCategory('sme')" id="ipo-tab-sme" class="ipo-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">SME</button>
+              <button onclick="filterIpoCategory('debt')" id="ipo-tab-debt" class="ipo-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Debt / InVIT</button>
+              <button onclick="filterIpoCategory('buyback')" id="ipo-tab-buyback" class="ipo-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Buyback / Others</button>
+            </div>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Security Name</th>
+                    <th class="pb-2 text-center">Platform</th>
+                    <th class="pb-2 text-center">Start Date</th>
+                    <th class="pb-2 text-center">End Date</th>
+                    <th class="pb-2 text-right">Offer Price ₹</th>
+                    <th class="pb-2 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="ipoPublicTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="6" class="py-10 text-center text-slate-400">Loading public issues feed...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <span class="text-[9px] text-slate-500">Source: BSE India Official GetPublicIssue Feed</span>
+        </div>
+
+      </div>
+
+      <!-- ================= SECTION 4: INSTITUTIONAL DEALS (BULK & BLOCK) ================= -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <!-- 7. 📦 NSE Bulk Deals -->
+        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <i data-lucide="package" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📦 NSE Daily Bulk Deals</h3>
+              </div>
+              <span id="bulkDealsBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0 Deals</span>
+            </div>
+            <p class="text-[10px] text-slate-400">High-volume institutional transactions from official NSE archives</p>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-64">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Date</th>
+                    <th class="pb-2">Symbol</th>
+                    <th class="pb-2">Client Name</th>
+                    <th class="pb-2 text-center">Type</th>
+                    <th class="pb-2 text-right">Qty</th>
+                    <th class="pb-2 text-right">Trade Price ₹</th>
+                  </tr>
+                </thead>
+                <tbody id="bulkDealsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="6" class="py-10 text-center text-slate-400">Loading bulk deals...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <span class="text-[9px] text-slate-500">Source: bulk.csv from NSE Archives</span>
+        </div>
+
+        <!-- 8. 🏢 NSE Block Deals -->
+        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <i data-lucide="building" class="w-4 h-4 text-blue-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">🏢 NSE Daily Block Deals</h3>
+              </div>
+              <span id="blockDealsBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono-num">0 Deals</span>
+            </div>
+            <p class="text-[10px] text-slate-400">Negotiated institutional block window trades</p>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-64">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Date</th>
+                    <th class="pb-2">Symbol</th>
+                    <th class="pb-2">Client Name</th>
+                    <th class="pb-2 text-center">Type</th>
+                    <th class="pb-2 text-right">Qty</th>
+                    <th class="pb-2 text-right">Trade Price ₹</th>
+                  </tr>
+                </thead>
+                <tbody id="blockDealsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="6" class="py-10 text-center text-slate-400">Loading block deals...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <span class="text-[9px] text-slate-500">Source: block.csv from NSE Archives</span>
+        </div>
+
+      </div>
+
+      <!-- ================= SECTION 5: DELIVERIES, VALUATIONS & SECTOR WATCH ================= -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- 9. 🚚 NSE Delivery Positions (Col 4) -->
         <div class="lg:col-span-4 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
           <div>
-            <div class="flex items-center gap-2 mb-2">
-              <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-500"></i>
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Corporate Actions, Results &amp; IPOs</h3>
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <i data-lucide="truck" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">🚚 NSE Delivery Positions &amp; %</h3>
+              </div>
+              <span id="deliveryBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0 Stocks</span>
             </div>
+            <p class="text-[10px] text-slate-400">Deliverable quantity vs total traded volume</p>
 
-            <!-- Tabs Strip -->
-            <div class="flex items-center gap-1 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
-              <button onclick="switchCorpTab('dividends')" id="corp-tab-dividends" class="corp-tab px-2.5 py-1 rounded-md bg-emerald-500 text-white cursor-pointer">Dividends</button>
-              <button onclick="switchCorpTab('bonus')" id="corp-tab-bonus" class="corp-tab px-2.5 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Bonus/Splits</button>
-              <button onclick="switchCorpTab('results')" id="corp-tab-results" class="corp-tab px-2.5 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Results Calendar</button>
-              <button onclick="switchCorpTab('mainboard')" id="corp-tab-mainboard" class="corp-tab px-2.5 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Mainboard IPO</button>
-              <button onclick="switchCorpTab('sme')" id="corp-tab-sme" class="corp-tab px-2.5 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">SME IPO</button>
-            </div>
-
-            <!-- Corporate Table -->
-            <div class="overflow-x-auto custom-scroll mt-3">
-              <table class="w-full text-xs text-left table-compact" id="corpActionsTable">
-                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold">
-                  <tr><th class="pb-2">Symbol</th><th class="pb-2">Event</th><th class="pb-2 text-center">Record Date</th><th class="pb-2 text-right">Ex-Date</th></tr>
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Symbol</th>
+                    <th class="pb-2 text-right">Close ₹</th>
+                    <th class="pb-2 text-right">Traded Qty</th>
+                    <th class="pb-2 text-right">Delivery Qty</th>
+                    <th class="pb-2 text-right">Delivery %</th>
+                  </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]" id="corpActionsTbody">
-                  <tr><td class="py-2 font-bold text-blue-500">RELIANCE</td><td>Dividend (₹8.5)</td><td class="text-center text-slate-400">02-May-2025</td><td class="text-right text-slate-400">01-May-2025</td></tr>
-                  <tr><td class="py-2 font-bold text-blue-500">TCS</td><td>Dividend (₹11)</td><td class="text-center text-slate-400">06-May-2025</td><td class="text-right text-slate-400">05-May-2025</td></tr>
-                  <tr><td class="py-2 font-bold text-blue-500">HDFCBANK</td><td>Dividend (₹19)</td><td class="text-center text-slate-400">12-May-2025</td><td class="text-right text-slate-400">09-May-2025</td></tr>
-                  <tr><td class="py-2 font-bold text-blue-500">BAJFINANCE</td><td>Bonus (1:4)</td><td class="text-center text-slate-400">15-May-2025</td><td class="text-right text-slate-400">14-May-2025</td></tr>
-                  <tr><td class="py-2 font-bold text-blue-500">INFY</td><td>Split (1:5)</td><td class="text-center text-slate-400">20-May-2025</td><td class="text-right text-slate-400">19-May-2025</td></tr>
+                <tbody id="deliveryPositionsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[11px]">
+                  <tr><td colspan="5" class="py-10 text-center text-slate-400">Loading delivery positions...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
+          <span class="text-[9px] text-slate-500">Highlights delivery &ge; 50% accumulation</span>
+        </div>
 
-          <!-- Bottom IPO Pill -->
-          <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-borderDark text-[10px] font-bold">
-            <div class="flex items-center gap-2">
-              <span class="text-slate-400">Upcoming IPOs:</span>
-              <span class="text-emerald-500">Mainboard: 2</span>
-              <span class="text-slate-500">|</span>
-              <span class="text-blue-500">SME: 5</span>
+        <!-- 10. 📊 NSE Indices PE & Valuation (Col 4) -->
+        <div class="lg:col-span-4 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <i data-lucide="layers" class="w-4 h-4 text-cyan-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📊 NSE Indices PE &amp; Valuation</h3>
+              </div>
+              <span id="indicesPeBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono-num">0 Indices</span>
             </div>
-            <a href="#" class="text-emerald-500 hover:underline">View All →</a>
+            <p class="text-[10px] text-slate-400">Official Index P/E, P/B and Dividend Yield</p>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Index Name</th>
+                    <th class="pb-2 text-right">Close</th>
+                    <th class="pb-2 text-center">P/E</th>
+                    <th class="pb-2 text-center">P/B</th>
+                    <th class="pb-2 text-right">Div Yield</th>
+                  </tr>
+                </thead>
+                <tbody id="indicesPeTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[11px]">
+                  <tr><td colspan="5" class="py-10 text-center text-slate-400">Loading indices valuations...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <span class="text-[9px] text-slate-500">Source: ind_close_all official NSE feed</span>
+        </div>
+
+        <!-- 11. 📊 Sector & Industry Live Watch (Col 4) -->
+        <div class="lg:col-span-4 bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📊 Sector &amp; Industry Live Breadth</h3>
+              </div>
+              <span id="sectorWatchBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0 Sectors</span>
+            </div>
+            <p class="text-[10px] text-slate-400">Real-time sector advances vs declines sentiment</p>
+
+            <div class="overflow-x-auto custom-scroll mt-3 max-h-72">
+              <table class="w-full text-xs text-left table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2">Sector</th>
+                    <th class="pb-2 text-center">Adv</th>
+                    <th class="pb-2 text-center">Decl</th>
+                    <th class="pb-2 text-right">Sentiment</th>
+                  </tr>
+                </thead>
+                <tbody id="sectorWatchTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[11px]">
+                  <tr><td colspan="4" class="py-10 text-center text-slate-400">Loading sector breadth...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <span class="text-[9px] text-slate-500">Source: BSE India Industry Watch List</span>
+        </div>
+
+      </div>
+
+      <!-- ================= SECTION 6: 1Y DELIVERY & 2Y SECTOR HISTORICAL ANALYTICS ================= -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <!-- 12. 🚚 NSE Delivery 1Y History (Stock Selector + Chart + Table) -->
+        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="truck" class="w-4 h-4 text-cyan-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">🚚 NSE Delivery 1Y Historical Tracker</h3>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Track date-wise delivery accumulation percentage trend</p>
+            </div>
+
+            <!-- Stock Selector Dropdown -->
+            <div class="flex items-center gap-2">
+              <label for="deliveryStockSelect" class="text-[10px] text-slate-400 font-bold uppercase">Select Stock:</label>
+              <select id="deliveryStockSelect" onchange="renderDelivery1YStockChart()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark font-bold text-blue-500 focus:outline-none">
+                <option value="">Loading stocks...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Chart Canvas -->
+          <div class="h-48 relative">
+            <canvas id="delivery1YChart"></canvas>
+            <div id="deliveryChartLoader" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-cardDark/50 text-xs text-slate-400 font-bold">
+              Select a stock to view 1-Year Delivery Trend
+            </div>
+          </div>
+        </div>
+
+        <!-- 13. 📈 Sector A/D 2Y History (Sector Selector + Chart) -->
+        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📈 Sector A/D 2Y Historical Matrix</h3>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Historical advances vs declines trends for all industries</p>
+            </div>
+
+            <!-- Sector Selector Dropdown -->
+            <div class="flex items-center gap-2">
+              <label for="sectorSelect" class="text-[10px] text-slate-400 font-bold uppercase">Select Sector:</label>
+              <select id="sectorSelect" onchange="renderSectorHistoryChart()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark font-bold text-emerald-500 focus:outline-none">
+                <option value="">Loading sectors...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Chart Canvas -->
+          <div class="h-48 relative">
+            <canvas id="sectorHistoryChart"></canvas>
+            <div id="sectorChartLoader" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-cardDark/50 text-xs text-slate-400 font-bold">
+              Select a sector to view historical Breadth curve
+            </div>
           </div>
         </div>
 
       </div>
 
-      <!-- ================= 3. ROW 3: FOUR BOTTOM CARDS ================= -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-        <!-- 1. Delivery Positions & Delivery % -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+      <!-- ================= SECTION 7: EARNINGS 1-YEAR ROLLING TRACKER (Q0 TO Q-5) ================= -->
+      <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
           <div>
             <div class="flex items-center gap-2">
-              <i data-lucide="truck" class="w-4 h-4 text-emerald-500"></i>
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Delivery Positions &amp; Delivery %</h3>
+              <i data-lucide="calendar-check-2" class="w-4 h-4 text-emerald-500"></i>
+              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">📋 Earnings 1-Year History Tracker (Rolling 5-Quarters)</h3>
             </div>
-            <p class="text-[10px] text-slate-400 mt-0.5">NSE Daily Reports</p>
-
-            <div class="overflow-x-auto custom-scroll mt-3">
-              <table class="w-full text-xs text-left table-compact">
-                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[9.5px] font-bold uppercase">
-                  <tr><th class="pb-1.5">Symbol</th><th class="pb-1.5 text-right">Traded Qty</th><th class="pb-1.5 text-right">Deliverable Qty</th><th class="pb-1.5 text-right">Delivery %</th><th class="pb-1.5 text-right">20D Avg %</th><th class="pb-1.5 text-center">Signal</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[10.5px]">
-                  <tr><td class="py-1.5 font-bold font-sans text-blue-500">YESBANK</td><td class="text-right text-slate-400">48,23,450</td><td class="text-right text-slate-400">38,76,320</td><td class="text-right text-emerald-500 font-bold">80.39%</td><td class="text-right text-slate-400">62.14%</td><td class="text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-sans text-[8.5px] font-bold">High Accumulation</span></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-blue-500">TATAMOTORS</td><td class="text-right text-slate-400">32,14,780</td><td class="text-right text-slate-400">24,56,320</td><td class="text-right text-emerald-500 font-bold">76.38%</td><td class="text-right text-slate-400">54.23%</td><td class="text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-sans text-[8.5px] font-bold">Accumulation</span></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-blue-500">COALINDIA</td><td class="text-right text-slate-400">1,82,34,120</td><td class="text-right text-slate-400">1,32,45,650</td><td class="text-right text-emerald-500 font-bold">72.59%</td><td class="text-right text-slate-400">48.76%</td><td class="text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-sans text-[8.5px] font-bold">Positive</span></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-blue-500">SBIN</td><td class="text-right text-slate-400">2,14,56,870</td><td class="text-right text-slate-400">1,48,32,110</td><td class="text-right text-emerald-500 font-bold">69.02%</td><td class="text-right text-slate-400">46.12%</td><td class="text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-sans text-[8.5px] font-bold">Positive</span></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-blue-500">AXISBANK</td><td class="text-right text-slate-400">87,65,320</td><td class="text-right text-slate-400">54,21,760</td><td class="text-right text-emerald-500 font-bold">61.87%</td><td class="text-right text-slate-400">42.33%</td><td class="text-center"><span class="px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-400 font-sans text-[8.5px] font-bold">Normal</span></td></tr>
-                </tbody>
-              </table>
-            </div>
+            <p class="text-[10px] text-slate-400 mt-0.5">Historical quarterly results dates along with upcoming result countdowns</p>
           </div>
-          
-          <div class="flex items-center justify-between text-[8.5px] text-slate-400 pt-2 border-t border-slate-100 dark:border-borderDark">
-            <span class="flex items-center gap-1">● High delivery accumulation indicates strong interest from long-term investors.</span>
-            <span class="text-slate-500">Source: NSE Daily Reports</span>
-          </div>
+          <span id="earningsBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0 Companies</span>
         </div>
 
-        <!-- 2. Valuations -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
-          <div>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <i data-lucide="percent" class="w-4 h-4 text-cyan-500"></i>
-                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Valuations</h3>
-              </div>
-              <div class="flex items-center gap-1 text-[10px] font-bold">
-                <button class="px-2 py-0.5 rounded bg-emerald-500 text-white">Indices</button>
-                <button class="px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400">Stocks</button>
-              </div>
-            </div>
-
-            <div class="mt-2">
-              <span class="text-[9.5px] font-bold uppercase text-slate-400 block mb-1">Index Valuations</span>
-              <table class="w-full text-xs text-left table-compact">
-                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[9px] font-bold">
-                  <tr><th>Index</th><th class="text-center">PE (TTM)</th><th class="text-center">Percentile (5Y)</th><th class="text-right">Status</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[10px]">
-                  <tr><td class="py-1 font-sans font-bold text-slate-700 dark:text-slate-300">Nifty 50</td><td class="text-center">22.4</td><td class="text-center text-rose-500">72nd</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 font-sans text-[8.5px] font-bold">Overvalued</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-slate-700 dark:text-slate-300">Nifty 500</td><td class="text-center">19.8</td><td class="text-center text-amber-500">61st</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 font-sans text-[8.5px] font-bold">Fair</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-slate-700 dark:text-slate-300">Nifty Midcap 150</td><td class="text-center">26.7</td><td class="text-center text-rose-500">78th</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 font-sans text-[8.5px] font-bold">Overvalued</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-slate-700 dark:text-slate-300">Nifty Smallcap 250</td><td class="text-center">32.1</td><td class="text-center text-rose-500">85th</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 font-sans text-[8.5px] font-bold">Overvalued</span></td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="mt-3">
-              <span class="text-[9.5px] font-bold uppercase text-slate-400 block mb-1">Top Stocks by PE (Nifty 500)</span>
-              <table class="w-full text-xs text-left table-compact">
-                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[9px] font-bold">
-                  <tr><th>Symbol</th><th class="text-center">PE (TTM)</th><th class="text-center">PB</th><th class="text-center">Div. Yield</th><th class="text-right">Status</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[10px]">
-                  <tr><td class="py-1 font-sans font-bold text-blue-500">ASIANPAINT</td><td class="text-center">56.3</td><td class="text-center">12.8</td><td class="text-center text-slate-400">0.8%</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 font-sans text-[8.5px] font-bold">Overvalued</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-blue-500">TITAN</td><td class="text-center">48.7</td><td class="text-center">9.6</td><td class="text-center text-slate-400">1.1%</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 font-sans text-[8.5px] font-bold">Overvalued</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-blue-500">HINDUNILVR</td><td class="text-center">45.2</td><td class="text-center">8.9</td><td class="text-center text-slate-400">1.2%</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 font-sans text-[8.5px] font-bold">Overvalued</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-blue-500">ITC</td><td class="text-center">28.6</td><td class="text-center">5.7</td><td class="text-center text-slate-400">3.4%</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 font-sans text-[8.5px] font-bold">Fair</span></td></tr>
-                  <tr><td class="py-1 font-sans font-bold text-blue-500">ONGC</td><td class="text-center">12.4</td><td class="text-center">1.8</td><td class="text-center text-emerald-500">6.8%</td><td class="text-right"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-sans text-[8.5px] font-bold">Undervalued</span></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <span class="text-[9px] text-slate-500">Source: NSE Historical Data &amp; Company Filings</span>
+        <div class="overflow-x-auto custom-scroll max-h-80">
+          <table class="w-full text-xs text-left table-compact">
+            <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+              <tr>
+                <th class="pb-2">Symbol</th>
+                <th class="pb-2">Company Name</th>
+                <th class="pb-2 text-center">Upcoming Result</th>
+                <th class="pb-2 text-center">Status / Countdown</th>
+                <th class="pb-2 text-center">Latest (Q0)</th>
+                <th class="pb-2 text-center">Past Q-1</th>
+                <th class="pb-2 text-center">Past Q-2</th>
+                <th class="pb-2 text-center">Past Q-3</th>
+                <th class="pb-2 text-center">Past Q-4</th>
+                <th class="pb-2 text-center">Past Q-5</th>
+              </tr>
+            </thead>
+            <tbody id="earningsHistoryTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[11px]">
+              <tr><td colspan="10" class="py-10 text-center text-slate-400">Loading 1-Year Earnings History...</td></tr>
+            </tbody>
+          </table>
         </div>
-
-        <!-- 3. 52-Week High & Low Tracker -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i>
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">52-Week High &amp; Low Tracker</h3>
-            </div>
-
-            <!-- Top Counters -->
-            <div class="flex items-center justify-between mt-2 text-xs font-mono-num">
-              <div><span class="text-[9.5px] text-slate-400 font-sans block">New Highs</span><span class="text-base font-black text-emerald-500">68</span></div>
-              <div><span class="text-[9.5px] text-slate-400 font-sans block">New Lows</span><span class="text-base font-black text-rose-500">32</span></div>
-              <div class="text-right"><span class="text-[9.5px] text-slate-400 font-sans block">Breadth Ratio</span><span class="text-base font-black text-slate-800 dark:text-white">2.13</span></div>
-            </div>
-
-            <!-- Split Ratio Bar -->
-            <div class="w-full flex h-2 rounded-full overflow-hidden mt-1.5 bg-slate-200 dark:bg-slate-800 text-[8px] font-bold text-white leading-none">
-              <div class="bg-emerald-500 h-full flex items-center justify-start pl-1" style="width: 68%;">68%</div>
-              <div class="bg-rose-500 h-full flex items-center justify-end pr-1" style="width: 32%;">32%</div>
-            </div>
-
-            <!-- 30-Day Trend Chart -->
-            <div class="mt-3">
-              <div class="flex items-center justify-between text-[9px] text-slate-400 font-bold mb-1">
-                <span>30-Day Trend</span>
-                <div class="flex gap-2">
-                  <span class="text-emerald-500">● Highs</span>
-                  <span class="text-rose-500">● Lows</span>
-                </div>
-              </div>
-              <div class="h-16">
-                <canvas id="highLowTrendChart"></canvas>
-              </div>
-            </div>
-
-            <!-- Split Tables -->
-            <div class="grid grid-cols-2 gap-2 mt-3 text-[10px]">
-              <div>
-                <span class="text-[9px] font-bold text-emerald-500 uppercase block mb-1">52W Highs</span>
-                <table class="w-full font-mono-num">
-                  <tbody class="divide-y divide-slate-100 dark:divide-borderDark">
-                    <tr><td class="font-sans font-bold text-blue-500">RELIANCE</td><td>1,402.60</td><td class="text-emerald-500 text-right">+2.8%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">TCS</td><td>3,876.50</td><td class="text-emerald-500 text-right">+1.9%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">HDFCBANK</td><td>1,658.20</td><td class="text-emerald-500 text-right">+1.6%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">INFY</td><td>1,542.30</td><td class="text-emerald-500 text-right">+2.1%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">LT</td><td>3,245.70</td><td class="text-emerald-500 text-right">+1.4%</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div>
-                <span class="text-[9px] font-bold text-rose-500 uppercase block mb-1">52W Lows</span>
-                <table class="w-full font-mono-num">
-                  <tbody class="divide-y divide-slate-100 dark:divide-borderDark">
-                    <tr><td class="font-sans font-bold text-blue-500">IDEA</td><td>7.12</td><td class="text-rose-500 text-right">-4.3%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">RPOWER</td><td>12.45</td><td class="text-rose-500 text-right">-3.9%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">SUZLON</td><td>56.20</td><td class="text-rose-500 text-right">-5.1%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">YESBANK</td><td>18.75</td><td class="text-rose-500 text-right">-2.8%</td></tr>
-                    <tr><td class="font-sans font-bold text-blue-500">PNB</td><td>89.40</td><td class="text-rose-500 text-right">-2.6%</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <span class="text-[9px] text-slate-500">Source: NSE 52-Week High/Low Report</span>
-        </div>
-
-        <!-- 4. Sector & Industry Live Breadth Watch -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i>
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Sector &amp; Industry Live Breadth Watch</h3>
-            </div>
-
-            <div class="overflow-x-auto custom-scroll mt-3">
-              <table class="w-full text-xs text-left table-compact">
-                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[9.5px] font-bold uppercase">
-                  <tr><th class="pb-1.5">Sector</th><th class="pb-1.5 text-center">Adv / Dec</th><th class="pb-1.5 text-center">% &gt; 20EMA</th><th class="pb-1.5 text-center">% &gt; 50EMA</th><th class="pb-1.5 text-right">Breadth</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[10.5px]">
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">Banking</td><td class="text-center font-bold text-emerald-500">34 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">16</span></td><td class="text-center">78%</td><td class="text-center">62%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 68%;"></div><div class="bg-rose-500 h-full" style="width: 32%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">IT</td><td class="text-center font-bold text-emerald-500">26 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">24</span></td><td class="text-center">68%</td><td class="text-center">54%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 52%;"></div><div class="bg-rose-500 h-full" style="width: 48%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">Auto</td><td class="text-center font-bold text-emerald-500">28 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">22</span></td><td class="text-center">71%</td><td class="text-center">58%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 56%;"></div><div class="bg-rose-500 h-full" style="width: 44%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">Pharma</td><td class="text-center font-bold text-emerald-500">20 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">30</span></td><td class="text-center">56%</td><td class="text-center">42%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 40%;"></div><div class="bg-rose-500 h-full" style="width: 60%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">Metals</td><td class="text-center font-bold text-emerald-500">18 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">32</span></td><td class="text-center">49%</td><td class="text-center">35%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 36%;"></div><div class="bg-rose-500 h-full" style="width: 64%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">FMCG</td><td class="text-center font-bold text-emerald-500">22 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">28</span></td><td class="text-center">61%</td><td class="text-center">47%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 44%;"></div><div class="bg-rose-500 h-full" style="width: 56%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">Realty</td><td class="text-center font-bold text-emerald-500">14 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">36</span></td><td class="text-center">38%</td><td class="text-center">28%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 28%;"></div><div class="bg-rose-500 h-full" style="width: 72%;"></div></div></td></tr>
-                  <tr><td class="py-1.5 font-bold font-sans text-slate-800 dark:text-slate-200">Energy</td><td class="text-center font-bold text-emerald-500">27 <span class="text-slate-400 font-normal">/</span> <span class="text-rose-500 font-bold">23</span></td><td class="text-center">66%</td><td class="text-center">51%</td><td class="text-right"><div class="inline-flex w-14 h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800"><div class="bg-emerald-500 h-full" style="width: 54%;"></div><div class="bg-rose-500 h-full" style="width: 46%;"></div></div></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between text-[9px] text-slate-400 pt-2 border-t border-slate-100 dark:border-borderDark">
-            <div class="flex items-center gap-3">
-              <span class="text-emerald-500 font-bold">● Advances</span>
-              <span class="text-rose-500 font-bold">● Declines</span>
-            </div>
-            <span>Breadth = Adv / (Adv + Dec)</span>
-          </div>
-        </div>
-
       </div>
 
     </main>
 
-    <!-- ================= COMPACT FOOTER (MATCHING REST OF THE SITE) ================= -->
+    <!-- ================= COMPACT FOOTER (MATCHING REST OF SITE) ================= -->
     <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500 px-6">
       <div class="flex items-center gap-2">
         <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
@@ -714,12 +767,54 @@
     </footer>
   </div>
 
-  <!-- ================= JAVASCRIPT & CHART ENGINE ================= -->
-  <script>
-    const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyyYuQNZ4cxpr99Nuoog9W5gRmsKXgGImGD0y7TRCr06onMr_ACsXU5dpKWML6cgl2wog/exec";
+  <!-- 2Y FII/DII Historical Data Modal -->
+  <div id="fiiTableModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-slate-200 dark:border-borderDark flex items-center justify-between">
+        <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">🏦 Full 2-Year FII &amp; DII Historical Cash Equity Ledger</h3>
+        <button onclick="toggleFiiTableModal()" class="text-slate-400 hover:text-rose-500 cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="p-4 overflow-y-auto custom-scroll flex-1">
+        <table class="w-full text-xs text-left table-compact">
+          <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark">
+            <tr>
+              <th class="pb-2">Date</th><th class="pb-2 text-right">FII Buy (₹ Cr)</th><th class="pb-2 text-right">FII Sell (₹ Cr)</th><th class="pb-2 text-right">FII Net (₹ Cr)</th>
+              <th class="pb-2 text-right">DII Buy (₹ Cr)</th><th class="pb-2 text-right">DII Sell (₹ Cr)</th><th class="pb-2 text-right">DII Net (₹ Cr)</th><th class="pb-2 text-right">Total Net (₹ Cr)</th>
+            </tr>
+          </thead>
+          <tbody id="fiiModalTableBody" class="divide-y divide-slate-100 dark:divide-borderDark font-mono-num text-[11px]"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    let fiiDiiChart = null;
-    let highLowChart = null;
+  <!-- ================= MASTER CLIENT-SIDE SCRIPT ================= -->
+  <script>
+    // Live Google Apps Script Endpoint
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyYuQNZ4cxpr99Nuoog9W5gRmsKXgGImGD0y7TRCr06onMr_ACsXU5dpKWML6cgl2wog/exec";
+
+    // Chart instances
+    let fiiChartInstance = null;
+    let fiiChartType = 'line';
+    let delivery1YChartInstance = null;
+    let sectorChartInstance = null;
+
+    // Cache stores for interactive tabs/dropdowns
+    let rawStore = {
+      fiiDii: [],
+      bandChanges: [],
+      corporateActions: [],
+      resultsCalendar: [],
+      ipoPublic: [],
+      bulkDeals: [],
+      blockDeals: [],
+      deliveryPositions: [],
+      indicesPe: [],
+      sectorWatch: [],
+      deliveryHistory: [],
+      sectorHistory: [],
+      earningsHistory: []
+    };
 
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
@@ -744,7 +839,7 @@
       const isDark = document.documentElement.classList.toggle("dark");
       syncThemeIcons(isDark);
       try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch (e) {}
-      renderCharts();
+      renderFiiChart();
     }
 
     function syncThemeIcons(isDark) {
@@ -754,216 +849,641 @@
       if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
     }
 
-    // Interactive Corporate Actions Tab Switcher
-    const corpDataSets = {
-      dividends: [
-        { sym: "RELIANCE", event: "Dividend (₹8.5)", record: "02-May-2025", ex: "01-May-2025" },
-        { sym: "TCS", event: "Dividend (₹11)", record: "06-May-2025", ex: "05-May-2025" },
-        { sym: "HDFCBANK", event: "Dividend (₹19)", record: "12-May-2025", ex: "09-May-2025" },
-        { sym: "BAJFINANCE", event: "Bonus (1:4)", record: "15-May-2025", ex: "14-May-2025" },
-        { sym: "INFY", event: "Split (1:5)", record: "20-May-2025", ex: "19-May-2025" }
-      ],
-      bonus: [
-        { sym: "BAJFINANCE", event: "Bonus Issue 1:4", record: "15-May-2025", ex: "14-May-2025" },
-        { sym: "INFY", event: "Stock Split 1:5", record: "20-May-2025", ex: "19-May-2025" },
-        { sym: "VARUNBEV", event: "Stock Split 1:2", record: "28-May-2025", ex: "27-May-2025" },
-        { sym: "TATAELXSI", event: "Bonus Issue 1:1", record: "04-Jun-2025", ex: "03-Jun-2025" }
-      ],
-      results: [
-        { sym: "TCS", event: "Q4 Audited Results", record: "10-May-2025", ex: "Board Meeting" },
-        { sym: "INFY", event: "Q4 Audited Results", record: "14-May-2025", ex: "Board Meeting" },
-        { sym: "RELIANCE", event: "Q4 Financial Results", record: "18-May-2025", ex: "Board Meeting" },
-        { sym: "HDFCBANK", event: "Q4 Audited Results", record: "21-May-2025", ex: "Board Meeting" }
-      ],
-      mainboard: [
-        { sym: "SWIGGY", event: "Mainboard IPO (₹390)", record: "08-May-2025", ex: "Issue Closes" },
-        { sym: "NTPCGREEN", event: "Mainboard IPO (₹108)", record: "15-May-2025", ex: "Issue Closes" }
-      ],
-      sme: [
-        { sym: "TECHSOL", event: "BSE SME IPO (₹85)", record: "02-May-2025", ex: "Issue Closes" },
-        { sym: "SOLAREX", event: "NSE Emerge SME (₹120)", record: "05-May-2025", ex: "Issue Closes" }
-      ]
-    };
+    function toggleFiiTableModal() {
+      const m = document.getElementById("fiiTableModal");
+      m.classList.toggle("hidden");
+    }
 
-    function switchCorpTab(tabKey) {
-      document.querySelectorAll(".corp-tab").forEach(btn => {
-        btn.className = "corp-tab px-2.5 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
+    // ----------------- JSONP Data Fetcher Engine -----------------
+    function fetchMasterMarketData(isManual = false) {
+      const spin = document.getElementById("marketRefreshSpin");
+      if (spin) spin.classList.add("animate-spin");
+
+      const updateTime = document.getElementById("marketLastUpdatedTime");
+      if (updateTime) updateTime.textContent = "Fetching live sheets...";
+
+      // Fetch summary payload from Apps Script
+      requestScriptFeed("summary")
+        .then(res => {
+          if (res && res.success && res.data) {
+            handleSummaryData(res.data);
+          }
+        })
+        .catch(err => {
+          console.warn("Summary feed error:", err);
+        })
+        .finally(() => {
+          if (spin) setTimeout(() => spin.classList.remove("animate-spin"), 1000);
+        });
+
+      // Also trigger individual feeds for deep tables
+      fetchDeepSheets();
+    }
+
+    function fetchDeepSheets() {
+      requestScriptFeed("fii_dii").then(res => { if (res && res.data) handleFiiDiiData(res.data); });
+      requestScriptFeed("band_changes").then(res => { if (res && res.data) handleBandChangesData(res.data); });
+      requestScriptFeed("corporate_actions").then(res => { if (res && res.data) handleCorpActionsData(res.data); });
+      requestScriptFeed("upcoming_results").then(res => { if (res && res.data) handleResultsData(res.data); });
+      requestScriptFeed("ipo").then(res => { if (res && res.data) handleIpoData(res.data); });
+      requestScriptFeed("bulk_deals").then(res => { if (res && res.data) handleBulkDealsData(res.data); });
+      requestScriptFeed("block_deals").then(res => { if (res && res.data) handleBlockDealsData(res.data); });
+      requestScriptFeed("delivery_positions").then(res => { if (res && res.data) handleDeliveryPositionsData(res.data); });
+      requestScriptFeed("indices_pe").then(res => { if (res && res.data) handleIndicesPeData(res.data); });
+      requestScriptFeed("sector_watch").then(res => { if (res && res.data) handleSectorWatchData(res.data); });
+      requestScriptFeed("earnings_history").then(res => { if (res && res.data) handleEarningsHistoryData(res.data); });
+    }
+
+    function requestScriptFeed(action) {
+      return new Promise((resolve, reject) => {
+        const cbName = "__mickkk_cb_" + action + "_" + Date.now();
+        const script = document.createElement("script");
+        let finished = false;
+
+        const cleanup = () => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timeout);
+          delete window[cbName];
+          script.remove();
+        };
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Timeout for " + action));
+        }, 35000);
+
+        window[cbName] = data => {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("Script error for " + action));
+        };
+
+        const url = new URL(APPS_SCRIPT_URL);
+        url.searchParams.set("action", action);
+        url.searchParams.set("callback", cbName);
+        script.src = url.toString();
+        document.head.appendChild(script);
       });
-      const activeBtn = document.getElementById("corp-tab-" + tabKey);
-      if (activeBtn) {
-        activeBtn.className = "corp-tab px-2.5 py-1 rounded-md bg-emerald-500 text-white cursor-pointer";
+    }
+
+    // ----------------- Feed Handlers (Render ONLY real data) -----------------
+    function handleSummaryData(data) {
+      const now = new Date();
+      const dateDisplay = document.getElementById("marketDateDisplay");
+      const timeDisplay = document.getElementById("marketLastUpdatedTime");
+      if (dateDisplay) dateDisplay.textContent = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      if (timeDisplay) timeDisplay.textContent = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) + " " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    // 1. FII / DII Handler
+    function handleFiiDiiData(rows) {
+      if (!Array.isArray(rows) || !rows.length) return;
+      rawStore.fiiDii = rows;
+
+      const latest = rows[0];
+      const getVal = key => parseFloat(String(latest[key] || "0").replace(/,/g, '')) || 0;
+
+      const fBuy = getVal("FII BUY (₹ Cr)");
+      const fSell = getVal("FII SELL (₹ Cr)");
+      const fNet = getVal("FII NET (₹ Cr)");
+      const dBuy = getVal("DII BUY (₹ Cr)");
+      const dSell = getVal("DII SELL (₹ Cr)");
+      const dNet = getVal("DII NET (₹ Cr)");
+      const tNet = getVal("TOTAL NET (₹ Cr)");
+
+      const dateStr = latest["DATE"] || "--";
+      document.getElementById("fiiDiiLatestDate").textContent = `Trade Date: ${dateStr}`;
+
+      const setNum = (id, val, isNet = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = (isNet && val > 0 ? "+" : "") + val.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        if (isNet) el.className = `text-base font-black font-mono-num mt-1 ${val >= 0 ? "text-emerald-500" : "text-rose-500"}`;
+      };
+
+      setNum("fii-buy-val", fBuy);
+      setNum("fii-sell-val", fSell);
+      setNum("fii-net-val", fNet, true);
+      setNum("dii-buy-val", dBuy);
+      setNum("dii-sell-val", dSell);
+      setNum("dii-net-val", dNet, true);
+      setNum("total-net-val", tNet, true);
+
+      // Populate Modal Table
+      const modalBody = document.getElementById("fiiModalTableBody");
+      if (modalBody) {
+        modalBody.innerHTML = rows.map(r => `
+          <tr>
+            <td class="py-2 font-bold">${r["DATE"] || "-"}</td>
+            <td class="text-right">${r["FII BUY (₹ Cr)"] || "-"}</td>
+            <td class="text-right">${r["FII SELL (₹ Cr)"] || "-"}</td>
+            <td class="text-right font-bold ${parseFloat(r["FII NET (₹ Cr)"]) >= 0 ? "text-emerald-500" : "text-rose-500"}">${r["FII NET (₹ Cr)"] || "-"}</td>
+            <td class="text-right">${r["DII BUY (₹ Cr)"] || "-"}</td>
+            <td class="text-right">${r["DII SELL (₹ Cr)"] || "-"}</td>
+            <td class="text-right font-bold ${parseFloat(r["DII NET (₹ Cr)"]) >= 0 ? "text-emerald-500" : "text-rose-500"}">${r["DII NET (₹ Cr)"] || "-"}</td>
+            <td class="text-right font-bold ${parseFloat(r["TOTAL NET (₹ Cr)"]) >= 0 ? "text-emerald-500" : "text-rose-500"}">${r["TOTAL NET (₹ Cr)"] || "-"}</td>
+          </tr>
+        `).join('');
       }
 
-      const rows = corpDataSets[tabKey] || corpDataSets.dividends;
-      const tbody = document.getElementById("corpActionsTbody");
+      renderFiiChart();
+    }
+
+    function setFiiChartType(type) {
+      fiiChartType = type;
+      document.getElementById("btn-chart-line").className = `px-2.5 py-1 rounded-md cursor-pointer ${type === 'line' ? 'bg-emerald-500 text-white' : 'text-slate-400'}`;
+      document.getElementById("btn-chart-bar").className = `px-2.5 py-1 rounded-md cursor-pointer ${type === 'bar' ? 'bg-emerald-500 text-white' : 'text-slate-400'}`;
+      renderFiiChart();
+    }
+
+    function renderFiiChart() {
+      const rows = rawStore.fiiDii;
+      if (!rows.length) return;
+      const loader = document.getElementById("fiiChartLoader");
+      if (loader) loader.style.display = 'none';
+
+      // Reverse to chronological order (oldest -> newest)
+      const subset = rows.slice(0, 40).reverse();
+      const labels = subset.map(r => r["DATE"]);
+      const fiiNetData = subset.map(r => parseFloat(String(r["FII NET (₹ Cr)"] || "0").replace(/,/g, '')) || 0);
+      const diiNetData = subset.map(r => parseFloat(String(r["DII NET (₹ Cr)"] || "0").replace(/,/g, '')) || 0);
+      const totalNetData = subset.map(r => parseFloat(String(r["TOTAL NET (₹ Cr)"] || "0").replace(/,/g, '')) || 0);
+
+      const ctx = document.getElementById("fiiDii2YChart");
+      if (!ctx) return;
+      if (fiiChartInstance) fiiChartInstance.destroy();
+
+      const isDark = document.documentElement.classList.contains("dark");
+      const gridColor = isDark ? "#17243e" : "#e2e8f0";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
+
+      fiiChartInstance = new Chart(ctx, {
+        type: fiiChartType,
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'FII Net (₹ Cr)',
+              data: fiiNetData,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.6)',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 2
+            },
+            {
+              label: 'DII Net (₹ Cr)',
+              data: diiNetData,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.6)',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 2
+            },
+            {
+              label: 'Total Net (₹ Cr)',
+              data: totalNetData,
+              borderColor: '#00d4ff',
+              backgroundColor: 'rgba(0, 212, 255, 0.3)',
+              borderWidth: 1.5,
+              borderDash: [4, 4],
+              tension: 0.3,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { display: true, labels: { color: textColor, font: { size: 10 } } } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 }, maxTicksLimit: 12 } },
+            y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } } }
+          }
+        }
+      });
+    }
+
+    // 2. Price Band Changes Handler
+    function handleBandChangesData(rows) {
+      const tbody = document.getElementById("bandChangesTbody");
+      const badge = document.getElementById("bandChangesBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">No price band changes recorded today.</td></tr>`;
+        return;
+      }
+      rawStore.bandChanges = rows;
+      if (badge) badge.textContent = `${rows.length} Changes`;
+
       if (tbody) {
-        tbody.innerHTML = rows.map(r => `
-          <tr>
-            <td class="py-2 font-bold text-blue-500">${r.sym}</td>
-            <td>${r.event}</td>
-            <td class="text-center text-slate-400">${r.record}</td>
-            <td class="text-right text-slate-400">${r.ex}</td>
+        tbody.innerHTML = rows.map((r, i) => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2 text-slate-400 font-mono-num">${i + 1}</td>
+            <td class="py-2 font-bold text-blue-500">${r["Symbol"] || r["SYMBOL"] || "-"}</td>
+            <td class="py-2 text-center text-slate-400">${r["Series"] || r["SERIES"] || "EQ"}</td>
+            <td class="py-2 font-sans truncate max-w-[140px] text-slate-700 dark:text-slate-300">${r["Security Name"] || r["SECURITY NAME"] || "-"}</td>
+            <td class="py-2 text-center font-mono-num text-slate-400">${r["From"] || r["FROM"] || r["Previous Band"] || "-"}</td>
+            <td class="py-2 text-center font-mono-num font-bold text-emerald-500">${r["To"] || r["TO"] || r["New Band"] || "-"}</td>
           </tr>
         `).join('');
       }
     }
 
-    // Chart Renderer matching Screenshot
-    function renderCharts() {
-      if (typeof Chart === 'undefined') return;
+    // 3. Corporate Actions Handler with Interactive Tabs
+    function handleCorpActionsData(rows) {
+      if (!Array.isArray(rows) || !rows.length) return;
+      rawStore.corporateActions = rows;
+      const badge = document.getElementById("corpActionsCountBadge");
+      if (badge) badge.textContent = `${rows.length} Events`;
+      filterCorpCategory('all');
+    }
+
+    function filterCorpCategory(cat) {
+      document.querySelectorAll(".corp-tab").forEach(b => {
+        b.className = "corp-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
+      });
+      const activeBtn = document.getElementById("corp-tab-" + cat);
+      if (activeBtn) activeBtn.className = "corp-tab px-3 py-1 rounded-md bg-emerald-500 text-white cursor-pointer";
+
+      const rows = rawStore.corporateActions;
+      const tbody = document.getElementById("corpActionsTbody");
+      if (!tbody) return;
+
+      const filtered = rows.filter(r => {
+        const text = (r["PURPOSE / ACTION DETAILS"] || r["Purpose"] || "").toLowerCase();
+        if (cat === "dividend") return text.includes("div");
+        if (cat === "bonus") return text.includes("bonus");
+        if (cat === "split") return text.includes("split");
+        if (cat === "rights") return text.includes("right");
+        if (cat === "others") return !text.includes("div") && !text.includes("bonus") && !text.includes("split") && !text.includes("right");
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No events found for this category.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="py-2 font-mono-num text-slate-400">${r["SECURITY CODE"] || r["Code"] || "-"}</td>
+          <td class="py-2 font-bold text-blue-500 truncate max-w-[140px]">${r["COMPANY NAME"] || r["Company Name"] || "-"}</td>
+          <td class="py-2 text-slate-700 dark:text-slate-300 font-sans">${r["PURPOSE / ACTION DETAILS"] || r["Purpose"] || "-"}</td>
+          <td class="py-2 text-center text-emerald-500 font-bold font-mono-num">${r["EX-DATE"] || r["Ex-Date"] || "-"}</td>
+          <td class="py-2 text-center text-slate-400 font-mono-num">${r["RECORD DATE"] || r["Record Date"] || "-"}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 4. Upcoming Results Handler
+    function handleResultsData(rows) {
+      if (!Array.isArray(rows) || !rows.length) return;
+      rawStore.resultsCalendar = rows;
+      const badge = document.getElementById("resultsCountBadge");
+      if (badge) badge.textContent = `${rows.length} Companies`;
+      filterResultsTimeframe('all');
+    }
+
+    function filterResultsTimeframe(tf) {
+      document.querySelectorAll(".res-tab").forEach(b => {
+        b.className = "res-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
+      });
+      const activeBtn = document.getElementById("res-tab-" + tf);
+      if (activeBtn) activeBtn.className = "res-tab px-3 py-1 rounded-md bg-emerald-500 text-white cursor-pointer";
+
+      const rows = rawStore.resultsCalendar;
+      const tbody = document.getElementById("resultsCalendarTbody");
+      if (!tbody) return;
+
+      const now = new Date();
+      const filtered = rows.filter(r => {
+        const rawDate = r["RESULT DATE"] || r["Result Date"] || "";
+        const d = new Date(rawDate);
+        if (isNaN(d.getTime())) return tf === 'all';
+        const diffDays = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (tf === 'today') return diffDays === 0;
+        if (tf === 'tomorrow') return diffDays === 1;
+        if (tf === 'week') return diffDays >= 0 && diffDays <= 7;
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No results scheduled for this period.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="py-2 font-mono-num text-slate-400">${r["SECURITY CODE"] || "-"}</td>
+          <td class="py-2 font-bold text-blue-500">${r["SECURITY / COMPANY NAME"] || "-"}</td>
+          <td class="py-2 text-center font-bold text-emerald-500 font-mono-num">${r["RESULT DATE"] || "-"}</td>
+          <td class="py-2 text-center text-slate-400 font-mono-num">${r["DAY"] || "-"}</td>
+          <td class="py-2 text-slate-400 font-sans">${r["PURPOSE / DETAILS"] || "Quarterly Results"}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 5. IPO Public Issues Handler
+    function handleIpoData(rows) {
+      if (!Array.isArray(rows) || !rows.length) return;
+      rawStore.ipoPublic = rows;
+      const badge = document.getElementById("ipoCountBadge");
+      if (badge) badge.textContent = `${rows.length} Issues`;
+      filterIpoCategory('all');
+    }
+
+    function filterIpoCategory(cat) {
+      document.querySelectorAll(".ipo-tab").forEach(b => {
+        b.className = "ipo-tab px-3 py-1 rounded-md bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
+      });
+      const activeBtn = document.getElementById("ipo-tab-" + cat);
+      if (activeBtn) activeBtn.className = "ipo-tab px-3 py-1 rounded-md bg-blue-500 text-white cursor-pointer";
+
+      const rows = rawStore.ipoPublic;
+      const tbody = document.getElementById("ipoPublicTbody");
+      if (!tbody) return;
+
+      const filtered = rows.filter(r => {
+        const platform = (r["PLATFORM"] || r["Platform"] || "").toLowerCase();
+        const type = (r["ISSUE TYPE"] || r["Issue Type"] || "").toLowerCase();
+        if (cat === "mainboard") return platform.includes("main");
+        if (cat === "sme") return platform.includes("sme");
+        if (cat === "debt") return platform.includes("debt") || type.includes("debt");
+        if (cat === "buyback") return type.includes("buyback");
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">No public issues found for this platform.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="py-2 font-bold text-blue-500">${r["SECURITY / COMPANY NAME"] || "-"}</td>
+          <td class="py-2 text-center text-slate-400">${r["PLATFORM"] || "-"}</td>
+          <td class="py-2 text-center font-mono-num text-slate-400">${r["START DATE"] || "-"}</td>
+          <td class="py-2 text-center font-mono-num text-slate-400">${r["END DATE"] || "-"}</td>
+          <td class="py-2 text-right font-mono-num font-bold">${r["OFFER PRICE (₹)"] || "-"}</td>
+          <td class="py-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${String(r["STATUS"]||"").includes("LIVE") ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"}">${r["STATUS"] || "Active"}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // 6. Bulk Deals Handler
+    function handleBulkDealsData(rows) {
+      const tbody = document.getElementById("bulkDealsTbody");
+      const badge = document.getElementById("bulkDealsBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">No bulk deals reported today.</td></tr>`;
+        return;
+      }
+      if (badge) badge.textContent = `${rows.length} Deals`;
+      if (tbody) {
+        tbody.innerHTML = rows.map(r => {
+          const keys = Object.keys(r);
+          const isBuy = String(r[keys[3]] || "").toUpperCase().includes("BUY");
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="py-2 font-mono-num text-slate-400">${r[keys[0]] || "-"}</td>
+              <td class="py-2 font-bold text-blue-500">${r[keys[1]] || "-"}</td>
+              <td class="py-2 text-slate-700 dark:text-slate-300 truncate max-w-[160px]">${r[keys[2]] || "-"}</td>
+              <td class="py-2 text-center font-bold ${isBuy ? "text-emerald-500" : "text-rose-500"}">${r[keys[3]] || "-"}</td>
+              <td class="py-2 text-right font-mono-num">${r[keys[4]] || "-"}</td>
+              <td class="py-2 text-right font-mono-num font-bold">₹${r[keys[5]] || "-"}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 7. Block Deals Handler
+    function handleBlockDealsData(rows) {
+      const tbody = document.getElementById("blockDealsTbody");
+      const badge = document.getElementById("blockDealsBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">No block deals reported today.</td></tr>`;
+        return;
+      }
+      if (badge) badge.textContent = `${rows.length} Deals`;
+      if (tbody) {
+        tbody.innerHTML = rows.map(r => {
+          const keys = Object.keys(r);
+          const isBuy = String(r[keys[3]] || "").toUpperCase().includes("BUY");
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="py-2 font-mono-num text-slate-400">${r[keys[0]] || "-"}</td>
+              <td class="py-2 font-bold text-blue-500">${r[keys[1]] || "-"}</td>
+              <td class="py-2 text-slate-700 dark:text-slate-300 truncate max-w-[160px]">${r[keys[2]] || "-"}</td>
+              <td class="py-2 text-center font-bold ${isBuy ? "text-emerald-500" : "text-rose-500"}">${r[keys[3]] || "-"}</td>
+              <td class="py-2 text-right font-mono-num">${r[keys[4]] || "-"}</td>
+              <td class="py-2 text-right font-mono-num font-bold">₹${r[keys[5]] || "-"}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 8. Delivery Positions Handler
+    function handleDeliveryPositionsData(rows) {
+      const tbody = document.getElementById("deliveryPositionsTbody");
+      const badge = document.getElementById("deliveryBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No delivery data available.</td></tr>`;
+        return;
+      }
+      if (badge) badge.textContent = `${rows.length} Stocks`;
+
+      // Populate Stock Dropdown for 1Y Delivery chart
+      const select = document.getElementById("deliveryStockSelect");
+      if (select) {
+        const topSymbols = rows.slice(0, 50).map(r => r["SYMBOL"] || r["Symbol"]).filter(Boolean);
+        select.innerHTML = topSymbols.map(s => `<option value="${s}">${s}</option>`).join('');
+      }
+
+      if (tbody) {
+        tbody.innerHTML = rows.slice(0, 40).map(r => {
+          const pct = parseFloat(r["DELIVERY %"] || r["Delivery %"] || 0);
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="py-1.5 font-bold text-blue-500">${r["SYMBOL"] || "-"}</td>
+              <td class="py-1.5 text-right font-mono-num">₹${r["CLOSE PRICE"] || "-"}</td>
+              <td class="py-1.5 text-right font-mono-num text-slate-400">${r["TRADED QTY"] || "-"}</td>
+              <td class="py-1.5 text-right font-mono-num text-slate-400">${r["DELIVERY QTY"] || "-"}</td>
+              <td class="py-1.5 text-right font-mono-num font-bold ${pct >= 50 ? "text-emerald-500" : "text-slate-400"}">${pct.toFixed(2)}%</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 9. Indices P/E Handler
+    function handleIndicesPeData(rows) {
+      const tbody = document.getElementById("indicesPeTbody");
+      const badge = document.getElementById("indicesPeBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No valuation data available.</td></tr>`;
+        return;
+      }
+      if (badge) badge.textContent = `${rows.length} Indices`;
+
+      if (tbody) {
+        tbody.innerHTML = rows.map(r => {
+          const pe = parseFloat(r["P/E RATIO"] || r["P/E"] || 0);
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="py-2 font-bold font-sans text-slate-800 dark:text-slate-200">${r["INDEX NAME"] || "-"}</td>
+              <td class="py-2 text-right font-mono-num">₹${r["CLOSING VALUE"] || "-"}</td>
+              <td class="py-2 text-center font-mono-num font-bold ${pe < 20 ? "text-emerald-500" : pe >= 30 ? "text-rose-500" : "text-amber-500"}">${pe ? pe.toFixed(2) : "-"}</td>
+              <td class="py-2 text-center font-mono-num text-slate-400">${r["P/B RATIO"] || "-"}</td>
+              <td class="py-2 text-right font-mono-num font-bold text-emerald-500">${r["DIV YIELD (%)"] || "-"}%</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 10. Sector Live Watch Handler
+    function handleSectorWatchData(rows) {
+      const tbody = document.getElementById("sectorWatchTbody");
+      const badge = document.getElementById("sectorWatchBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">No sector breadth available.</td></tr>`;
+        return;
+      }
+      if (badge) badge.textContent = `${rows.length} Sectors`;
+
+      // Populate Sector Select for 2Y Sector chart
+      const secSelect = document.getElementById("sectorSelect");
+      if (secSelect) {
+        const secList = rows.map(r => r["INDUSTRY / SECTOR NAME"]).filter(Boolean);
+        secSelect.innerHTML = secList.map(s => `<option value="${s}">${s}</option>`).join('');
+      }
+
+      if (tbody) {
+        tbody.innerHTML = rows.map(r => {
+          const adv = parseInt(r["ADVANCES"] || 0, 10);
+          const dec = parseInt(r["DECLINES"] || 0, 10);
+          const ratio = dec > 0 ? (adv / dec).toFixed(1) : adv;
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="py-2 font-bold font-sans text-slate-800 dark:text-slate-200 truncate max-w-[130px]">${r["INDUSTRY / SECTOR NAME"] || "-"}</td>
+              <td class="py-2 text-center font-mono-num font-bold text-emerald-500">${adv}</td>
+              <td class="py-2 text-center font-mono-num font-bold text-rose-500">${dec}</td>
+              <td class="py-2 text-right"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${adv >= dec ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}">${adv >= dec ? `Strong (${ratio}x)` : `Weak (${ratio}x)`}</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 11. Earnings 1-Year History Handler
+    function handleEarningsHistoryData(rows) {
+      const tbody = document.getElementById("earningsHistoryTbody");
+      const badge = document.getElementById("earningsBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="py-8 text-center text-slate-400">No earnings history data available.</td></tr>`;
+        return;
+      }
+      if (badge) badge.textContent = `${rows.length} Companies`;
+
+      if (tbody) {
+        tbody.innerHTML = rows.slice(0, 40).map(r => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2 font-bold text-blue-500">${r["SYMBOL"] || "-"}</td>
+            <td class="py-2 font-sans truncate max-w-[160px]">${r["COMPANY NAME"] || "-"}</td>
+            <td class="py-2 text-center font-bold text-emerald-500">${r["UPCOMING RESULT"] || "-"}</td>
+            <td class="py-2 text-center font-sans font-bold text-[10px]">${r["STATUS / COUNTDOWN"] || "-"}</td>
+            <td class="py-2 text-center font-bold text-slate-300">${r["LATEST (Q0)"] || "-"}</td>
+            <td class="py-2 text-center text-slate-400">${r["PAST Q-1"] || "-"}</td>
+            <td class="py-2 text-center text-slate-400">${r["PAST Q-2"] || "-"}</td>
+            <td class="py-2 text-center text-slate-400">${r["PAST Q-3"] || "-"}</td>
+            <td class="py-2 text-center text-slate-400">${r["PAST Q-4"] || "-"}</td>
+            <td class="py-2 text-center text-slate-400">${r["PAST Q-5 (1Y)"] || "-"}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Delivery 1Y Chart Render
+    function renderDelivery1YStockChart() {
+      const loader = document.getElementById("deliveryChartLoader");
+      if (loader) loader.style.display = 'none';
+      const ctx = document.getElementById("delivery1YChart");
+      if (!ctx) return;
+      if (delivery1YChartInstance) delivery1YChartInstance.destroy();
+
       const isDark = document.documentElement.classList.contains("dark");
       const gridColor = isDark ? "#17243e" : "#e2e8f0";
-      const textColor = isDark ? "#64748b" : "#94a3b8";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
 
-      // 1. FII & DII Dual Line Chart
-      const ctxFii = document.getElementById("fiiDiiLineChart");
-      if (ctxFii) {
-        if (fiiDiiChart) fiiDiiChart.destroy();
-        const months = ["Apr'23", "Jul'23", "Oct'23", "Jan'24", "Apr'24", "Jul'24", "Oct'24", "Jan'25", "Apr'25"];
-        fiiDiiChart = new Chart(ctxFii, {
-          type: 'line',
-          data: {
-            labels: months,
-            datasets: [
-              {
-                label: 'FII (₹ Cr)',
-                data: [1245, -1230, 1482, -340, 432, 915, -754, 843, -1245],
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                pointBackgroundColor: '#10b981',
-                pointRadius: 3,
-                borderWidth: 2,
-                tension: 0.35,
-                fill: false
-              },
-              {
-                label: 'DII (₹ Cr)',
-                data: [856, 942, 1432, 1542, 963, 1321, 1165, 1287, 1102],
-                borderColor: '#0284c7',
-                backgroundColor: 'rgba(2, 132, 199, 0.08)',
-                pointBackgroundColor: '#0284c7',
-                pointRadius: 3,
-                borderWidth: 2,
-                tension: 0.35,
-                fill: false
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } } },
-              y: { 
-                grid: { color: gridColor }, 
-                ticks: { color: textColor, font: { size: 9 } },
-                suggestedMin: -2000,
-                suggestedMax: 2000
-              }
-            }
+      delivery1YChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ["T-20", "T-16", "T-12", "T-8", "T-4", "Latest"],
+          datasets: [{
+            label: 'Delivery %',
+            data: [42, 55, 61, 58, 69, 74],
+            borderColor: '#00d4ff',
+            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } } },
+            y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } }, min: 0, max: 100 }
           }
-        });
-      }
-
-      // 2. High/Low 30-Day Trend Chart
-      const ctxHl = document.getElementById("highLowTrendChart");
-      if (ctxHl) {
-        if (highLowChart) highLowChart.destroy();
-        const days = ["Mar 29", "Apr 05", "Apr 12", "Apr 19", "Apr 26"];
-        highLowChart = new Chart(ctxHl, {
-          type: 'line',
-          data: {
-            labels: days,
-            datasets: [
-              {
-                label: 'Highs',
-                data: [72, 65, 58, 62, 68],
-                borderColor: '#10b981',
-                borderWidth: 1.5,
-                pointRadius: 2,
-                pointBackgroundColor: '#10b981',
-                tension: 0.3
-              },
-              {
-                label: 'Lows',
-                data: [25, 30, 42, 38, 32],
-                borderColor: '#ef4444',
-                borderWidth: 1.5,
-                pointRadius: 2,
-                pointBackgroundColor: '#ef4444',
-                tension: 0.3
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8 } } },
-              y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 8 } } }
-            }
-          }
-        });
-      }
-    }
-
-    // Live Feed Fetcher using user's Apps Script Web App URL
-    async function refreshMarketData(isManual = false) {
-      const spin = document.getElementById("marketRefreshSpin");
-      if (isManual && spin) spin.classList.add("animate-spin");
-
-      try {
-        const callbackName = "__mickkkMarketCb_" + Date.now();
-        const script = document.createElement("script");
-        window[callbackName] = function(data) {
-          if (data && data.success) {
-            updateDashboardFromLiveFeed(data.data);
-          }
-          delete window[callbackName];
-          script.remove();
-        };
-
-        const url = `${GOOGLE_SHEET_API_URL}?action=summary&callback=${callbackName}`;
-        script.src = url;
-        document.head.appendChild(script);
-      } catch (err) {
-        console.warn("Could not fetch live Google Sheet feed, holding mockup state:", err);
-      } finally {
-        if (isManual && spin) {
-          setTimeout(() => spin.classList.remove("animate-spin"), 1000);
         }
-      }
+      });
     }
 
-    function updateDashboardFromLiveFeed(data) {
-      if (!data) return;
-      // Update FII / DII KPI from real sheet if present
-      if (data.fiiDiiRecent && data.fiiDiiRecent.length) {
-        const latest = data.fiiDiiRecent[0];
-        const fiiNet = parseFloat(latest["FII NET (₹ Cr)"] || 0);
-        const diiNet = parseFloat(latest["DII NET (₹ Cr)"] || 0);
-        const fiiEl = document.getElementById("kpi-fii-ytd");
-        const diiEl = document.getElementById("kpi-dii-ytd");
-        if (fiiEl) fiiEl.innerText = (fiiNet >= 0 ? '+' : '') + fiiNet.toLocaleString();
-        if (diiEl) diiEl.innerText = (diiNet >= 0 ? '+' : '') + diiNet.toLocaleString();
-      }
+    // Sector 2Y History Chart Render
+    function renderSectorHistoryChart() {
+      const loader = document.getElementById("sectorChartLoader");
+      if (loader) loader.style.display = 'none';
+      const ctx = document.getElementById("sectorHistoryChart");
+      if (!ctx) return;
+      if (sectorChartInstance) sectorChartInstance.destroy();
 
-      // Update Band count from real sheet if present
-      if (data.bandChanges && data.bandChanges.length) {
-        const countEl = document.getElementById("kpi-band-count");
-        if (countEl) countEl.innerText = data.bandChanges.length;
-      }
+      const isDark = document.documentElement.classList.contains("dark");
+      const gridColor = isDark ? "#17243e" : "#e2e8f0";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
 
-      const timeEl = document.getElementById("marketLastUpdatedTime");
-      if (timeEl) {
-        timeEl.innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
+      sectorChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ["T-20", "T-16", "T-12", "T-8", "T-4", "Latest"],
+          datasets: [
+            { label: 'Advances', data: [32, 28, 35, 41, 38, 44], borderColor: '#10b981', tension: 0.3, borderWidth: 2 },
+            { label: 'Declines', data: [18, 22, 15, 9, 12, 6], borderColor: '#ef4444', tension: 0.3, borderWidth: 2 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, labels: { color: textColor, font: { size: 9 } } } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } } },
+            y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } } }
+          }
+        }
+      });
     }
 
-    // Filter all tables by search query
-    function filterMarketTables() {
+    // Search filter across all tables
+    function filterAllTables() {
       const q = (document.getElementById("marketSearch")?.value || "").toLowerCase().trim();
       document.querySelectorAll("table tbody tr").forEach(row => {
         const text = row.innerText.toLowerCase();
@@ -971,13 +1491,13 @@
       });
     }
 
+    // ----------------- Initialization -----------------
     document.addEventListener("DOMContentLoaded", () => {
       syncThemeIcons(document.documentElement.classList.contains("dark"));
       if (localStorage.getItem("mickkk_sidebar_collapsed") === "true") {
         toggleSidebar();
       }
-      renderCharts();
-      refreshMarketData(false);
+      fetchMasterMarketData(false);
       if (window.lucide) lucide.createIcons();
     });
   </script>
