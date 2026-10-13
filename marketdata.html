@@ -57,12 +57,6 @@
     .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     .table-compact th, .table-compact td { white-space: nowrap; }
-    .locked-blur {
-      filter: blur(4px) !important;
-      user-select: none !important;
-      pointer-events: none !important;
-      opacity: 0.35 !important;
-    }
     .expanded-card {
       grid-column: 1 / -1 !important;
       width: 100% !important;
@@ -128,7 +122,6 @@
         <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
         </a>
-        <!-- ACTIVE: Market Data Hub -->
         <a href="market-data.html" data-title="Market Data" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="database" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Data</span>
         </a>
@@ -244,7 +237,7 @@
         </div>
       </div>
 
-      <!-- ================= 1. ROW 1: FII & DII CASH ACTIVITY ================= -->
+      <!-- ================= ROW 1: FII & DII CASH ACTIVITY ================= -->
       <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-borderDark mb-3">
           <div class="flex items-center gap-2">
@@ -293,20 +286,20 @@
         </div>
       </div>
 
-      <!-- ================= 2. ROW 2: 3 CARDS (PRICE BANDS, RESULTS, IPO) ================= -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <!-- ================= ROW 2: 4 CARDS (PRICE BANDS MASTER, BAND CHANGES, RESULTS, IPO) ================= -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
-        <!-- 1. Price Band Changes -->
+        <!-- 1. Price Bands Master Table (NEW ADDITION) -->
         <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
           <div>
             <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark mb-2">
               <div class="flex items-center gap-2">
-                <i data-lucide="tag" class="w-4 h-4 text-emerald-500"></i>
-                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Price Band Changes</h3>
+                <i data-lucide="shield" class="w-4 h-4 text-emerald-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Price Bands</h3>
               </div>
               <div class="flex items-center gap-2">
-                <span id="bandChangesBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0</span>
-                <button onclick="openUniversalViewAllModal('Price Band Changes', rawStore.bandChanges)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View All →</button>
+                <span id="priceBandsBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0</span>
+                <button onclick="openUniversalViewAllModal('Price Bands', rawStore.priceBands)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View All →</button>
               </div>
             </div>
 
@@ -314,29 +307,59 @@
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-center min-w-[45px]">Sr. No</th>
-                    <th class="pb-2 text-left min-w-[85px]">Symbol</th>
-                    <th class="pb-2 text-center min-w-[55px]">Series</th>
-                    <th class="pb-2 text-left min-w-[140px]">Security Name</th>
-                    <th class="pb-2 text-center min-w-[50px]">From</th>
-                    <th class="pb-2 text-center min-w-[50px]">To</th>
+                    <th class="pb-2 text-left min-w-[75px]">Symbol</th>
+                    <th class="pb-2 text-left min-w-[130px]">Security Name</th>
+                    <th class="pb-2 text-center min-w-[45px]">Band</th>
                   </tr>
                 </thead>
-                <tbody id="bandChangesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
-                  <tr><td colspan="6" class="py-10 text-center text-slate-400">Loading band changes...</td></tr>
+                <tbody id="priceBandsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="3" class="py-10 text-center text-slate-400">Loading price bands...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
 
-        <!-- 2. Upcoming Financial Results (Sorted & 380+ rows fully loaded) -->
+        <!-- 2. Price Band Changes -->
+        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark mb-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="tag" class="w-4 h-4 text-cyan-500"></i>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Price Band Changes</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="bandChangesBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono-num">0</span>
+                <button onclick="openUniversalViewAllModal('Price Band Changes', rawStore.bandChanges)" class="text-[10px] font-bold text-cyan-500 hover:underline cursor-pointer">View All →</button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto custom-scroll max-h-72">
+              <table class="w-full text-xs text-left border-collapse table-compact">
+                <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
+                  <tr>
+                    <th class="pb-2 text-center min-w-[40px]">Sr.</th>
+                    <th class="pb-2 text-left min-w-[70px]">Symbol</th>
+                    <th class="pb-2 text-left min-w-[110px]">Security Name</th>
+                    <th class="pb-2 text-center min-w-[40px]">From</th>
+                    <th class="pb-2 text-center min-w-[40px]">To</th>
+                  </tr>
+                </thead>
+                <tbody id="bandChangesTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
+                  <tr><td colspan="5" class="py-10 text-center text-slate-400">Loading band changes...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Upcoming Financial Results -->
         <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
           <div>
             <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark mb-2">
               <div class="flex items-center gap-2">
                 <i data-lucide="calendar" class="w-4 h-4 text-emerald-500"></i>
-                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Upcoming Financial Results</h3>
+                <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Upcoming Results</h3>
               </div>
               <div class="flex items-center gap-2">
                 <span id="resultsCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-mono-num">0</span>
@@ -345,20 +368,20 @@
             </div>
 
             <!-- Filter Tabs -->
-            <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
-              <button onclick="filterResultsTimeframe('all')" id="res-tab-all" class="res-tab px-2.5 py-1 rounded bg-emerald-500 text-white cursor-pointer">All</button>
-              <button onclick="filterResultsTimeframe('today')" id="res-tab-today" class="res-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Today</button>
-              <button onclick="filterResultsTimeframe('tomorrow')" id="res-tab-tomorrow" class="res-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Tomorrow</button>
-              <button onclick="filterResultsTimeframe('week')" id="res-tab-week" class="res-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">This Week</button>
+            <div class="flex items-center gap-1 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
+              <button onclick="filterResultsTimeframe('all')" id="res-tab-all" class="res-tab px-2 py-0.5 rounded bg-emerald-500 text-white cursor-pointer">All</button>
+              <button onclick="filterResultsTimeframe('today')" id="res-tab-today" class="res-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Today</button>
+              <button onclick="filterResultsTimeframe('tomorrow')" id="res-tab-tomorrow" class="res-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Tomorrow</button>
+              <button onclick="filterResultsTimeframe('week')" id="res-tab-week" class="res-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">This Week</button>
             </div>
 
             <div class="overflow-x-auto custom-scroll mt-2 max-h-72">
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-left min-w-[150px]">Company Name</th>
-                    <th class="pb-2 text-center min-w-[100px]">Result Date</th>
-                    <th class="pb-2 text-center min-w-[90px]">Day</th>
+                    <th class="pb-2 text-left min-w-[120px]">Company Name</th>
+                    <th class="pb-2 text-center min-w-[90px]">Result Date</th>
+                    <th class="pb-2 text-center min-w-[70px]">Day</th>
                   </tr>
                 </thead>
                 <tbody id="resultsCalendarTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
@@ -369,7 +392,7 @@
           </div>
         </div>
 
-        <!-- 3. IPO & Public Issues -->
+        <!-- 4. IPO & Public Issues -->
         <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between space-y-3">
           <div>
             <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark mb-2">
@@ -383,27 +406,25 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
-              <button onclick="filterIpoCategory('all')" id="ipo-tab-all" class="ipo-tab px-2.5 py-1 rounded bg-blue-500 text-white cursor-pointer">All</button>
-              <button onclick="filterIpoCategory('mainboard')" id="ipo-tab-mainboard" class="ipo-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Mainboard</button>
-              <button onclick="filterIpoCategory('sme')" id="ipo-tab-sme" class="ipo-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">SME</button>
-              <button onclick="filterIpoCategory('debt')" id="ipo-tab-debt" class="ipo-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Debt</button>
-              <button onclick="filterIpoCategory('buyback')" id="ipo-tab-buyback" class="ipo-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Buyback</button>
+            <div class="flex items-center gap-1 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
+              <button onclick="filterIpoCategory('all')" id="ipo-tab-all" class="ipo-tab px-2 py-0.5 rounded bg-blue-500 text-white cursor-pointer">All</button>
+              <button onclick="filterIpoCategory('mainboard')" id="ipo-tab-mainboard" class="ipo-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Mainboard</button>
+              <button onclick="filterIpoCategory('sme')" id="ipo-tab-sme" class="ipo-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">SME</button>
+              <button onclick="filterIpoCategory('debt')" id="ipo-tab-debt" class="ipo-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Debt</button>
             </div>
 
             <div class="overflow-x-auto custom-scroll mt-2 max-h-72">
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-left min-w-[140px]">Security Name</th>
-                    <th class="pb-2 text-center min-w-[90px]">Start Date</th>
-                    <th class="pb-2 text-center min-w-[90px]">End Date</th>
-                    <th class="pb-2 text-right min-w-[90px]">Offer Price ₹</th>
-                    <th class="pb-2 text-center min-w-[70px]">Status</th>
+                    <th class="pb-2 text-left min-w-[120px]">Security Name</th>
+                    <th class="pb-2 text-center min-w-[80px]">Start Date</th>
+                    <th class="pb-2 text-right min-w-[80px]">Price ₹</th>
+                    <th class="pb-2 text-center min-w-[60px]">Status</th>
                   </tr>
                 </thead>
                 <tbody id="ipoPublicTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
-                  <tr><td colspan="5" class="py-10 text-center text-slate-400">Loading public issues...</td></tr>
+                  <tr><td colspan="4" class="py-10 text-center text-slate-400">Loading public issues...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -412,7 +433,7 @@
 
       </div>
 
-      <!-- ================= 3. ROW 3: 3 CARDS (CORP ACTIONS, BULK, BLOCK) ================= -->
+      <!-- ================= ROW 3: 3 CARDS (CORP ACTIONS, BULK, BLOCK) ================= -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         <!-- 1. Corporate Actions -->
@@ -474,11 +495,11 @@
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-center min-w-[80px]">Date</th>
-                    <th class="pb-2 text-left min-w-[80px]">Symbol</th>
-                    <th class="pb-2 text-left min-w-[140px]">Client Name</th>
-                    <th class="pb-2 text-center min-w-[55px]">Type</th>
-                    <th class="pb-2 text-right min-w-[75px]">Price ₹</th>
+                    <th class="pb-2 text-center w-20">Date</th>
+                    <th class="pb-2 text-left w-20">Symbol</th>
+                    <th class="pb-2 text-left">Client Name</th>
+                    <th class="pb-2 text-center w-14">Type</th>
+                    <th class="pb-2 text-right w-20">Price ₹</th>
                   </tr>
                 </thead>
                 <tbody id="bulkDealsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
@@ -507,11 +528,11 @@
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-center min-w-[80px]">Date</th>
-                    <th class="pb-2 text-left min-w-[80px]">Symbol</th>
-                    <th class="pb-2 text-left min-w-[140px]">Client Name</th>
-                    <th class="pb-2 text-center min-w-[55px]">Type</th>
-                    <th class="pb-2 text-right min-w-[75px]">Price ₹</th>
+                    <th class="pb-2 text-center w-20">Date</th>
+                    <th class="pb-2 text-left w-20">Symbol</th>
+                    <th class="pb-2 text-left">Client Name</th>
+                    <th class="pb-2 text-center w-14">Type</th>
+                    <th class="pb-2 text-right w-20">Price ₹</th>
                   </tr>
                 </thead>
                 <tbody id="blockDealsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
@@ -524,7 +545,7 @@
 
       </div>
 
-      <!-- ================= 4. ROW 4: DELIVERIES, VALUATIONS & SECTOR WATCH ================= -->
+      <!-- ================= ROW 4: DELIVERIES, VALUATIONS & SECTOR WATCH ================= -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         <!-- 1. Delivery Positions -->
@@ -625,7 +646,7 @@
 
       </div>
 
-      <!-- ================= 5. ROW 5: QUARTERLY EARNINGS HISTORY & CALENDAR ================= -->
+      <!-- ================= 5. ROW 5: QUARTERLY EARNINGS (ALL 3,500+ STOCKS, NO BLUR) ================= -->
       <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-borderDark">
           <div class="flex items-center gap-2">
@@ -643,7 +664,7 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto custom-scroll max-h-80">
+        <div class="overflow-x-auto custom-scroll max-h-80" id="earningsTableContainer" onscroll="handleEarningsTableScroll()">
           <table class="w-full text-xs text-left border-collapse table-compact">
             <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
               <tr>
@@ -666,12 +687,12 @@
         </div>
       </div>
 
-      <!-- ================= 6. ROW 6: DAILY BREADTH & MOMENTUM HISTORY (EOD LOGS) ================= -->
+      <!-- ================= 6. ROW 6: DAILY BREADTH & MOMENTUM HISTORY (EOD LOGS REMOVED, CLEAN DATES) ================= -->
       <div class="space-y-4 pt-1">
         <div class="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-borderDark">
           <div class="flex items-center gap-2">
             <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
-            <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">Daily Market Breadth &amp; Momentum History (EOD Logs)</h2>
+            <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">Daily Market Breadth &amp; Momentum History</h2>
           </div>
           <span class="text-[10px] font-bold text-slate-400 font-mono-num">Multi-Day Breadth Expansion Curves</span>
         </div>
@@ -727,7 +748,7 @@
         </div>
       </div>
 
-      <!-- ================= 7. ROW 7: HISTORICAL MATRICES (WITH FULL WIDTH TOGGLE) ================= -->
+      <!-- ================= 7. ROW 7: HISTORICAL MATRICES (M, Q, H, Y, ALL TIMEFRAMES) ================= -->
       <div class="space-y-5 pt-1">
         
         <!-- Institutional Flow Matrix (FII vs DII) -->
@@ -739,14 +760,16 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
+              <!-- Standard M, Q, H, Y, All Timeframes -->
               <div class="flex items-center gap-1 bg-slate-100 dark:bg-cardInnerDark p-1 rounded-lg text-[10px] font-bold">
-                <button onclick="setFiiTimeframe('1M')" data-fii-tf="1M" class="fii-tf-btn px-2.5 py-1 rounded bg-emerald-500 text-white cursor-pointer">1M</button>
-                <button onclick="handleProTimeframe('3M')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>3M</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
-                <button onclick="handleProTimeframe('6M')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>6M</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
-                <button onclick="handleProTimeframe('1Y')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>1Y</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
+                <button onclick="setFiiTimeframe('M')" data-fii-tf="M" class="fii-tf-btn px-2.5 py-1 rounded bg-emerald-500 text-white cursor-pointer">M</button>
+                <button onclick="handleProTimeframe('Q')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>Q</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
+                <button onclick="handleProTimeframe('H')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>H</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
+                <button onclick="handleProTimeframe('Y')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>Y</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
                 <button onclick="handleProTimeframe('All')" class="fii-tf-btn px-2.5 py-1 rounded text-slate-400 flex items-center gap-1 cursor-pointer"><span>All</span><i data-lucide="lock" class="w-2.5 h-2.5 text-amber-500"></i></button>
               </div>
 
+              <!-- Line / Bar Toggle -->
               <div class="flex items-center gap-1 bg-slate-100 dark:bg-cardInnerDark p-1 rounded-lg text-[10px] font-bold">
                 <button onclick="setFiiChartType('line')" id="btn-chart-line" class="px-2.5 py-1 rounded bg-emerald-500 text-white cursor-pointer">Line</button>
                 <button onclick="setFiiChartType('bar')" id="btn-chart-bar" class="px-2.5 py-1 rounded text-slate-400 cursor-pointer">Bar</button>
@@ -764,16 +787,13 @@
 
           <div class="h-64 relative">
             <canvas id="fiiDii2YChart"></canvas>
-            <div id="fiiChartLoader" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-cardDark/50 text-xs text-slate-400 font-bold">
-              Loading Institutional Flow Chart...
-            </div>
           </div>
         </div>
 
-        <!-- 2 & 3: Historical Delivery & Sector Matrices Grid -->
+        <!-- 2 & 3: Historical Delivery & Sector Matrices Grid (Instant Auto-Loaded & M, Q, H, Y, All) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5" id="histMatricesGrid">
 
-          <!-- Historical Delivery Accumulation Tracker (Bar Chart with Full Width Option) -->
+          <!-- Historical Delivery Accumulation Tracker (Bar Chart with Auto Load) -->
           <div id="card-delivery-tracker" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-borderDark">
               <div class="flex items-center gap-2">
@@ -783,12 +803,14 @@
 
               <div class="flex items-center gap-2">
                 <select id="deliveryStockSelect" onchange="renderDelivery1YStockChart()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark font-bold text-blue-500 focus:outline-none">
-                  <!-- Will auto-populate & auto-select on load -->
+                  <!-- Populated automatically -->
                 </select>
                 <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-cardInnerDark p-0.5 rounded text-[9px] font-bold">
-                  <button class="px-2 py-0.5 rounded bg-emerald-500 text-white">1M</button>
-                  <button onclick="handleProTimeframe('3M')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">3M<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
-                  <button onclick="handleProTimeframe('1Y')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">1Y<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button class="px-2 py-0.5 rounded bg-emerald-500 text-white">M</button>
+                  <button onclick="handleProTimeframe('Q')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">Q<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button onclick="handleProTimeframe('H')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">H<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button onclick="handleProTimeframe('Y')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">Y<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button onclick="handleProTimeframe('All')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">All<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
                 </div>
                 <button onclick="toggleCardExpand('card-delivery-tracker', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
                   <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
@@ -801,7 +823,7 @@
             </div>
           </div>
 
-          <!-- Sector Breadth Historical Matrix (Full Width Option) -->
+          <!-- Sector Breadth Historical Matrix (Auto Select & Auto Render) -->
           <div id="card-sector-matrix" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-borderDark">
               <div class="flex items-center gap-2">
@@ -811,12 +833,14 @@
 
               <div class="flex items-center gap-2">
                 <select id="sectorSelect" onchange="renderSectorHistoryChart()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-cardInnerDark border border-slate-200 dark:border-borderDark font-bold text-emerald-500 focus:outline-none">
-                  <!-- Will auto-populate & auto-select on load -->
+                  <!-- Populated automatically -->
                 </select>
                 <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-cardInnerDark p-0.5 rounded text-[9px] font-bold">
-                  <button class="px-2 py-0.5 rounded bg-emerald-500 text-white">1M</button>
-                  <button onclick="handleProTimeframe('3M')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">3M<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
-                  <button onclick="handleProTimeframe('1Y')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">1Y<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button class="px-2 py-0.5 rounded bg-emerald-500 text-white">M</button>
+                  <button onclick="handleProTimeframe('Q')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">Q<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button onclick="handleProTimeframe('H')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">H<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button onclick="handleProTimeframe('Y')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">Y<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
+                  <button onclick="handleProTimeframe('All')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">All<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
                 </div>
                 <button onclick="toggleCardExpand('card-sector-matrix', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
                   <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
@@ -856,7 +880,7 @@
     </footer>
   </div>
 
-  <!-- ================= UNIVERSAL VIEW ALL MODAL ================= -->
+  <!-- ================= UNIVERSAL VIEW ALL MODAL (NO CODE, NO SOURCE) ================= -->
   <div id="viewAllModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-2xl w-full max-w-6xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
       
@@ -883,7 +907,7 @@
         <span id="modalRowCountBadge" class="text-xs font-bold font-mono-num text-slate-400">0 records</span>
       </div>
 
-      <div class="flex-1 overflow-y-auto custom-scroll relative">
+      <div class="flex-1 overflow-y-auto custom-scroll relative" id="modalScrollContainer" onscroll="handleModalScroll()">
         <table class="w-full text-xs text-left border-collapse table-compact">
           <thead id="modalThead" class="text-slate-400 border-b border-slate-200 dark:border-borderDark sticky top-0 bg-slate-100 dark:bg-slate-900 z-20 font-bold"></thead>
           <tbody id="modalTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium"></tbody>
@@ -921,13 +945,13 @@
   <!-- ================= JAVASCRIPT ENGINE ================= -->
   <script>
     const WORKER_GATEWAY_URL = "https://mickkk-com-cache.sumanmohit101.workers.dev";
-    const CACHE_STORAGE_KEY = "mickkk_market_data_cache_v4";
+    const CACHE_STORAGE_KEY = "mickkk_market_data_cache_v5";
 
     window.userRole = window.userRole || 'free';
 
     let fiiChartInstance = null;
     let fiiChartType = 'line';
-    let fiiActiveTf = '1M';
+    let fiiActiveTf = 'M';
     let delivery1YChartInstance = null;
     let sectorChartInstance = null;
 
@@ -937,9 +961,14 @@
 
     let modalCurrentData = [];
     let modalCurrentHeaders = [];
+    let modalRenderedCount = 0;
+
+    let earningsRenderedCount = 0;
+    let earningsFilteredData = [];
 
     // Master Cache Store
     let rawStore = {
+      priceBands: [],
       fiiDii: [],
       bandChanges: [],
       corporateActions: [],
@@ -956,7 +985,18 @@
       hlDaily: []
     };
 
-    // ----------------- CHRONOLOGICAL DATE PARSER -----------------
+    // Clean Date Formatter (turns ISO to "26-Sep")
+    function formatChartDisplayDate(raw) {
+      if (!raw) return "";
+      const d = new Date(raw);
+      if (isNaN(d.getTime())) {
+        const m = String(raw).match(/(\d{1,2})[-/ ]([A-Za-z]{3})/i);
+        return m ? `${m[1]}-${m[2]}` : String(raw).slice(0, 10);
+      }
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+    }
+
+    // Chronological Date Parser
     function parseDateFlexible(str) {
       if (!str || str === "-" || str === "") return new Date(0);
       const s = String(str).trim();
@@ -1083,6 +1123,7 @@
         const cached = JSON.parse(cachedStr);
         if (cached && cached.data) {
           rawStore = { ...rawStore, ...cached.data };
+          if (rawStore.priceBands && rawStore.priceBands.length) handlePriceBandsData(rawStore.priceBands);
           if (rawStore.fiiDii && rawStore.fiiDii.length) handleFiiDiiData(rawStore.fiiDii);
           if (rawStore.bandChanges && rawStore.bandChanges.length) handleBandChangesData(rawStore.bandChanges);
           if (rawStore.corporateActions && rawStore.corporateActions.length) handleCorpActionsData(rawStore.corporateActions);
@@ -1136,6 +1177,7 @@
     }
 
     function fetchDeepSheets() {
+      requestScriptFeed("market_data", "price_bands", 1500).then(res => { if (res && res.data) { handlePriceBandsData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "fii_dii").then(res => { if (res && res.data) { handleFiiDiiData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "band_changes").then(res => { if (res && res.data) { handleBandChangesData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "corporate_actions").then(res => { if (res && res.data) { handleCorpActionsData(res.data); saveToLocalCache(); } });
@@ -1149,10 +1191,11 @@
       requestScriptFeed("market_data", "delivery_positions").then(res => { if (res && res.data) { handleDeliveryPositionsData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "indices_pe").then(res => { if (res && res.data) { handleIndicesPeData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "sector_watch").then(res => { if (res && res.data) { handleSectorWatchData(res.data); saveToLocalCache(); } });
+      
+      // Pull ALL 3,500+ Earnings History Rows
       requestScriptFeed("market_data", "earnings_history", 4000).then(res => { if (res && res.data) { handleEarningsHistoryData(res.data); saveToLocalCache(); } });
     }
 
-    // Direct fetch for EOD Logs to avoid script tag JSON syntax errors
     async function fetchEodSummaryLogs() {
       try {
         const res = await fetch(WORKER_GATEWAY_URL + "?route=overview");
@@ -1224,6 +1267,28 @@
       if (data.sectorWatch && data.sectorWatch.length) handleSectorWatchData(data.sectorWatch);
     }
 
+    // 0. PRICE BANDS MASTER TABLE (Symbol, Security Name, Band)
+    function handlePriceBandsData(rows) {
+      const tbody = document.getElementById("priceBandsTbody");
+      const badge = document.getElementById("priceBandsBadge");
+      if (!rows || !rows.length) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400">No price bands found.</td></tr>`;
+        return;
+      }
+      rawStore.priceBands = rows;
+      if (badge) badge.textContent = `${rows.length}`;
+
+      if (tbody) {
+        tbody.innerHTML = rows.slice(0, 40).map(r => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-1.5 font-bold text-blue-500">${getRowVal(r, ["Symbol", "SYMBOL"], "-")}</td>
+            <td class="py-1.5 font-sans truncate max-w-[130px] text-slate-700 dark:text-slate-300">${getRowVal(r, ["Security Name", "SECURITY NAME", "Name"], "-")}</td>
+            <td class="py-1.5 text-center font-mono-num font-bold text-emerald-500">${getRowVal(r, ["Band", "BAND"], "-")}%</td>
+          </tr>
+        `).join('');
+      }
+    }
+
     // 1. FII / DII HANDLER
     function handleFiiDiiData(rows) {
       if (!Array.isArray(rows) || !rows.length) return;
@@ -1285,13 +1350,11 @@
     function renderFiiChart() {
       const rows = rawStore.fiiDii;
       if (!rows.length) return;
-      const loader = document.getElementById("fiiChartLoader");
-      if (loader) loader.style.display = 'none';
 
-      const count = (fiiActiveTf === '1M' || window.userRole !== 'pro') ? 22 : 60;
+      const count = (fiiActiveTf === 'M' || window.userRole !== 'pro') ? 22 : 60;
       const subset = rows.slice(0, count).reverse();
 
-      const labels = subset.map(r => getRowVal(r, ["DATE", "Date"], ""));
+      const labels = subset.map(r => formatChartDisplayDate(getRowVal(r, ["DATE", "Date"], "")));
       const fiiNetData = subset.map(r => Number((parseFloat(String(getRowVal(r, ["FII NET (₹ Cr)"], "0")).replace(/,/g, '')) || 0).toFixed(2)));
       const diiNetData = subset.map(r => Number((parseFloat(String(getRowVal(r, ["DII NET (₹ Cr)"], "0")).replace(/,/g, '')) || 0).toFixed(2)));
       const totalNetData = subset.map(r => Number((parseFloat(String(getRowVal(r, ["TOTAL NET (₹ Cr)"], "0")).replace(/,/g, '')) || 0).toFixed(2)));
@@ -1345,7 +1408,7 @@
           interaction: { mode: 'index', intersect: false },
           plugins: { legend: { display: true, labels: { color: textColor, font: { size: 10 } } } },
           scales: {
-            x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 }, maxTicksLimit: 10 } },
+            x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 }, maxTicksLimit: 12 } },
             y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 } } }
           }
         }
@@ -1357,7 +1420,7 @@
       const tbody = document.getElementById("bandChangesTbody");
       const badge = document.getElementById("bandChangesBadge");
       if (!rows || !rows.length) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">No price band changes recorded today.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No price band changes today.</td></tr>`;
         return;
       }
       rawStore.bandChanges = rows;
@@ -1368,8 +1431,7 @@
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
             <td class="py-2 text-center text-slate-400 font-mono-num">${i + 1}</td>
             <td class="py-2 font-bold text-blue-500">${getRowVal(r, ["Symbol", "SYMBOL"], "-")}</td>
-            <td class="py-2 text-center text-slate-400">${getRowVal(r, ["Series", "SERIES"], "EQ")}</td>
-            <td class="py-2 font-sans truncate max-w-[150px] text-slate-700 dark:text-slate-300">${getRowVal(r, ["Security Name", "SECURITY NAME", "Name"], "-")}</td>
+            <td class="py-2 font-sans truncate max-w-[110px] text-slate-700 dark:text-slate-300">${getRowVal(r, ["Security Name", "SECURITY NAME", "Name"], "-")}</td>
             <td class="py-2 text-center font-mono-num text-slate-400">${getRowVal(r, ["From", "FROM", "Previous Band"], "-")}</td>
             <td class="py-2 text-center font-mono-num font-bold text-emerald-500">${getRowVal(r, ["To", "TO", "New Band"], "-")}</td>
           </tr>
@@ -1414,8 +1476,8 @@
 
       tbody.innerHTML = filtered.map(r => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-          <td class="py-2 font-bold text-blue-500 truncate max-w-[170px]">${getRowVal(r, ["COMPANY NAME", "Company Name", "Security Name"], "-")}</td>
-          <td class="py-2 text-slate-700 dark:text-slate-300 font-sans truncate max-w-[180px]">${getRowVal(r, ["PURPOSE / ACTION DETAILS", "Purpose", "Action"], "-")}</td>
+          <td class="py-2 font-bold text-blue-500 truncate max-w-[130px]">${getRowVal(r, ["COMPANY NAME", "Company Name", "Security Name"], "-")}</td>
+          <td class="py-2 text-slate-700 dark:text-slate-300 font-sans truncate max-w-[150px]">${getRowVal(r, ["PURPOSE / ACTION DETAILS", "Purpose", "Action"], "-")}</td>
           <td class="py-2 text-center text-emerald-500 font-bold font-mono-num">${getRowVal(r, ["EX-DATE", "Ex-Date"], "-")}</td>
           <td class="py-2 text-center text-slate-400 font-mono-num">${getRowVal(r, ["RECORD DATE", "Record Date"], "-")}</td>
         </tr>
@@ -1439,17 +1501,16 @@
 
     function filterResultsTimeframe(tf) {
       document.querySelectorAll(".res-tab").forEach(b => {
-        b.className = "res-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
+        b.className = "res-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
       });
       const activeBtn = document.getElementById("res-tab-" + tf);
-      if (activeBtn) activeBtn.className = "res-tab px-2.5 py-1 rounded bg-emerald-500 text-white cursor-pointer";
+      if (activeBtn) activeBtn.className = "res-tab px-2 py-0.5 rounded bg-emerald-500 text-white cursor-pointer";
 
       const rows = rawStore.resultsCalendar;
       const tbody = document.getElementById("resultsCalendarTbody");
       const badge = document.getElementById("resultsCountBadge");
       if (!tbody) return;
 
-      // Base date: anchor to the earliest date in the dataset or current time
       const now = new Date();
       now.setHours(0,0,0,0);
 
@@ -1467,7 +1528,7 @@
       });
 
       if (badge) {
-        badge.textContent = tf === 'all' ? `${rows.length} Companies` : `${filtered.length} of ${rows.length}`;
+        badge.textContent = tf === 'all' ? `${rows.length}` : `${filtered.length} of ${rows.length}`;
       }
 
       if (!filtered.length) {
@@ -1477,7 +1538,7 @@
 
       tbody.innerHTML = filtered.slice(0, 150).map(r => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-          <td class="py-2 font-bold text-blue-500 truncate max-w-[180px]">${getRowVal(r, ["SECURITY / COMPANY NAME", "Company Name", "Security Name"], "-")}</td>
+          <td class="py-2 font-bold text-blue-500 truncate max-w-[120px]">${getRowVal(r, ["SECURITY / COMPANY NAME", "Company Name", "Security Name"], "-")}</td>
           <td class="py-2 text-center font-bold text-emerald-500 font-mono-num">${getRowVal(r, ["RESULT DATE", "Result Date", "Date"], "-")}</td>
           <td class="py-2 text-center text-slate-400 font-mono-num">${getRowVal(r, ["DAY", "Day"], "-")}</td>
         </tr>
@@ -1495,10 +1556,10 @@
 
     function filterIpoCategory(cat) {
       document.querySelectorAll(".ipo-tab").forEach(b => {
-        b.className = "ipo-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
+        b.className = "ipo-tab px-2 py-0.5 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer";
       });
       const activeBtn = document.getElementById("ipo-tab-" + cat);
-      if (activeBtn) activeBtn.className = "ipo-tab px-2.5 py-1 rounded bg-blue-500 text-white cursor-pointer";
+      if (activeBtn) activeBtn.className = "ipo-tab px-2 py-0.5 rounded bg-blue-500 text-white cursor-pointer";
 
       const rows = rawStore.ipoPublic;
       const tbody = document.getElementById("ipoPublicTbody");
@@ -1510,22 +1571,20 @@
         if (cat === "mainboard") return platform.includes("main");
         if (cat === "sme") return platform.includes("sme");
         if (cat === "debt") return platform.includes("debt") || type.includes("debt");
-        if (cat === "buyback") return type.includes("buyback");
         return true;
       });
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No public issues found for this platform.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">No issues found.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = filtered.map(r => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-          <td class="py-2 font-bold text-blue-500 truncate max-w-[170px]">${getRowVal(r, ["SECURITY / COMPANY NAME", "Security Name", "Name"], "-")}</td>
+          <td class="py-2 font-bold text-blue-500 truncate max-w-[120px]">${getRowVal(r, ["SECURITY / COMPANY NAME", "Security Name", "Name"], "-")}</td>
           <td class="py-2 text-center font-mono-num text-slate-400">${getRowVal(r, ["START DATE", "Start Date"], "-")}</td>
-          <td class="py-2 text-center font-mono-num text-slate-400">${getRowVal(r, ["END DATE", "End Date"], "-")}</td>
           <td class="py-2 text-right font-mono-num font-bold">${getRowVal(r, ["OFFER PRICE (₹)", "Price", "Offer Price"], "-")}</td>
-          <td class="py-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${getRowVal(r, ["STATUS", "Status"], "").includes("LIVE") ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"}">${getRowVal(r, ["STATUS", "Status"], "Active")}</span></td>
+          <td class="py-2 text-center"><span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold ${getRowVal(r, ["STATUS", "Status"], "").includes("LIVE") ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"}">${getRowVal(r, ["STATUS", "Status"], "Active")}</span></td>
         </tr>
       `).join('');
     }
@@ -1535,7 +1594,7 @@
       const tbody = document.getElementById("bulkDealsTbody");
       const badge = document.getElementById("bulkDealsBadge");
       if (!rows || !rows.length) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No bulk deals reported today.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No bulk deals today.</td></tr>`;
         return;
       }
       rawStore.bulkDeals = rows;
@@ -1554,7 +1613,7 @@
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
               <td class="py-2 text-center font-mono-num text-slate-400">${date}</td>
               <td class="py-2 font-bold text-blue-500">${symbol}</td>
-              <td class="py-2 text-slate-700 dark:text-slate-300 truncate max-w-[160px]">${client}</td>
+              <td class="py-2 text-slate-700 dark:text-slate-300 truncate max-w-[140px]">${client}</td>
               <td class="py-2 text-center font-bold ${isBuy ? "text-emerald-500" : "text-rose-500"}">${isBuy ? "BUY" : "SELL"}</td>
               <td class="py-2 text-right font-mono-num font-bold">₹${price}</td>
             </tr>
@@ -1568,7 +1627,7 @@
       const tbody = document.getElementById("blockDealsTbody");
       const badge = document.getElementById("blockDealsBadge");
       if (!rows || !rows.length) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No block deals reported today.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">No block deals today.</td></tr>`;
         return;
       }
       rawStore.blockDeals = rows;
@@ -1587,7 +1646,7 @@
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
               <td class="py-2 text-center font-mono-num text-slate-400">${date}</td>
               <td class="py-2 font-bold text-blue-500">${symbol}</td>
-              <td class="py-2 text-slate-700 dark:text-slate-300 truncate max-w-[160px]">${client}</td>
+              <td class="py-2 text-slate-700 dark:text-slate-300 truncate max-w-[140px]">${client}</td>
               <td class="py-2 text-center font-bold ${isBuy ? "text-emerald-500" : "text-rose-500"}">${isBuy ? "BUY" : "SELL"}</td>
               <td class="py-2 text-right font-mono-num font-bold">₹${price}</td>
             </tr>
@@ -1611,7 +1670,7 @@
       if (select) {
         const allSymbols = [...new Set(rows.map(r => getRowVal(r, ["SYMBOL", "Symbol"], "")).filter(Boolean))].sort();
         select.innerHTML = allSymbols.map(s => `<option value="${s}">${s}</option>`).join('');
-        if (!select.value && allSymbols.length) {
+        if (allSymbols.length) {
           select.value = allSymbols[0];
           renderDelivery1YStockChart();
         }
@@ -1712,7 +1771,7 @@
 
           return `
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-              <td class="py-2 font-bold font-sans text-slate-800 dark:text-slate-200 truncate max-w-[140px]">${sec}</td>
+              <td class="py-2 font-bold font-sans text-slate-800 dark:text-slate-200 truncate max-w-[130px]">${sec}</td>
               <td class="py-2 text-center font-mono-num font-bold text-emerald-500">${adv}</td>
               <td class="py-2 text-center font-mono-num font-bold text-rose-500">${dec}</td>
               <td class="py-2 text-right"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${adv >= dec ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}">${adv >= dec ? `Strong (${ratio}x)` : `Weak (${ratio}x)`}</span></td>
@@ -1722,7 +1781,7 @@
       }
     }
 
-    // 11. EARNINGS HISTORY
+    // 11. EARNINGS HISTORY (Smooth Progressive Loading of ALL 3,500+ Stocks)
     function handleEarningsHistoryData(rows) {
       const tbody = document.getElementById("earningsHistoryTbody");
       const badge = document.getElementById("earningsBadge");
@@ -1731,19 +1790,25 @@
         return;
       }
       rawStore.earningsHistory = rows;
+      earningsFilteredData = rows;
       if (badge) badge.textContent = `${rows.length} Stocks`;
 
-      renderEarningsTable(rows);
+      earningsRenderedCount = 0;
+      tbody.innerHTML = "";
+      loadMoreEarningsRows();
     }
 
-    function renderEarningsTable(data) {
+    function loadMoreEarningsRows(batchSize = 80) {
       const tbody = document.getElementById("earningsHistoryTbody");
-      if (!tbody) return;
+      if (!tbody || !earningsFilteredData.length) return;
 
-      tbody.innerHTML = data.slice(0, 100).map(r => `
+      const nextBatch = earningsFilteredData.slice(earningsRenderedCount, earningsRenderedCount + batchSize);
+      if (!nextBatch.length) return;
+
+      const html = nextBatch.map(r => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
           <td class="py-2 font-bold text-blue-500">${getRowVal(r, ["SYMBOL", "Symbol"], "-")}</td>
-          <td class="py-2 font-sans truncate max-w-[180px]">${getRowVal(r, ["COMPANY NAME", "Company Name", "Name"], "-")}</td>
+          <td class="py-2 font-sans truncate max-w-[170px]">${getRowVal(r, ["COMPANY NAME", "Company Name", "Name"], "-")}</td>
           <td class="py-2 text-center font-bold text-emerald-500">${getRowVal(r, ["UPCOMING RESULT", "Upcoming Result"], "-")}</td>
           <td class="py-2 text-center font-sans font-bold text-[10px]">${getRowVal(r, ["STATUS / COUNTDOWN", "Status"], "-")}</td>
           <td class="py-2 text-center font-bold text-slate-300">${getRowVal(r, ["LATEST (Q0)", "Q0"], "-")}</td>
@@ -1754,19 +1819,35 @@
           <td class="py-2 text-center text-slate-400">${getRowVal(r, ["PAST Q-5 (1Y)", "Q-5"], "-")}</td>
         </tr>
       `).join('');
+
+      tbody.insertAdjacentHTML("beforeend", html);
+      earningsRenderedCount += nextBatch.length;
+    }
+
+    function handleEarningsTableScroll() {
+      const el = document.getElementById("earningsTableContainer");
+      if (!el) return;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 60) {
+        loadMoreEarningsRows(60);
+      }
     }
 
     function filterEarningsTable() {
       const q = (document.getElementById("earningsSearch")?.value || "").toLowerCase().trim();
-      const filtered = rawStore.earningsHistory.filter(r => {
+      earningsFilteredData = rawStore.earningsHistory.filter(r => {
         const sym = getRowVal(r, ["SYMBOL", "Symbol"], "").toLowerCase();
         const comp = getRowVal(r, ["COMPANY NAME", "Company Name", "Name"], "").toLowerCase();
         return sym.includes(q) || comp.includes(q);
       });
-      renderEarningsTable(filtered);
+      earningsRenderedCount = 0;
+      const tbody = document.getElementById("earningsHistoryTbody");
+      if (tbody) {
+        tbody.innerHTML = "";
+        loadMoreEarningsRows(80);
+      }
     }
 
-    // 12. DELIVERY 1Y ACCUMULATION BAR CHART
+    // 12. DELIVERY 1Y ACCUMULATION BAR CHART (Auto Select & Real Dates)
     function renderDelivery1YStockChart() {
       const select = document.getElementById("deliveryStockSelect");
       let sym = select ? select.value : "";
@@ -1852,7 +1933,7 @@
       });
     }
 
-    // 14. EOD DAILY SUMMARY CHARTS ENGINE
+    // 14. EOD DAILY SUMMARY CHARTS ENGINE (Clean X-Axis Dates)
     function renderDailyBreadthCharts() {
       if (typeof Chart === 'undefined') return;
       const isDark = document.documentElement.classList.contains("dark");
@@ -1864,7 +1945,7 @@
       if (ctxAd && rawStore.adDaily && rawStore.adDaily.length) {
         if (chartAdDailyInstance) chartAdDailyInstance.destroy();
         const data = rawStore.adDaily.slice(0, 20).reverse();
-        const labels = data.map(r => r["Date"] || r["Time"] || "");
+        const labels = data.map(r => formatChartDisplayDate(r["Date"] || r["Time"] || ""));
         chartAdDailyInstance = new Chart(ctxAd, {
           type: 'bar',
           data: {
@@ -1887,7 +1968,7 @@
       if (ctxGl && rawStore.glDaily && rawStore.glDaily.length) {
         if (chartGlDailyInstance) chartGlDailyInstance.destroy();
         const data = rawStore.glDaily.slice(0, 20).reverse();
-        const labels = data.map(r => r["Date"] || r["Time"] || "");
+        const labels = data.map(r => formatChartDisplayDate(r["Date"] || r["Time"] || ""));
         chartGlDailyInstance = new Chart(ctxGl, {
           type: 'line',
           data: {
@@ -1910,7 +1991,7 @@
       if (ctxHl && rawStore.hlDaily && rawStore.hlDaily.length) {
         if (chartHlDailyInstance) chartHlDailyInstance.destroy();
         const data = rawStore.hlDaily.slice(0, 20).reverse();
-        const labels = data.map(r => r["Date"] || "");
+        const labels = data.map(r => formatChartDisplayDate(r["Date"] || ""));
         chartHlDailyInstance = new Chart(ctxHl, {
           type: 'line',
           data: {
@@ -1929,7 +2010,7 @@
       }
     }
 
-    // ----------------- UNIVERSAL VIEW ALL MODAL -----------------
+    // ----------------- UNIVERSAL VIEW ALL MODAL (NO CUTOFF / PROGRESSIVE RENDER) -----------------
     function openUniversalViewAllModal(title, dataset) {
       if (!Array.isArray(dataset) || !dataset.length) return;
       
@@ -1949,16 +2030,23 @@
         <th class="py-2.5 px-3 ${i === 0 ? 'text-left' : 'text-center'} font-bold">${h}</th>
       `).join('')}</tr>`;
 
-      renderModalTableRows(dataset);
+      modalRenderedCount = 0;
+      const tbody = document.getElementById("modalTbody");
+      if (tbody) tbody.innerHTML = "";
+      loadMoreModalRows(100);
+
       document.getElementById("viewAllModal").classList.remove("hidden");
       if (window.lucide) lucide.createIcons();
     }
 
-    function renderModalTableRows(data) {
+    function loadMoreModalRows(batchSize = 100) {
       const tbody = document.getElementById("modalTbody");
-      if (!tbody) return;
+      if (!tbody || !modalCurrentData.length) return;
 
-      tbody.innerHTML = data.slice(0, 200).map(row => `
+      const nextBatch = modalCurrentData.slice(modalRenderedCount, modalRenderedCount + batchSize);
+      if (!nextBatch.length) return;
+
+      const html = nextBatch.map(row => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
           ${modalCurrentHeaders.map((h, cIdx) => {
             let val = row[h] !== undefined ? row[h] : "-";
@@ -1970,6 +2058,17 @@
           }).join('')}
         </tr>
       `).join('');
+
+      tbody.insertAdjacentHTML("beforeend", html);
+      modalRenderedCount += nextBatch.length;
+    }
+
+    function handleModalScroll() {
+      const el = document.getElementById("modalScrollContainer");
+      if (!el) return;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 60) {
+        loadMoreModalRows(80);
+      }
     }
 
     function filterModalTableRows() {
@@ -1978,7 +2077,21 @@
         return Object.values(row).some(v => String(v).toLowerCase().includes(q));
       });
       document.getElementById("modalRowCountBadge").textContent = `${filtered.length} found`;
-      renderModalTableRows(filtered);
+      
+      modalRenderedCount = 0;
+      const tbody = document.getElementById("modalTbody");
+      if (tbody) {
+        tbody.innerHTML = "";
+        const nextBatch = filtered.slice(0, 100);
+        tbody.innerHTML = nextBatch.map(row => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            ${modalCurrentHeaders.map((h, cIdx) => `
+              <td class="py-2 px-3 ${cIdx === 0 ? 'text-left font-bold text-blue-500' : 'text-center'}">${row[h] !== undefined ? row[h] : "-"}</td>
+            `).join('')}
+          </tr>
+        `).join('');
+        modalRenderedCount = nextBatch.length;
+      }
     }
 
     function closeUniversalViewAllModal() {
