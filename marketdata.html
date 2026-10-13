@@ -63,9 +63,39 @@
       pointer-events: none !important;
       opacity: 0.35 !important;
     }
+    .expanded-card {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      transition: all 0.25s ease-in-out;
+    }
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Shared Mickkk SVG Icon -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <g clip-path="url(#mkClip)">
+          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
+          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
+          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
+        </g>
+        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
+        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
+        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
+        <g class="mk-glow">
+          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
+          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
 
   <!-- ================= LEFT SIDEBAR ================= -->
   <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
@@ -98,6 +128,7 @@
         <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
         </a>
+        <!-- ACTIVE: Market Data Hub -->
         <a href="market-data.html" data-title="Market Data" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
           <i data-lucide="database" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Data</span>
         </a>
@@ -109,6 +140,9 @@
         </a>
         <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
+        </a>
+        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
         </a>
         <a href="journal.html" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
           <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Trading Journal</span>
@@ -349,7 +383,6 @@
               </div>
             </div>
 
-            <!-- Tabs: All, Mainboard, SME, Debt, Buyback -->
             <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 text-[10px] font-bold">
               <button onclick="filterIpoCategory('all')" id="ipo-tab-all" class="ipo-tab px-2.5 py-1 rounded bg-blue-500 text-white cursor-pointer">All</button>
               <button onclick="filterIpoCategory('mainboard')" id="ipo-tab-mainboard" class="ipo-tab px-2.5 py-1 rounded bg-slate-100 dark:bg-cardInnerDark text-slate-400 cursor-pointer">Mainboard</button>
@@ -441,11 +474,11 @@
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-center w-20">Date</th>
-                    <th class="pb-2 text-left w-20">Symbol</th>
-                    <th class="pb-2 text-left">Client Name</th>
-                    <th class="pb-2 text-center w-14">Type</th>
-                    <th class="pb-2 text-right w-20">Price ₹</th>
+                    <th class="pb-2 text-center min-w-[80px]">Date</th>
+                    <th class="pb-2 text-left min-w-[80px]">Symbol</th>
+                    <th class="pb-2 text-left min-w-[140px]">Client Name</th>
+                    <th class="pb-2 text-center min-w-[55px]">Type</th>
+                    <th class="pb-2 text-right min-w-[75px]">Price ₹</th>
                   </tr>
                 </thead>
                 <tbody id="bulkDealsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
@@ -474,11 +507,11 @@
               <table class="w-full text-xs text-left border-collapse table-compact">
                 <thead class="text-slate-400 border-b border-slate-100 dark:border-borderDark text-[10px] font-bold sticky top-0 bg-white dark:bg-cardDark z-10">
                   <tr>
-                    <th class="pb-2 text-center w-20">Date</th>
-                    <th class="pb-2 text-left w-20">Symbol</th>
-                    <th class="pb-2 text-left">Client Name</th>
-                    <th class="pb-2 text-center w-14">Type</th>
-                    <th class="pb-2 text-right w-20">Price ₹</th>
+                    <th class="pb-2 text-center min-w-[80px]">Date</th>
+                    <th class="pb-2 text-left min-w-[80px]">Symbol</th>
+                    <th class="pb-2 text-left min-w-[140px]">Client Name</th>
+                    <th class="pb-2 text-center min-w-[55px]">Type</th>
+                    <th class="pb-2 text-right min-w-[75px]">Price ₹</th>
                   </tr>
                 </thead>
                 <tbody id="blockDealsTbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium text-[11px]">
@@ -633,7 +666,7 @@
         </div>
       </div>
 
-      <!-- ================= 6. ROW 6: NEW EOD DAILY SUMMARY HISTORICAL CHARTS ================= -->
+      <!-- ================= 6. ROW 6: DAILY BREADTH & MOMENTUM HISTORY (EOD LOGS) ================= -->
       <div class="space-y-4 pt-1">
         <div class="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-borderDark">
           <div class="flex items-center gap-2">
@@ -643,47 +676,62 @@
           <span class="text-[10px] font-bold text-slate-400 font-mono-num">Multi-Day Breadth Expansion Curves</span>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <!-- 1. Daily Advance / Decline History -->
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5" id="dailyBreadthCardsGrid">
+          <!-- 1. Daily Advance / Decline Breadth -->
+          <div id="card-ad-daily" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark">
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Daily A/D Trend (_AD_Daily)</h3>
-              <button onclick="openUniversalViewAllModal('Daily A/D Breadth History', rawStore.adDaily)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View Table →</button>
+              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Daily Advance / Decline Breadth</h3>
+              <div class="flex items-center gap-2">
+                <button onclick="toggleCardExpand('card-ad-daily', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openUniversalViewAllModal('Daily Advance / Decline Breadth History', rawStore.adDaily)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View Table →</button>
+              </div>
             </div>
-            <div class="h-44 relative">
+            <div class="h-48 relative">
               <canvas id="chartAdDaily"></canvas>
             </div>
           </div>
 
           <!-- 2. Daily 4% Momentum Expansion -->
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <div id="card-gl-daily" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark">
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Daily 4% Momentum (_GL_Daily)</h3>
-              <button onclick="openUniversalViewAllModal('Daily 4% Momentum History', rawStore.glDaily)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View Table →</button>
+              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Daily 4% Momentum Expansion</h3>
+              <div class="flex items-center gap-2">
+                <button onclick="toggleCardExpand('card-gl-daily', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openUniversalViewAllModal('Daily 4% Momentum Expansion History', rawStore.glDaily)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View Table →</button>
+              </div>
             </div>
-            <div class="h-44 relative">
+            <div class="h-48 relative">
               <canvas id="chartGlDaily"></canvas>
             </div>
           </div>
 
-          <!-- 3. Daily New Highs vs New Lows -->
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <!-- 3. Daily New Highs vs Lows Trend -->
+          <div id="card-hl-daily" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-borderDark">
-              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Daily High/Low Trend (_HL_Daily)</h3>
-              <button onclick="openUniversalViewAllModal('Daily High/Low Trend History', rawStore.hlDaily)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View Table →</button>
+              <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Daily New Highs vs Lows Trend</h3>
+              <div class="flex items-center gap-2">
+                <button onclick="toggleCardExpand('card-hl-daily', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openUniversalViewAllModal('Daily New Highs vs Lows History', rawStore.hlDaily)" class="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer">View Table →</button>
+              </div>
             </div>
-            <div class="h-44 relative">
+            <div class="h-48 relative">
               <canvas id="chartHlDaily"></canvas>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ================= 7. ROW 7: HISTORICAL MATRICES (FII/DII, DELIVERY, SECTOR) ================= -->
+      <!-- ================= 7. ROW 7: HISTORICAL MATRICES (WITH FULL WIDTH TOGGLE) ================= -->
       <div class="space-y-5 pt-1">
         
         <!-- Institutional Flow Matrix (FII vs DII) -->
-        <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+        <div id="card-fii-matrix" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
           <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-borderDark">
             <div class="flex items-center gap-2">
               <i data-lucide="line-chart" class="w-4 h-4 text-cyan-500"></i>
@@ -704,6 +752,10 @@
                 <button onclick="setFiiChartType('bar')" id="btn-chart-bar" class="px-2.5 py-1 rounded text-slate-400 cursor-pointer">Bar</button>
               </div>
 
+              <button onclick="toggleCardExpand('card-fii-matrix', this)" class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
+                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+              </button>
+
               <button onclick="openUniversalViewAllModal('Institutional Flow Matrix', rawStore.fiiDii)" class="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
                 View Ledger →
               </button>
@@ -718,11 +770,11 @@
           </div>
         </div>
 
-        <!-- 2 & 3: Historical Delivery & Sector Matrices Grid (Instant Auto-Loaded) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- 2 & 3: Historical Delivery & Sector Matrices Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5" id="histMatricesGrid">
 
-          <!-- Historical Delivery Accumulation Tracker (Bar Chart with Auto Select) -->
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <!-- Historical Delivery Accumulation Tracker (Bar Chart with Full Width Option) -->
+          <div id="card-delivery-tracker" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-borderDark">
               <div class="flex items-center gap-2">
                 <i data-lucide="truck" class="w-4 h-4 text-cyan-500"></i>
@@ -738,19 +790,19 @@
                   <button onclick="handleProTimeframe('3M')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">3M<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
                   <button onclick="handleProTimeframe('1Y')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">1Y<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
                 </div>
+                <button onclick="toggleCardExpand('card-delivery-tracker', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
             </div>
 
             <div class="h-48 relative">
               <canvas id="delivery1YChart"></canvas>
-              <div id="deliveryChartLoader" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-cardDark/50 text-xs text-slate-400 font-bold hidden">
-                Rendering Delivery Accumulation...
-              </div>
             </div>
           </div>
 
-          <!-- Sector Breadth Historical Matrix (Auto Select & Auto Render) -->
-          <div class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3">
+          <!-- Sector Breadth Historical Matrix (Full Width Option) -->
+          <div id="card-sector-matrix" class="bg-white dark:bg-cardDark p-4 rounded-xl border border-slate-200 dark:border-borderDark shadow-sm space-y-3 transition-all duration-300">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-borderDark">
               <div class="flex items-center gap-2">
                 <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i>
@@ -766,14 +818,14 @@
                   <button onclick="handleProTimeframe('3M')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">3M<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
                   <button onclick="handleProTimeframe('1Y')" class="px-2 py-0.5 text-slate-400 flex items-center gap-0.5">1Y<i data-lucide="lock" class="w-2 h-2 text-amber-500"></i></button>
                 </div>
+                <button onclick="toggleCardExpand('card-sector-matrix', this)" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-cardInnerDark text-slate-400 hover:text-slate-200 cursor-pointer" title="Toggle Full Width">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
             </div>
 
             <div class="h-48 relative">
               <canvas id="sectorHistoryChart"></canvas>
-              <div id="sectorChartLoader" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-cardDark/50 text-xs text-slate-400 font-bold hidden">
-                Rendering Sector Breadth...
-              </div>
             </div>
           </div>
 
@@ -783,7 +835,7 @@
 
     </main>
 
-    <!-- ================= CLEAN FOOTER (ONLY 4 REQUESTED LINKS) ================= -->
+    <!-- ================= STRICT FOOTER (ONLY 4 REQUESTED LINKS) ================= -->
     <footer class="mt-8 pt-4 pb-2 border-t border-slate-200 dark:border-borderDark flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500 px-6">
       <div class="flex items-center gap-2">
         <svg viewBox="0 0 100 100" class="w-6 h-6 shrink-0"><use href="#mick-icon"/></svg>
@@ -866,10 +918,10 @@
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT ENGINE WITH SWR INSTANT CACHE ================= -->
+  <!-- ================= JAVASCRIPT ENGINE ================= -->
   <script>
     const WORKER_GATEWAY_URL = "https://mickkk-com-cache.sumanmohit101.workers.dev";
-    const CACHE_STORAGE_KEY = "mickkk_market_data_cache_v3";
+    const CACHE_STORAGE_KEY = "mickkk_market_data_cache_v4";
 
     window.userRole = window.userRole || 'free';
 
@@ -904,18 +956,16 @@
       hlDaily: []
     };
 
-    // ----------------- FLEXIBLE CHRONOLOGICAL DATE PARSER -----------------
+    // ----------------- CHRONOLOGICAL DATE PARSER -----------------
     function parseDateFlexible(str) {
       if (!str || str === "-" || str === "") return new Date(0);
       const s = String(str).trim();
-      // DD-MMM-YYYY format (e.g. 06-Nov-2026, 13-Oct-2026)
       const m1 = s.match(/^(\d{1,2})[-/ ]([A-Za-z]{3,4})[-/ ](\d{4})/i);
       if (m1) {
         const months = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
         const mon = months[m1[2].toLowerCase().slice(0,3)];
         if (mon !== undefined) return new Date(parseInt(m1[3], 10), mon, parseInt(m1[1], 10));
       }
-      // YYYY-MM-DD format
       const m2 = s.match(/^(\d{4})[-/ ](\d{1,2})[-/ ](\d{1,2})/);
       if (m2) return new Date(parseInt(m2[1], 10), parseInt(m2[2], 10) - 1, parseInt(m2[3], 10));
       
@@ -923,7 +973,6 @@
       return isNaN(d.getTime()) ? new Date(0) : d;
     }
 
-    // ----------------- SMART ACCURATE KEY RESOLVER -----------------
     function getRowVal(row, possibleKeys, fallback = "-") {
       if (!row || typeof row !== "object") return fallback;
       for (const targetKey of possibleKeys) {
@@ -1005,6 +1054,27 @@
       setFiiTimeframe(tf);
     }
 
+    // ----------------- FULL-WIDTH TOGGLE FOR ALL CHARTS -----------------
+    function toggleCardExpand(cardId, btn) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      card.classList.toggle("expanded-card");
+      const isExpanded = card.classList.contains("expanded-card");
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="${isExpanded ? 'minimize-2' : 'maximize-2'}" class="w-3.5 h-3.5"></i>`;
+        if (window.lucide) lucide.createIcons();
+      }
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        if (fiiChartInstance) fiiChartInstance.resize();
+        if (delivery1YChartInstance) delivery1YChartInstance.resize();
+        if (sectorChartInstance) sectorChartInstance.resize();
+        if (chartAdDailyInstance) chartAdDailyInstance.resize();
+        if (chartGlDailyInstance) chartGlDailyInstance.resize();
+        if (chartHlDailyInstance) chartHlDailyInstance.resize();
+      }, 150);
+    }
+
     // ----------------- FAST SWR LOCAL STORAGE CACHE -----------------
     function renderFromLocalCache() {
       try {
@@ -1056,16 +1126,12 @@
       const updateTime = document.getElementById("marketLastUpdatedTime");
       if (updateTime) updateTime.textContent = "Syncing live feeds...";
 
-      // 1. Primary Sheet Calls
       requestScriptFeed("market_data", "summary")
         .then(res => { if (res && res.data) handleSummaryData(res.data); })
         .catch(err => console.warn("Summary feed error:", err))
         .finally(() => { if (spin) setTimeout(() => spin.classList.remove("animate-spin"), 1000); });
 
-      // 2. Fetch Deep Datasets (Including 1000 Upcoming Results & 4000 Earnings)
       fetchDeepSheets();
-
-      // 3. Fetch EOD Daily Summary Breadth Logs from Overview Route
       fetchEodSummaryLogs();
     }
 
@@ -1075,7 +1141,7 @@
       requestScriptFeed("market_data", "corporate_actions").then(res => { if (res && res.data) { handleCorpActionsData(res.data); saveToLocalCache(); } });
       
       // Pull ALL 380+ Upcoming Results
-      requestScriptFeed("market_data", "upcoming_results", 1000).then(res => { if (res && res.data) { handleResultsData(res.data); saveToLocalCache(); } });
+      requestScriptFeed("market_data", "upcoming_results", 2000).then(res => { if (res && res.data) { handleResultsData(res.data); saveToLocalCache(); } });
       
       requestScriptFeed("market_data", "ipo").then(res => { if (res && res.data) { handleIpoData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "bulk_deals").then(res => { if (res && res.data) { handleBulkDealsData(res.data); saveToLocalCache(); } });
@@ -1083,21 +1149,24 @@
       requestScriptFeed("market_data", "delivery_positions").then(res => { if (res && res.data) { handleDeliveryPositionsData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "indices_pe").then(res => { if (res && res.data) { handleIndicesPeData(res.data); saveToLocalCache(); } });
       requestScriptFeed("market_data", "sector_watch").then(res => { if (res && res.data) { handleSectorWatchData(res.data); saveToLocalCache(); } });
-      
-      // Pull ALL 3,500+ Earnings History Rows
       requestScriptFeed("market_data", "earnings_history", 4000).then(res => { if (res && res.data) { handleEarningsHistoryData(res.data); saveToLocalCache(); } });
     }
 
-    function fetchEodSummaryLogs() {
-      requestScriptFeed("overview", "").then(res => {
-        if (res) {
-          rawStore.adDaily = res.adDaily || res["_AD_Daily_Summary_Log_"] || [];
-          rawStore.glDaily = res.glDaily || res["_GL_Daily_Summary_Log_"] || [];
-          rawStore.hlDaily = res.hlDaily || res["_HL_Daily_Summary_Log_"] || [];
+    // Direct fetch for EOD Logs to avoid script tag JSON syntax errors
+    async function fetchEodSummaryLogs() {
+      try {
+        const res = await fetch(WORKER_GATEWAY_URL + "?route=overview");
+        const data = await res.json();
+        if (data) {
+          rawStore.adDaily = data.adDaily || data["_AD_Daily_Summary_Log_"] || [];
+          rawStore.glDaily = data.glDaily || data["_GL_Daily_Summary_Log_"] || [];
+          rawStore.hlDaily = data.hlDaily || data["_HL_Daily_Summary_Log_"] || [];
           renderDailyBreadthCharts();
           saveToLocalCache();
         }
-      }).catch(err => console.warn("Overview EOD log fetch:", err));
+      } catch (err) {
+        console.warn("EOD Overview fetch error:", err);
+      }
     }
 
     function requestScriptFeed(route, action, customLimit = null) {
@@ -1149,14 +1218,13 @@
       if (data.fiiDiiRecent && data.fiiDiiRecent.length) handleFiiDiiData(data.fiiDiiRecent);
       if (data.bandChanges && data.bandChanges.length) handleBandChangesData(data.bandChanges);
       if (data.corporateActions && data.corporateActions.length) handleCorpActionsData(data.corporateActions);
-      if (data.upcomingResults && data.upcomingResults.length) handleResultsData(data.upcomingResults);
       if (data.ipos && data.ipos.length) handleIpoData(data.ipos);
       if (data.bulkDeals && data.bulkDeals.length) handleBulkDealsData(data.bulkDeals);
       if (data.blockDeals && data.blockDeals.length) handleBlockDealsData(data.blockDeals);
       if (data.sectorWatch && data.sectorWatch.length) handleSectorWatchData(data.sectorWatch);
     }
 
-    // 1. FII / DII HANDLER (Fixed Float Formatting)
+    // 1. FII / DII HANDLER
     function handleFiiDiiData(rows) {
       if (!Array.isArray(rows) || !rows.length) return;
       rawStore.fiiDii = rows;
@@ -1354,11 +1422,11 @@
       `).join('');
     }
 
-    // 4. UPCOMING RESULTS (Accurate Date Sorting & Complete 380+ rows)
+    // 4. UPCOMING RESULTS (Full 380+ rows & Robust Chronological Date Sorting)
     function handleResultsData(rows) {
       if (!Array.isArray(rows) || !rows.length) return;
       
-      // Sort strictly by Chronological Upcoming Dates!
+      // Strict Chronological Sort: Earliest upcoming dates first!
       rows.sort((a, b) => {
         const dA = parseDateFlexible(getRowVal(a, ["RESULT DATE", "Result Date", "Date"], ""));
         const dB = parseDateFlexible(getRowVal(b, ["RESULT DATE", "Result Date", "Date"], ""));
@@ -1366,8 +1434,6 @@
       });
 
       rawStore.resultsCalendar = rows;
-      const badge = document.getElementById("resultsCountBadge");
-      if (badge) badge.textContent = `${rows.length}`;
       filterResultsTimeframe('all');
     }
 
@@ -1380,15 +1446,19 @@
 
       const rows = rawStore.resultsCalendar;
       const tbody = document.getElementById("resultsCalendarTbody");
+      const badge = document.getElementById("resultsCountBadge");
       if (!tbody) return;
 
+      // Base date: anchor to the earliest date in the dataset or current time
       const now = new Date();
       now.setHours(0,0,0,0);
 
       const filtered = rows.filter(r => {
+        if (tf === 'all') return true;
         const rawDate = getRowVal(r, ["RESULT DATE", "Result Date", "Date"], "");
         const d = parseDateFlexible(rawDate);
-        if (isNaN(d.getTime()) || d.getTime() === 0) return tf === 'all';
+        if (isNaN(d.getTime()) || d.getTime() === 0) return false;
+        
         const diffDays = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         if (tf === 'today') return diffDays === 0;
         if (tf === 'tomorrow') return diffDays === 1;
@@ -1396,12 +1466,16 @@
         return true;
       });
 
+      if (badge) {
+        badge.textContent = tf === 'all' ? `${rows.length} Companies` : `${filtered.length} of ${rows.length}`;
+      }
+
       if (!filtered.length) {
         tbody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400">No results scheduled for this period.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filtered.slice(0, 100).map(r => `
+      tbody.innerHTML = filtered.slice(0, 150).map(r => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
           <td class="py-2 font-bold text-blue-500 truncate max-w-[180px]">${getRowVal(r, ["SECURITY / COMPANY NAME", "Company Name", "Security Name"], "-")}</td>
           <td class="py-2 text-center font-bold text-emerald-500 font-mono-num">${getRowVal(r, ["RESULT DATE", "Result Date", "Date"], "-")}</td>
@@ -1456,7 +1530,7 @@
       `).join('');
     }
 
-    // 6. BULK DEALS (Fixed Real NSE Header: Trade Price / Wght. Avg. Price)
+    // 6. BULK DEALS
     function handleBulkDealsData(rows) {
       const tbody = document.getElementById("bulkDealsTbody");
       const badge = document.getElementById("bulkDealsBadge");
@@ -1522,7 +1596,7 @@
       }
     }
 
-    // 8. DELIVERY POSITIONS & AUTO-POPULATE CHART
+    // 8. DELIVERY POSITIONS
     function handleDeliveryPositionsData(rows) {
       const tbody = document.getElementById("deliveryPositionsTbody");
       const badge = document.getElementById("deliveryBadge");
@@ -1537,8 +1611,7 @@
       if (select) {
         const allSymbols = [...new Set(rows.map(r => getRowVal(r, ["SYMBOL", "Symbol"], "")).filter(Boolean))].sort();
         select.innerHTML = allSymbols.map(s => `<option value="${s}">${s}</option>`).join('');
-        // Instant Auto-Select first item on load!
-        if (allSymbols.length) {
+        if (!select.value && allSymbols.length) {
           select.value = allSymbols[0];
           renderDelivery1YStockChart();
         }
@@ -1565,7 +1638,7 @@
       }
     }
 
-    // 9. INDICES VALUATION (Smart Magnitude Clean)
+    // 9. INDICES VALUATION
     function handleIndicesPeData(rows) {
       const tbody = document.getElementById("indicesPeTbody");
       const badge = document.getElementById("indicesPeBadge");
@@ -1609,7 +1682,7 @@
       }
     }
 
-    // 10. SECTOR WATCH & AUTO-SELECT CHART
+    // 10. SECTOR WATCH
     function handleSectorWatchData(rows) {
       const tbody = document.getElementById("sectorWatchTbody");
       const badge = document.getElementById("sectorWatchBadge");
@@ -1624,7 +1697,6 @@
       if (secSelect) {
         const secList = rows.map(r => getRowVal(r, ["INDUSTRY / SECTOR NAME", "Sector Name", "Sector"], "")).filter(Boolean);
         secSelect.innerHTML = secList.map(s => `<option value="${s}">${s}</option>`).join('');
-        // Auto-select first item and render chart immediately!
         if (secList.length) {
           secSelect.value = secList[0];
           renderSectorHistoryChart();
@@ -1650,7 +1722,7 @@
       }
     }
 
-    // 11. EARNINGS HISTORY (All 3,500+ Stocks, No Blur)
+    // 11. EARNINGS HISTORY
     function handleEarningsHistoryData(rows) {
       const tbody = document.getElementById("earningsHistoryTbody");
       const badge = document.getElementById("earningsBadge");
@@ -1694,7 +1766,7 @@
       renderEarningsTable(filtered);
     }
 
-    // 12. DELIVERY 1Y ACCUMULATION BAR CHART (Auto Select & Real Dates)
+    // 12. DELIVERY 1Y ACCUMULATION BAR CHART
     function renderDelivery1YStockChart() {
       const select = document.getElementById("deliveryStockSelect");
       let sym = select ? select.value : "";
@@ -1704,8 +1776,6 @@
       }
       if (!sym) return;
 
-      const loader = document.getElementById("deliveryChartLoader");
-      if (loader) loader.style.display = 'none';
       const ctx = document.getElementById("delivery1YChart");
       if (!ctx) return;
       if (delivery1YChartInstance) delivery1YChartInstance.destroy();
@@ -1714,7 +1784,6 @@
       const gridColor = isDark ? "#17243e" : "#e2e8f0";
       const textColor = isDark ? "#94a3b8" : "#64748b";
 
-      // Real Dates extracted or recent 6 trading sessions
       const realDates = ["06-Oct", "07-Oct", "08-Oct", "09-Oct", "12-Oct", "13-Oct"];
 
       delivery1YChartInstance = new Chart(ctx, {
@@ -1742,7 +1811,7 @@
       });
     }
 
-    // 13. SECTOR BREADTH 2Y CHART (Auto Select & Real Dates)
+    // 13. SECTOR BREADTH 2Y CHART
     function renderSectorHistoryChart() {
       const select = document.getElementById("sectorSelect");
       let sec = select ? select.value : "";
@@ -1752,8 +1821,6 @@
       }
       if (!sec) return;
 
-      const loader = document.getElementById("sectorChartLoader");
-      if (loader) loader.style.display = 'none';
       const ctx = document.getElementById("sectorHistoryChart");
       if (!ctx) return;
       if (sectorChartInstance) sectorChartInstance.destroy();
@@ -1785,14 +1852,14 @@
       });
     }
 
-    // 14. EOD DAILY SUMMARY CHARTS ENGINE (_AD_Daily, _GL_Daily, _HL_Daily)
+    // 14. EOD DAILY SUMMARY CHARTS ENGINE
     function renderDailyBreadthCharts() {
       if (typeof Chart === 'undefined') return;
       const isDark = document.documentElement.classList.contains("dark");
       const gridColor = isDark ? "#17243e" : "#e2e8f0";
       const textColor = isDark ? "#94a3b8" : "#64748b";
 
-      // 1. Chart A/D Daily Summary
+      // 1. Chart A/D Daily
       const ctxAd = document.getElementById("chartAdDaily");
       if (ctxAd && rawStore.adDaily && rawStore.adDaily.length) {
         if (chartAdDailyInstance) chartAdDailyInstance.destroy();
@@ -1815,7 +1882,7 @@
         });
       }
 
-      // 2. Chart G/L Daily Summary
+      // 2. Chart G/L Daily
       const ctxGl = document.getElementById("chartGlDaily");
       if (ctxGl && rawStore.glDaily && rawStore.glDaily.length) {
         if (chartGlDailyInstance) chartGlDailyInstance.destroy();
@@ -1838,7 +1905,7 @@
         });
       }
 
-      // 3. Chart H/L Daily Summary
+      // 3. Chart H/L Daily
       const ctxHl = document.getElementById("chartHlDaily");
       if (ctxHl && rawStore.hlDaily && rawStore.hlDaily.length) {
         if (chartHlDailyInstance) chartHlDailyInstance.destroy();
@@ -1862,12 +1929,11 @@
       }
     }
 
-    // ----------------- UNIVERSAL VIEW ALL MODAL (CLEAN HEADERS) -----------------
+    // ----------------- UNIVERSAL VIEW ALL MODAL -----------------
     function openUniversalViewAllModal(title, dataset) {
       if (!Array.isArray(dataset) || !dataset.length) return;
       
       const rawHeaders = Object.keys(dataset[0]);
-      // Remove any unwanted internal columns
       modalCurrentHeaders = rawHeaders.filter(h => {
         const lower = h.toLowerCase().trim();
         return !lower.includes("code") && !lower.includes("source") && !lower.includes("last synced") && lower !== "cd" && lower !== "scrip_cd";
@@ -1947,10 +2013,10 @@
         toggleSidebar();
       }
       
-      // 1. Instant Paint from LocalStorage Cache (0ms latency!)
+      // Instant SWR Render (0ms)
       renderFromLocalCache();
 
-      // 2. Fetch fresh live data from Worker in background
+      // Fresh sync
       fetchMasterMarketData(false);
 
       if (window.lucide) lucide.createIcons();
