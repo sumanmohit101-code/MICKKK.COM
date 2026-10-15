@@ -1,0 +1,219 @@
+name: Update FII DII Data
+
+on:
+  schedule:
+    - cron: "30 13 * * 1-5" # 19:00 IST, Monday-Friday
+  workflow_dispatch:
+
+concurrency:
+  group: market-data-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update-fii-dii:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Fetch FII DII data and update history
+        run: |
+          python <<'PY'
+          import json
+          import os
+          import time
+          from datetime import datetime, timedelta, timezone
+
+          import requests
+
+          KEEP_DAYS = 730  # 2 saal
+          API_URL = "https://www.nseindia.com/api/fiidiiTradeReact"
+          HISTORY_PATH = "data/fii-dii-history.json"
+          LATEST_PATH = "data/fii-dii-latest.json"
+
+          session = requests.Session()
+          session.headers.update({
+              "User-Agent": (
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/131.0.0.0 Safari/537.36"
+              ),
+              "Accept": "application/json, text/plain, */*",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://www.nseindia.com/reports/fii-dii",
+              "Connection": "keep-alive",
+          })
+
+          # Warm-up: NSE cookies ke bina API block karta hai
+          for warm in (
+              "https://www.nseindia.com/",
+              "https://www.nseindia.com/reports/fii-dii",
+          ):
+              try:
+                  session.get(warm, timeout=30)
+              except Exception as exc:
+                  print("Warm-up failed (continuing):", exc)
+
+          def fetch_json(retries=4):
+              for attempt in range(1, retries + 1):
+                  try:
+                      print(f"Fetching ({attempt}/{retries})")
+                      r = session.get(API_URL, timeout=60)
+                      print("HTTP:", r.status_code, "Size:", len(r.content))
+                      if r.status_code != 200:
+                          raise RuntimeError(f"HTTP {r.status_code}")
+                      data = r.json()
+                      if not isinstance(data, list) or not data:
+                          raise RuntimeError("Unexpected response shape")
+                      return data
+                  except Exception as exc:
+                      print("Failed:", exc)
+                      time.sleep(4 * attempt)
+              return None
+
+          raw = fetch_json()
+          if raw is None:
+              raise SystemExit("Could not fetch FII/DII data from NSE.")
+
+          def num(v):
+              try:
+                  return float(str(v).replace(",", "").strip())
+              except Exception:
+                  return None
+
+          # Raw rows -> {date: {"FII": {...}, "DII": {...}}}
+          days = {}
+          for row in raw:
+              cat = str(row.get("category", "")).upper()
+              if "FII" in cat or "FPI" in cat:
+                  key = "fii"
+              elif "DII" in cat:
+                  key = "dii"
+              else:
+                  continue
+              try:
+                  d = datetime.strptime(str(row["date"]).strip(), "%d-%b-%Y")
+              except Exception:
+                  print("Bad date, skipping:", row.get("date"))
+                  continue
+              iso = d.strftime("%Y-%m-%d")
+              days.setdefault(iso, {})[key] = {
+                  "buy": num(row.get("buyValue")),
+                  "sell": num(row.get("sellValue")),
+                  "net": num(row.get("netValue")),
+              }
+
+          # Sirf wahi din rakho jisme FII aur DII dono hain
+          days = {k: v for k, v in days.items() if "fii" in v and "dii" in v}
+          if not days:
+              raise SystemExit("No valid FII/DII rows found.")
+
+          # Existing history load
+          history = {}
+          if os.path.exists(HISTORY_PATH):
+              try:
+                  with open(HISTORY_PATH, encoding="utf-8") as f:
+                      old = json.load(f)
+                  for rec in old.get("records", []):
+                      history[rec["date"]] = {"fii": rec["fii"], "dii": rec["dii"]}
+              except Exception as exc:
+                  print("Could not read old history, starting fresh:", exc)
+
+          # Naya data merge (same date ho to overwrite)
+          for iso, v in days.items():
+              history[iso] = v
+
+          # 2 saal se purana hatao
+          latest_date = max(history.keys())
+          cutoff = (
+              datetime.strptime(latest_date, "%Y-%m-%d") - timedelta(days=KEEP_DAYS)
+          ).strftime("%Y-%m-%d")
+          history = {k: v for k, v in history.items() if k >= cutoff}
+
+          records = [
+              {"date": k, "fii": v["fii"], "dii": v["dii"]}
+              for k, v in sorted(history.items(), reverse=True)  # newest first
+          ]
+
+          # Agar kuch badla nahi to file mat likho (faltu commit nahi)
+          unchanged = False
+          if os.path.exists(HISTORY_PATH):
+              try:
+                  with open(HISTORY_PATH, encoding="utf-8") as f:
+                      unchanged = json.load(f).get("records") == records
+              except Exception:
+                  pass
+
+          os.makedirs("data", exist_ok=True)
+
+          if unchanged:
+              print("History already up to date. Latest:", latest_date)
+          else:
+              updated_at = datetime.now(timezone.utc).isoformat()
+              with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+                  json.dump({
+                      "updatedAt": updated_at,
+                      "source": "NSE",
+                      "unit": "INR crore",
+                      "keepDays": KEEP_DAYS,
+                      "recordCount": len(records),
+                      "records": records,
+                  }, f, ensure_ascii=False, separators=(",", ":"))
+              with open(LATEST_PATH, "w", encoding="utf-8") as f:
+                  json.dump({
+                      "updatedAt": updated_at,
+                      "source": "NSE",
+                      "unit": "INR crore",
+                      "latest": records[0],
+                  }, f, ensure_ascii=False, indent=2)
+
+          print("Latest date:", latest_date)
+          print("History records:", len(records))
+          PY
+
+      - name: Commit and push FII DII data
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/fii-dii-history.json data/fii-dii-latest.json
+
+          if git diff --cached --quiet; then
+            echo "No FII/DII data changes."
+            exit 0
+          fi
+
+          git commit -m "Auto-update FII/DII data"
+
+          for attempt in 1 2 3 4 5; do
+            echo "Push attempt $attempt/5..."
+            git fetch origin main
+            if git rebase origin/main; then
+              if git push origin main; then
+                echo "Push successful."
+                exit 0
+              fi
+            else
+              git rebase --abort || true
+            fi
+            sleep 5
+          done
+
+          echo "ERROR: Could not push after 5 attempts."
+          exit 1
