@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Screener — Mickkk.com</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#070d18',
+            sidebarDark: '#0b1329',
+            cardDark: '#0f172a',
+            cardSubDark: '#132238',
+            borderDark: '#1e293b',
+            accentCyan: '#00d4ff',
+            accentGreen: '#10b981',
+            accentRed: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    
+    /* Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* Theme Logo Tokens */
+    :root { --mk-m1:#0b1329; --mk-m2:#334155; --mk-word:#0b1329; --mk-com:#1e293b; --mk-tag:#475569; }
+    .dark { --mk-m1:#ffffff; --mk-m2:#cbd5e1; --mk-word:#ffffff; --mk-com:#f1f5f9; --mk-tag:#e2e8f0; }
+    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
+    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:500; color:var(--mk-com); letter-spacing:-0.01em; }
+    .mk-dot  { display:inline-block; width:.3em; height:.3em; border-radius:50%; background:#00f5a0; margin:0 .02em 0 .08em; }
+    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:500; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; }
+
+    /* Collapsible Sidebar Engine */
+    .sidebar-collapsed { width: 4.2rem !important; }
+    .sidebar-collapsed .brand-text,
+    .sidebar-collapsed .nav-text,
+    .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
+    .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
+    .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+
+    .sidebar-collapsed .nav-item:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 4.2rem;
+      background: #0f172a;
+      color: #fff;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      border: 1px solid #1e293b;
+    }
+
+    .collapse-float-btn {
+      position: absolute;
+      right: -12px;
+      top: 22px;
+      z-index: 60;
+    }
+
+    /* Table Sticky Columns */
+    .sticky-col-check { position: sticky; left: 0; z-index: 20; }
+    .sticky-col-sym { position: sticky; left: 36px; z-index: 20; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200">
+
+  <!-- SVG Mickkk Shared Logo Symbol -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMFade" gradientUnits="userSpaceOnUse" x1="46" y1="50" x2="77" y2="16"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m1);stop-opacity:.15"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="14" y1="92" x2="95" y2="6"><stop offset="0" stop-color="#16a34a"/><stop offset=".55" stop-color="#10d98a"/><stop offset="1" stop-color="#00f5a0"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="26" y1="70" x2="82" y2="18"><stop offset="0" stop-color="#10d98a" stop-opacity="0"/><stop offset=".35" stop-color="#10d98a" stop-opacity=".85"/><stop offset="1" stop-color="#00f5a0"/></linearGradient>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <path d="M46 50 L77 16 L77 90" fill="none" stroke="url(#mkMFade)" stroke-width="17" stroke-linejoin="round"/>
+        <path d="M15 90 L15 16 L46 50" fill="none" stroke="url(#mkM)" stroke-width="17" stroke-linejoin="round"/>
+        <rect x="31" y="76" width="8" height="14" rx="1.5" fill="url(#mkG)"/>
+        <rect x="42" y="64" width="8" height="26" rx="1.5" fill="url(#mkG)"/>
+        <rect x="53" y="52" width="8" height="38" rx="1.5" fill="url(#mkG)"/>
+        <line x1="26" y1="70" x2="82" y2="18" stroke="url(#mkShaft)" stroke-width="7" stroke-linecap="round"/>
+        <polygon points="95,5 89.3,27 74.7,10" fill="#00f5a0" stroke="#00f5a0" stroke-width="2" stroke-linejoin="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Full Loader -->
+  <div id="loader" class="fixed inset-0 bg-[#070d18]/90 backdrop-blur-sm flex flex-col items-center justify-center z-[100]">
+    <div class="w-10 h-10 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
+    <p class="mt-3 text-xs font-bold text-slate-300" id="loader-msg">Loading Live Screener Universe...</p>
+  </div>
+
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
+    <button onclick="toggleSidebar()" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
+      <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
+    </button>
+
+    <div>
+      <div class="brand-container flex flex-col items-stretch gap-1.5 w-full px-0.5 py-1">
+        <div class="flex items-center gap-2">
+          <svg viewBox="0 0 100 100" class="w-10 h-10 shrink-0"><use href="#mick-icon"/></svg>
+          <div class="brand-text min-w-0 flex items-baseline whitespace-nowrap">
+            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
+          </div>
+        </div>
+        <div class="brand-text flex items-center gap-1.5 w-full">
+          <span class="h-[1.5px] w-3 bg-[#00f5a0] rounded-full shrink-0"></span>
+          <span class="mk-tag text-[5.6px] tracking-[0.16em] flex-1 text-center">Market Intelligence &amp; Trading Platform</span>
+          <span class="h-[1.5px] w-3 bg-[#00f5a0] rounded-full shrink-0"></span>
+        </div>
+      </div>
+
+      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
+
+      <nav class="space-y-1 text-xs font-semibold">
+        <a href="index.html" data-title="Dashboard" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="#" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="line-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
+        </a>
+        <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
+          <i data-lucide="sliders" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Stock Screener</span>
+        </a>
+        <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="layers" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Index Terminal</span>
+        </a>
+        <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
+        </a>
+        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
+        </a>
+        <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
+        </a>
+        <a href="#" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Trading Journal</span>
+        </a>
+        <a href="#" data-title="Watchlist" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
+          <i data-lucide="bookmark" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Watchlist</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom User Strip -->
+    <div>
+      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">M</div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">mohit su...</div>
+              <div class="text-[9px] text-slate-400 truncate">Free Plan</div>
+            </div>
+          </div>
+          <button onclick="toggleTheme()" class="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white">
+            <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
+            <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN WORKSPACE ================= -->
+  <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
+    
+    <!-- Top Search & Bar -->
+    <header class="h-14 bg-white dark:bg-sidebarDark border-b border-slate-200 dark:border-borderDark px-6 flex items-center justify-between sticky top-0 z-40">
+      <div class="relative w-80">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input type="text" id="global-search-input" placeholder="Search stocks, indices, sectors..." oninput="handleSearch(this.value)" class="w-full bg-slate-100 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500">
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button onclick="toggleTheme()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+          <i data-lucide="sun" class="w-4 h-4 dark:hidden"></i>
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-xs">M</div>
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mohit Suman</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Body Content -->
+    <main class="p-6 space-y-5">
+      
+      <!-- Top Title + Action Buttons -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight">Stock Screener</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Find high quality stocks with advanced filters and real-time data.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <button onclick="copySymbols()" class="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-borderDark bg-white dark:bg-cardDark text-xs font-bold flex items-center gap-1.5 shadow-sm hover:border-emerald-500">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Save Screen
+          </button>
+          <button onclick="resetAllFilters()" class="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Screen
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs Nav -->
+      <div class="flex items-center gap-5 border-b border-slate-200 dark:border-borderDark text-xs font-bold pb-2">
+        <span class="text-slate-900 dark:text-white border-b-2 border-emerald-500 pb-2 cursor-pointer">Predefined</span>
+        <span class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">My Screens</span>
+        <span class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">Watchlist</span>
+        <span class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">Results (<span id="results-count-tab">0</span>)</span>
+      </div>
+
+      <!-- Segment Pills -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="filterSegment(this, 'ALL')" class="seg-btn active px-3 py-1 rounded-md text-xs font-bold bg-emerald-500 text-white shadow-sm">All Stocks</button>
+        <button onclick="filterSegment(this, 'NIFTY 50')" class="seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white">Nifty 50</button>
+        <button onclick="filterSegment(this, 'NIFTY NEXT 50')" class="seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white">Nifty Next 50</button>
+        <button onclick="filterSegment(this, 'BANK NIFTY')" class="seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white">Bank Nifty</button>
+        <button onclick="filterSegment(this, 'Mid Cap')" class="seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white">Midcap</button>
+        <button onclick="filterSegment(this, 'Small Cap')" class="seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white">Smallcap</button>
+        <button onclick="filterSegment(this, 'F&O')" class="seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white">F&O</button>
+      </div>
+
+      <!-- ================= 4-COLUMN FILTER PANEL (SCREENSHOT EXACT) ================= -->
+      <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-borderDark pb-2.5">
+          <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">Apply Filters</h3>
+          <div class="flex items-center gap-3">
+            <button onclick="resetAllFilters()" class="text-xs font-bold text-slate-400 hover:text-slate-700 dark:hover:text-white">Reset</button>
+            <button onclick="applyAllFilters()" class="px-3.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-sm">Run Scan</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <!-- Col 1: Basic -->
+          <div class="space-y-2.5">
+            <div class="font-bold text-slate-400 text-[11px] pb-1 border-b border-slate-100 dark:border-borderDark">Basic</div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Market</label>
+              <select id="f-market" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="NSE" selected>NSE</option>
+                <option value="BSE">BSE</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Sector</label>
+              <select id="f-sector" onchange="populateIndustries(); applyAllFilters();" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">All Sectors</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Industry</label>
+              <select id="f-industry" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">All Industries</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Market Cap</label>
+              <select id="f-cap" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="Large Cap">Large Cap</option>
+                <option value="Mid Cap">Mid Cap</option>
+                <option value="Small Cap">Small Cap</option>
+                <option value="Micro Cap">Micro Cap</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Col 2: Price & Volume -->
+          <div class="space-y-2.5">
+            <div class="font-bold text-slate-400 text-[11px] pb-1 border-b border-slate-100 dark:border-borderDark">Price & Volume</div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Price Range (₹)</label>
+              <div class="flex items-center gap-2">
+                <input type="number" id="f-min-price" value="10" placeholder="Min" onchange="applyAllFilters()" class="w-1/2 bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-mono text-xs font-bold outline-none">
+                <input type="number" id="f-max-price" value="5000" placeholder="Max" onchange="applyAllFilters()" class="w-1/2 bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-mono text-xs font-bold outline-none">
+              </div>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Volume (Avg. Daily)</label>
+              <select id="f-vol" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="0">Any</option>
+                <option value="100000">&gt; 100K</option>
+                <option value="500000">&gt; 500K</option>
+                <option value="1000000">&gt; 1M</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">52W High</label>
+              <select id="f-52wh" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="-5">Within 5%</option>
+                <option value="-10">Within 10%</option>
+                <option value="-20">Within 20%</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">52W Low</label>
+              <select id="f-52wl" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="20">&gt; 20% Above Low</option>
+                <option value="50">&gt; 50% Above Low</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Col 3: Technical -->
+          <div class="space-y-2.5">
+            <div class="font-bold text-slate-400 text-[11px] pb-1 border-b border-slate-100 dark:border-borderDark">Technical</div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Price above</label>
+              <select id="f-ema" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="10">10 EMA</option>
+                <option value="20" selected>20 EMA</option>
+                <option value="50">50 EMA</option>
+                <option value="200">200 EMA</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">RSI (14)</label>
+              <select id="f-rsi" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="50">&gt; 50</option>
+                <option value="60">&gt; 60</option>
+                <option value="70">&gt; 70</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">DMI +DI</label>
+              <select class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none text-slate-400"><option>Any</option></select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">ADX</label>
+              <select class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none text-slate-400"><option>Any</option></select>
+            </div>
+          </div>
+
+          <!-- Col 4: Fundamental -->
+          <div class="space-y-2.5">
+            <div class="font-bold text-slate-400 text-[11px] pb-1 border-b border-slate-100 dark:border-borderDark">Fundamental</div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">P/E Ratio</label>
+              <select id="f-pe" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="30">&lt; 30</option>
+                <option value="50">&lt; 50</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">ROCE (%)</label>
+              <select id="f-roce" onchange="applyAllFilters()" class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none">
+                <option value="ALL">Any</option>
+                <option value="15">&gt; 15%</option>
+                <option value="20">&gt; 20%</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Sales Growth (YoY)</label>
+              <select class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none text-slate-400"><option>Any</option></select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 font-semibold block mb-1">Profit Growth (YoY)</label>
+              <select class="w-full bg-slate-50 dark:bg-brandDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 font-bold outline-none text-slate-400"><option>Any</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Count Bar -->
+      <div class="flex items-center justify-between text-xs font-bold pt-1">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-extrabold" id="shown-count">0</span>
+          <span>Stocks Found</span>
+          <span class="text-emerald-500 font-extrabold">(NSE)</span>
+          <span class="text-slate-400 text-[11px] font-normal" id="sync-time">• Last Updated: Just Now</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-normal">Sort by</span>
+          <select id="sort-select" onchange="handleSort(this.value)" class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1 text-xs font-bold outline-none">
+            <option value="mcap">Market Cap (High to Low)</option>
+            <option value="change">Change % (High to Low)</option>
+            <option value="price">Price (High to Low)</option>
+            <option value="rs">RS Rating (High to Low)</option>
+            <option value="vol">Volume (High to Low)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ================= MAIN STOCKS TABLE ================= -->
+      <div class="bg-white dark:bg-cardDark rounded-xl border border-slate-200 dark:border-borderDark overflow-hidden shadow-sm">
+        <div class="overflow-x-auto max-h-[580px] custom-scroll">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-borderDark text-[11px] sticky top-0 bg-slate-50 dark:bg-cardDark z-30 uppercase">
+              <tr>
+                <th class="p-3 w-8 text-center sticky-col-check bg-slate-50 dark:bg-cardDark"><input type="checkbox"></th>
+                <th class="p-3 sticky-col-sym bg-slate-50 dark:bg-cardDark">Symbol</th>
+                <th class="p-3">Company</th>
+                <th class="p-3">Price (₹)</th>
+                <th class="p-3">Change %</th>
+                <th class="p-3">Volume</th>
+                <th class="p-3">Market Cap (Cr)</th>
+                <th class="p-3 text-center">RS Rating</th>
+                <th class="p-3 text-center">Trend</th>
+                <th class="p-3 w-8"></th>
+              </tr>
+            </thead>
+            <tbody id="stocks-tbody" class="divide-y divide-slate-100 dark:divide-borderDark font-medium"></tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="p-3 border-t border-slate-200 dark:border-borderDark flex items-center justify-center gap-1.5 text-xs font-bold bg-slate-50/50 dark:bg-cardDark/50">
+          <button onclick="prevPage()" class="w-7 h-7 rounded border border-slate-200 dark:border-borderDark flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800">&lt;</button>
+          <span id="pagination-pages" class="flex items-center gap-1"></span>
+          <button onclick="nextPage()" class="w-7 h-7 rounded border border-slate-200 dark:border-borderDark flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800">&gt;</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ================= JAVASCRIPT & DATA FETCHER ================= -->
+  <script>
+    const SPREADSHEET_ID = "13SG0bcfTGXLQfq14hb_rRrTUALq5GYUQuNegP_AH42Y";
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Chartink%20Data`;
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwyf03hzfg05WOcl_TImieFbqTb7djfEuAmM5v31CVqMS2Du1-2GYX72xd26e4jsbFm8g/exec";
+
+    let rawStocks = [];
+    let filteredStocks = [];
+    let currentPage = 1;
+    const pageSize = 25;
+
+    // SVG Sparkline paths
+    const upSparkline = "M 0 16 Q 18 18 35 10 T 70 3";
+    const downSparkline = "M 0 4 Q 18 2 35 12 T 70 19";
+
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      loadData();
+    };
+
+    // 🎨 Theme Toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    if (localStorage.getItem("theme") === "light") {
+      document.documentElement.classList.remove("dark");
+    }
+
+    // 📁 Sidebar Toggle
+    function toggleSidebar() {
+      const sb = document.getElementById("sidebar");
+      const mc = document.getElementById("mainContent");
+      const arrow = document.getElementById("collapseArrow");
+
+      sb.classList.toggle("sidebar-collapsed");
+      if (sb.classList.contains("sidebar-collapsed")) {
+        mc.classList.remove("ml-60");
+        mc.classList.add("ml-[4.2rem]");
+        arrow.setAttribute("data-lucide", "chevron-right");
+      } else {
+        mc.classList.remove("ml-[4.2rem]");
+        mc.classList.add("ml-60");
+        arrow.setAttribute("data-lucide", "chevron-left");
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // 🚀 Dual Data Loader (Never Fails)
+    async function loadData() {
+      document.getElementById('loader').style.display = 'flex';
+
+      try {
+        const res = await fetch(GVIZ_URL);
+        const text = await res.text();
+        const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const gviz = JSON.parse(jsonStr);
+
+        if (gviz && gviz.table && gviz.table.rows && gviz.table.rows.length > 3) {
+          parseGViz(gviz.table.rows);
+          return;
+        }
+      } catch (e) {
+        console.warn("GViz fetch failed, trying WebApp fallback...", e);
+      }
+
+      fetchFallback();
+    }
+
+    async function fetchFallback() {
+      try {
+        const res = await fetch(`${WEBAPP_URL}?action=getMasterStockList`);
+        const json = await res.json();
+        if (json && json.success && json.data) {
+          rawStocks = json.data.map(item => ({
+            symbol: item['NSE Symbol'] || item['Symbol'] || '',
+            name: item['Stock Name'] || item['name'] || '',
+            close: cleanNum(item['Close']),
+            change: cleanNum(item['D'] || item['% Change (D)']),
+            volume: cleanNum(item['Volume']),
+            marketCap: cleanNum(item['Market Cap']),
+            sector: item['Sector'] || 'General',
+            industry: item['Industry'] || 'General',
+            capCategory: item['Market Cap Category'] || 'Mid Cap',
+            rs: Math.max(40, Math.min(99, Math.round(cleanNum(item['RS RATING']) || 70))),
+            ema20: cleanNum(item['20ema']),
+            rsi: cleanNum(item['RSI']) || 55,
+            away52wh: cleanNum(item['52WH Away'])
+          }));
+          setupDataset();
+        }
+      } catch (err) {
+        console.error("All data fetch failed:", err);
+      } finally {
+        document.getElementById('loader').style.display = 'none';
+      }
+    }
+
+    function parseGViz(rows) {
+      const parsed = [];
+      for (let i = 3; i < rows.length; i++) {
+        const c = rows[i].c;
+        if (!c || !c[1]) continue;
+
+        const sym = c[1].v ? String(c[1].v).trim().toUpperCase() : '';
+        const name = c[2] ? String(c[2].v || sym).trim() : sym;
+        if (!sym || sym === 'SYMBOL' || sym === 'NSE SYMBOL') continue;
+
+        const num = (idx) => {
+          if (!c[idx] || c[idx].v === null) return 0;
+          return typeof c[idx].v === 'number' ? c[idx].v : parseFloat(String(c[idx].v).replace(/[%,\s₹]/g, '')) || 0;
+        };
+
+        parsed.push({
+          symbol: sym,
+          name: name,
+          close: num(4),
+          change: num(12),
+          volume: num(5),
+          marketCap: num(3),
+          sector: c[6] ? String(c[6].v).trim() : 'General',
+          industry: c[7] ? String(c[7].v).trim() : 'General',
+          capCategory: c[8] ? String(c[8].v).trim() : 'Mid Cap',
+          rs: Math.max(40, Math.min(99, Math.round(num(9) > 0 ? num(9) : 72))),
+          ema20: num(30),
+          rsi: num(21) || 55,
+          away52wh: num(20)
+        });
+      }
+
+      rawStocks = parsed;
+      setupDataset();
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    function setupDataset() {
+      populateSectors();
+      applyAllFilters();
+      const tzTime = new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: '2-digit', minute:'2-digit' });
+      document.getElementById('sync-time').innerText = `• Last Updated: ${tzTime} IST`;
+    }
+
+    function populateSectors() {
+      const secSel = document.getElementById('f-sector');
+      const sectors = Array.from(new Set(rawStocks.map(s => s.sector))).filter(Boolean).sort();
+      secSel.innerHTML = `<option value="ALL">All Sectors</option>` + sectors.map(s => `<option value="${s}">${s}</option>`).join('');
+      populateIndustries();
+    }
+
+    function populateIndustries() {
+      const indSel = document.getElementById('f-industry');
+      const selectedSec = document.getElementById('f-sector').value;
+      let list = selectedSec !== 'ALL' ? rawStocks.filter(s => s.sector === selectedSec) : rawStocks;
+      const industries = Array.from(new Set(list.map(s => s.industry))).filter(Boolean).sort();
+      indSel.innerHTML = `<option value="ALL">All Industries</option>` + industries.map(i => `<option value="${i}">${i}</option>`).join('');
+    }
+
+    function applyAllFilters() {
+      const q = document.getElementById('global-search-input').value.trim().toLowerCase();
+      const sec = document.getElementById('f-sector').value;
+      const ind = document.getElementById('f-industry').value;
+      const cap = document.getElementById('f-cap').value;
+      const minP = parseFloat(document.getElementById('f-min-price').value) || 0;
+      const maxP = parseFloat(document.getElementById('f-max-price').value) || 999999;
+      const volMin = parseFloat(document.getElementById('f-vol').value) || 0;
+      const rsiFilter = document.getElementById('f-rsi').value;
+      const emaFilter = document.getElementById('f-ema').value;
+      const away52Filter = document.getElementById('f-52wh').value;
+
+      filteredStocks = rawStocks.filter(s => {
+        if (q && !s.symbol.toLowerCase().includes(q) && !s.name.toLowerCase().includes(q)) return false;
+        if (sec !== 'ALL' && s.sector !== sec) return false;
+        if (ind !== 'ALL' && s.industry !== ind) return false;
+        if (cap !== 'ALL' && s.capCategory !== cap) return false;
+        if (s.close < minP || s.close > maxP) return false;
+        if (volMin > 0 && s.volume < volMin) return false;
+
+        if (rsiFilter !== 'ALL' && s.rsi < parseFloat(rsiFilter)) return false;
+        if (emaFilter === '20' && s.close < s.ema20) return false;
+        if (away52Filter !== 'ALL' && s.away52wh < parseFloat(away52Filter)) return false;
+
+        return true;
+      });
+
+      currentPage = 1;
+      document.getElementById('shown-count').innerText = filteredStocks.length.toLocaleString();
+      document.getElementById('results-count-tab').innerText = filteredStocks.length;
+
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('stocks-tbody');
+      if (filteredStocks.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-slate-400">No stocks match your scan criteria.</td></tr>`;
+        return;
+      }
+
+      const start = (currentPage - 1) * pageSize;
+      const paged = filteredStocks.slice(start, start + pageSize);
+
+      tbody.innerHTML = paged.map(s => {
+        const isUp = s.change >= 0;
+        const changeSign = isUp ? '+' : '';
+        const badgeCls = isUp ? 'text-emerald-500 bg-emerald-500/10' : 'text-rose-500 bg-rose-500/10';
+        const strokeColor = isUp ? '#10b981' : '#f43f5e';
+        const path = isUp ? upSparkline : downSparkline;
+
+        let rsColor = 'bg-emerald-600 text-white';
+        if (s.rs < 70) rsColor = 'bg-amber-600 text-white';
+        if (s.rs < 50) rsColor = 'bg-rose-600 text-white';
+
+        const fmtMcap = s.marketCap > 10000 ? (s.marketCap / 10000000).toLocaleString('en-IN', {maximumFractionDigits:0}) : s.marketCap.toLocaleString('en-IN');
+        const fmtVol = s.volume >= 1000000 ? (s.volume / 1000000).toFixed(1) + 'M' : (s.volume / 1000).toFixed(0) + 'K';
+
+        return `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="p-3 text-center sticky-col-check bg-white dark:bg-cardDark"><input type="checkbox"></td>
+            <td class="p-3 sticky-col-sym bg-white dark:bg-cardDark font-mono-num font-bold text-sky-500">
+              <div class="flex items-center gap-2">
+                <span>${s.symbol}</span>
+                <a href="https://chartink.com/stocks/${s.symbol}.html" target="_blank" class="text-slate-400 hover:text-amber-500"><i data-lucide="external-link" class="w-3 h-3"></i></a>
+              </div>
+            </td>
+            <td class="p-3 text-slate-600 dark:text-slate-300 max-w-[200px] truncate" title="${s.name}">${s.name}</td>
+            <td class="p-3 font-mono-num font-bold">₹${s.close.toLocaleString('en-IN', {minimumFractionDigits:2})}</td>
+            <td class="p-3 font-mono-num"><span class="px-2 py-0.5 rounded font-bold ${badgeCls}">${changeSign}${s.change.toFixed(2)}%</span></td>
+            <td class="p-3 font-mono-num text-slate-500">${fmtVol}</td>
+            <td class="p-3 font-mono-num font-bold">${fmtMcap}</td>
+            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-black text-[11px] font-mono-num ${rsColor}">${s.rs}</span></td>
+            <td class="p-3 text-center">
+              <svg class="w-16 h-5 inline-block" viewBox="0 0 70 22" fill="none">
+                <path d="${path}" stroke="${strokeColor}" stroke-width="2"></path>
+              </svg>
+            </td>
+            <td class="p-3 text-center text-slate-400 hover:text-white cursor-pointer"><i data-lucide="eye" class="w-3.5 h-3.5"></i></td>
+          </tr>
+        `;
+      }).join('');
+
+      renderPagination();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderPagination() {
+      const container = document.getElementById('pagination-pages');
+      const totalPages = Math.ceil(filteredStocks.length / pageSize) || 1;
+      let html = '';
+
+      for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+        html += `<button onclick="goToPage(${i})" class="w-7 h-7 rounded border border-slate-200 dark:border-borderDark ${i === currentPage ? 'bg-emerald-500 text-white border-emerald-500' : 'hover:bg-slate-200 dark:hover:bg-slate-800'}">${i}</button>`;
+      }
+      if (totalPages > 5) {
+        html += `<span class="px-1 text-slate-400">...</span><button onclick="goToPage(${totalPages})" class="w-7 h-7 rounded border border-slate-200 dark:border-borderDark hover:bg-slate-200 dark:hover:bg-slate-800">${totalPages}</button>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function goToPage(p) { currentPage = p; renderTable(); }
+    function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
+    function nextPage() { if (currentPage < Math.ceil(filteredStocks.length / pageSize)) { currentPage++; renderTable(); } }
+
+    function handleSearch(val) { applyAllFilters(); }
+
+    function handleSort(type) {
+      if (type === 'mcap') filteredStocks.sort((a,b) => b.marketCap - a.marketCap);
+      if (type === 'change') filteredStocks.sort((a,b) => b.change - a.change);
+      if (type === 'price') filteredStocks.sort((a,b) => b.close - a.close);
+      if (type === 'rs') filteredStocks.sort((a,b) => b.rs - a.rs);
+      if (type === 'vol') filteredStocks.sort((a,b) => b.volume - a.volume);
+      renderTable();
+    }
+
+    function filterSegment(btn, seg) {
+      document.querySelectorAll('.seg-btn').forEach(b => b.className = "seg-btn px-3 py-1 rounded-md text-xs font-bold bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark text-slate-500 hover:text-slate-800 dark:hover:text-white");
+      btn.className = "seg-btn active px-3 py-1 rounded-md text-xs font-bold bg-emerald-500 text-white shadow-sm";
+
+      if (seg === 'ALL') {
+        document.getElementById('f-cap').value = 'ALL';
+      } else if (seg === 'Mid Cap' || seg === 'Small Cap') {
+        document.getElementById('f-cap').value = seg;
+      }
+      applyAllFilters();
+    }
+
+    function resetAllFilters() {
+      document.getElementById('global-search-input').value = '';
+      document.getElementById('f-sector').value = 'ALL';
+      document.getElementById('f-industry').value = 'ALL';
+      document.getElementById('f-cap').value = 'ALL';
+      document.getElementById('f-min-price').value = '10';
+      document.getElementById('f-max-price').value = '5000';
+      document.getElementById('f-vol').value = '0';
+      document.getElementById('f-rsi').value = 'ALL';
+      document.getElementById('f-ema').value = 'ALL';
+      document.getElementById('f-52wh').value = 'ALL';
+      applyAllFilters();
+    }
+
+    function copySymbols() {
+      if (filteredStocks.length === 0) return;
+      const text = filteredStocks.map(s => s.symbol).join(', ');
+      navigator.clipboard.writeText(text);
+      alert(`Copied ${filteredStocks.length} symbols to clipboard!`);
+    }
+
+    function cleanNum(val) {
+      if (val === "" || val === null || val === undefined) return 0;
+      if (typeof val === "number") return val;
+      const num = parseFloat(String(val).replace(/[%,\s₹]/g, ""));
+      return isNaN(num) ? 0 : num;
+    }
+  </script>
+</body>
+</html>
