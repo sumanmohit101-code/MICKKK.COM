@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Stock &amp; RS Terminal — Mickkk.com</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%230b1329'/%3E%3Cpath%20d='M20%2082V22L50%2052L80%2022V82'%20fill='none'%20stroke='%23fff'%20stroke-width='15'%20stroke-linejoin='round'/%3E%3Cpath%20d='M24%2080L78%2026'%20stroke='%2300f5a0'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Cpath%20d='M92%208L84%2036L64%2016Z'%20fill='%2300f5a0'/%3E%3C/svg%3E">
+
+  <!-- Instant theme (no flash). Same logic/key as the Market Data page -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (t === "dark" || (!t && prefersDark) || t === null) document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&family=Montserrat:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="./mickkk-shell.css">
+  <link rel="stylesheet" href="./screener.css">
+</head>
+<body>
+
+  <!-- Shared Mickkk SVG icon -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
+      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
+      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
+      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
+      <symbol id="mick-icon" viewBox="0 0 100 100">
+        <g clip-path="url(#mkClip)">
+          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
+          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
+          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
+        </g>
+        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
+        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
+        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
+        <g class="mk-glow">
+          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
+          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Loading State -->
+  <div id="loader">
+    <div class="spinner"></div>
+    <p style="margin-top: 10px; font-weight: 600; color: var(--c-slate); font-size: 11px;" id="loader-msg">Loading Stock Terminal Universe...</p>
+  </div>
+
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <aside id="sidebar" class="mk-sidebar">
+    <button id="collapseBtn" onclick="toggleSidebar()" aria-label="Toggle Sidebar" class="collapse-float-btn"><i data-lucide="chevron-left"></i></button>
+
+    <div class="mk-sb-top">
+      <a href="index.html" title="Mickkk.com Home" class="mk-logo brand-container">
+        <svg viewBox="0 0 100 100" class="mk-logo-icon"><use href="#mick-icon"/></svg>
+        <div class="brand-text">
+          <div class="mk-line"><span class="mk-word">Mickkk</span><span class="mk-dot"></span><span class="mk-com">com</span></div>
+          <div class="mk-tagrow"><i></i><span class="mk-tag">Trade Smarter</span><i></i></div>
+        </div>
+      </a>
+
+      <div class="mk-divider"></div>
+
+      <nav class="mk-nav">
+        <a href="overview.html" data-title="Market Overview" class="nav-item">
+          <i data-lucide="layout-dashboard" class=""></i> <span class="nav-text">Market Overview</span>
+        </a>
+        <a href="breadth.html" data-title="Market Breadth" class="nav-item">
+          <i data-lucide="activity" class="ic-green"></i> <span class="nav-text">Market Breadth</span>
+        </a>
+        <a href="market-data.html" data-title="Market Data" class="nav-item">
+          <i data-lucide="database" class="ic-green"></i> <span class="nav-text">Market Data</span>
+        </a>
+        <a href="screener.html" data-title="Stock Screener" class="nav-item active" aria-current="page">
+          <i data-lucide="scan" class=""></i> <span class="nav-text">Stock Screener</span>
+        </a>
+        <a href="#" data-title="Index Terminal" class="nav-item">
+          <i data-lucide="layers" class=""></i> <span class="nav-text">Index Terminal</span>
+        </a>
+        <a href="#" data-title="Sector & Industry" class="nav-item">
+          <i data-lucide="pie-chart" class=""></i> <span class="nav-text">Sector & Industry</span>
+        </a>
+        <a href="#" data-title="Charts" class="nav-item">
+          <i data-lucide="candlestick-chart" class=""></i> <span class="nav-text">Charts</span>
+        </a>
+        <a href="journal.html" data-title="Trading Journal" class="nav-item">
+          <i data-lucide="book-open" class=""></i> <span class="nav-text">Trading Journal</span>
+        </a>
+        <a href="guide.html" data-title="Terminal Guide" class="nav-item">
+          <i data-lucide="help-circle" class="ic-blue"></i> <span class="nav-text">Journal Guide</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom user bar: login + theme -->
+    <div>
+      <div class="sidebar-bottom-expanded mk-userbar">
+        <div class="mk-usercard">
+          <div class="mk-user-left">
+            <div class="mk-avatar guest" id="sideUserAvatar">G<span class="dot"></span></div>
+            <div style="min-width:0">
+              <div class="mk-uname" id="sideUserName">Guest</div>
+              <div class="mk-uplan">
+                <span id="sidePlanBadge" class="mk-badge">Not logged in</span>
+                <button onclick="openProModal()" id="sideUpgradeLink" class="mk-link">Upgrade</button>
+              </div>
+            </div>
+          </div>
+          <div class="mk-icons">
+            <button onclick="toggleTheme()" class="mk-iconbtn" title="Toggle Theme" aria-label="Toggle Theme">
+              <i data-lucide="sun" id="sunIconSide"></i><i data-lucide="moon" id="moonIconSide" style="display:none"></i>
+            </button>
+            <button data-auth="out" onclick="openLoginModal()" class="mk-iconbtn" title="Login" aria-label="Login"><i data-lucide="log-in"></i></button>
+            <button data-auth="in" onclick="logoutUser()" class="mk-iconbtn danger" title="Logout" aria-label="Logout" style="display:none"><i data-lucide="log-out"></i></button>
+          </div>
+        </div>
+        <div class="mk-ver">v1.0.42</div>
+      </div>
+
+      <!-- Collapsed capsule -->
+      <div class="sidebar-bottom-collapsed">
+        <div id="sideCollapsedUserWrap" data-title="Guest • Login" style="position:relative;cursor:pointer" onclick="openProModal()">
+          <div id="sideUserAvatarMini" class="mk-avatar guest">G<span class="dot"></span></div>
+        </div>
+        <button onclick="toggleTheme()" class="mk-iconbtn" title="Toggle Theme" aria-label="Toggle Theme">
+          <i data-lucide="sun" id="sunIconMini"></i><i data-lucide="moon" id="moonIconMini" style="display:none"></i>
+        </button>
+        <button data-auth="out" onclick="openLoginModal()" class="mk-iconbtn" title="Login" aria-label="Login"><i data-lucide="log-in"></i></button>
+        <button data-auth="in" onclick="logoutUser()" class="mk-iconbtn danger" title="Logout" aria-label="Logout" style="display:none"><i data-lucide="log-out"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <div id="mainContent" class="mk-main">
+    <main class="mk-content">
+  <div class="container">
+
+    <!-- ============ TOP HEADER BAR (Mickkk shell style) ============ -->
+    <div class="mk-topbar">
+      <div class="mk-topbar-left">
+        <div class="mk-topbar-icon"><i data-lucide="scan"></i></div>
+        <div>
+          <h1 id="main-view-title">⚙️ Stock Master Screener</h1>
+          <p id="main-view-subtitle">NSE Stock Universe — Complete Technical, Fundamental, Shareholding & Valuation Matrix</p>
+        </div>
+      </div>
+      <div class="mk-topbar-right">
+        <div class="mk-chip"><i data-lucide="calendar"></i><span id="headerDateDisplay">--</span></div>
+        <span class="last-updated-badge" id="last-updated-time"><i data-lucide="clock" style="width:11px;height:11px;"></i> Syncing...</span>
+        <div class="auto-refresh-wrap">
+            <span>🔄 Auto-Refresh:</span>
+            <select id="auto-refresh-interval" class="auto-refresh-select" onchange="setupAutoRefreshTimer()">
+              <option value="0">OFF</option>
+              <option value="60">1 Min</option>
+              <option value="300" selected>5 Mins</option>
+              <option value="900">15 Mins</option>
+            </select>
+            <span id="timer-badge" style="color: var(--accent-cyan); font-family: 'JetBrains Mono';"></span>
+          </div>
+        <button class="btn-refresh-left" onclick="triggerActiveViewRefresh()"><i data-lucide="refresh-cw" style="width:11px;height:11px;"></i> Refresh Data</button>
+      </div>
+    </div>
+
+    <!-- Page view tabs (unchanged) -->
+    <div class="mk-tabs-row">
+    <div class="view-switch-btn-group">
+        <button class="page-tab-btn active" id="tab-master" onclick="switchAppView('master')">
+          <i data-lucide="layout-grid" style="width:13px;height:13px;"></i> Master
+        </button>
+
+        <button class="page-tab-btn" id="tab-relative" onclick="switchAppView('relative')">
+          <i data-lucide="activity" style="width:13px;height:13px;"></i> Relative Returns
+        </button>
+
+        <button class="page-tab-btn" id="tab-ranking" onclick="switchAppView('ranking')">
+          <i data-lucide="grid" style="width:13px;height:13px;"></i> RS Ranking Matrix
+        </button>
+
+        <button class="page-tab-btn" id="tab-gainers" onclick="switchAppView('gainers')">
+          <i data-lucide="trending-up" style="width:13px;height:13px;"></i> RS Gainers & Trend
+        </button>
+
+        <button class="page-tab-btn" id="tab-early" onclick="switchAppView('early')">
+          <i data-lucide="rocket" style="width:13px;height:13px;"></i> Early Trend
+        </button>
+
+        <button class="page-tab-btn" id="tab-history" onclick="switchAppView('history')">
+         <i data-lucide="history" style="width:13px;height:13px;"></i> RS History
+         </button>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: MASTER SCREENER VIEW (100+ Columns)                               -->
+    <!-- ========================================================================= -->
+    <div id="view-master" class="app-view-container">
+
+      <!-- Control Panel Card -->
+      <div class="control-panel-card">
+        
+        <!-- Primary Filters Row -->
+        <div class="primary-filter-row">
+          <div class="search-wrap">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="search-input" class="search-input" placeholder="Search Stock / Symbol (e.g. RELIANCE, TCS)..." oninput="applyAllFilters()">
+          </div>
+
+          <select id="sector-select" class="filter-select" onchange="populateIndustriesDropdown(); applyAllFilters();">
+            <option value="ALL">All Sectors</option>
+          </select>
+
+          <select id="industry-select" class="filter-select" onchange="applyAllFilters()">
+            <option value="ALL">All Industries</option>
+          </select>
+
+          <select id="marketcap-select" class="filter-select" onchange="applyAllFilters()">
+            <option value="ALL">All Market Caps</option>
+            <option value="Large Cap">Large Cap</option>
+            <option value="Mid Cap">Mid Cap</option>
+            <option value="Small Cap">Small Cap</option>
+            <option value="Micro Cap">Micro Cap</option>
+          </select>
+
+          <div class="action-btn-group">
+            <button class="btn-tool btn-tool-accent" onclick="openColumnModal()"><i data-lucide="columns"></i> Columns</button>
+            <button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
+            <button class="btn-tool btn-tool-danger" onclick="clearAllFilterChips()"><i data-lucide="x"></i> Clear</button>
+            <button class="btn-tool" onclick="copyTableData()"><i data-lucide="copy"></i> Copy</button>
+            <button class="btn-tool btn-tool-success" onclick="exportToCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+          </div>
+        </div>
+
+        <!-- VIEW MATRIX Tab Selection -->
+        <div class="view-matrix-row">
+          <span class="view-matrix-label">VIEW MATRIX:</span>
+          <button class="matrix-btn active" onclick="switchMatrixView(this, 'all')">
+            <i data-lucide="layout-grid"></i> All 102 Columns
+          </button>
+          <button class="matrix-btn" onclick="switchMatrixView(this, 'technicals')">
+            <i data-lucide="trending-up"></i> Technicals & Returns
+          </button>
+          <button class="matrix-btn" onclick="switchMatrixView(this, 'valuation')">
+            <i data-lucide="pie-chart"></i> Valuation & Ratios
+          </button>
+          <button class="matrix-btn" onclick="switchMatrixView(this, 'sales_profit')">
+            <i data-lucide="banknote"></i> Sales & Net Profits
+          </button>
+          <button class="matrix-btn" onclick="switchMatrixView(this, 'shareholding')">
+            <i data-lucide="users"></i> FII / DII / Promoters
+          </button>
+        </div>
+
+        <!-- Parameters Row -->
+        <div class="parameters-row">
+          <span class="param-label"><i data-lucide="sliders"></i> Parameters:</span>
+
+          <div class="param-box">
+            <span>🎯 Pullback <=</span>
+            <input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()">
+            <span>%</span>
+          </div>
+
+          <div class="param-box">
+            <span>Away 52WH >=</span>
+            <input type="number" id="param-away-52wh" class="param-input" value="-20" step="5" onchange="applyAllFilters()">
+            <span>%</span>
+          </div>
+
+          <div class="param-box">
+            <span>💰 Turnover >=</span>
+            <input type="number" id="param-turnover" class="param-input" value="0" step="5" onchange="applyAllFilters()">
+            <span>Cr</span>
+          </div>
+
+          <div class="param-box">
+            <span>📈 RSI >=</span>
+            <input type="number" id="param-rsi" class="param-input" value="60" step="5" onchange="applyAllFilters()">
+          </div>
+
+          <div class="param-box">
+            <span>🔥 ROCE >=</span>
+            <input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()">
+            <span>%</span>
+          </div>
+
+          <div class="param-box">
+            <span>💰 EPS ></span>
+            <input type="number" id="param-eps" class="param-input" value="0" step="5" onchange="applyAllFilters()">
+          </div>
+
+          <div class="param-box">
+            <span>💧 Current Ratio <</span>
+            <input type="number" id="param-cr-less" class="param-input" value="3.0" step="0.5" onchange="applyAllFilters()">
+          </div>
+
+          <div class="param-box">
+            <span>🏷️ P/B <</span>
+            <input type="number" id="param-pb-less" class="param-input" value="5.0" step="0.5" onchange="applyAllFilters()">
+          </div>
+
+          <div class="param-box">
+            <span>⚖️ Debt/Eq <=</span>
+            <input type="number" id="param-de" class="param-input" value="1.0" step="0.1" onchange="applyAllFilters()">
+          </div>
+
+          <div class="param-box">
+            <span>📊 Max P/E <=</span>
+            <input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()">
+          </div>
+        </div>
+
+        <!-- Filter Groups -->
+        <div class="filter-group-wrap">
+          <div class="filter-group-row" id="chartinkScannersRow">
+            <span class="filter-group-title scanner-title-glow"><i data-lucide="sparkles" style="width:11px;height:11px;display:inline-block;"></i> PATTERNS & SCANNERS</span>
+            <span style="font-size: 10px; color:var(--c-slate);" id="scannerLoaderText">Loading live scanners from 2nd sheet...</span>
+          </div>
+
+          <div class="filter-group-row">
+            <span class="filter-group-title tech-title"><i data-lucide="line-chart" style="width:10px;height:10px;display:inline-block;"></i> Technical</span>
+            <span class="chip" onclick="toggleChip(this, 'rsi60')">⚡ RSI > 60</span>
+            <span class="chip" onclick="toggleChip(this, 'rsi70')">⚡ RSI > 70</span>
+            <span class="chip" onclick="toggleChip(this, 'near52wh')">🎯 Near 52W High</span>
+            <span class="chip" onclick="toggleChip(this, 'closeEma10')">📈 Close > EMA 10</span>
+            <span class="chip" onclick="toggleChip(this, 'closeEma20')">📈 Close > EMA 20</span>
+            <span class="chip" onclick="toggleChip(this, 'closeEma50')">📈 Close > EMA 50</span>
+            <span class="chip" onclick="toggleChip(this, 'closeEma200')">📈 Close > EMA 200</span>
+            <span class="chip" onclick="toggleChip(this, 'pullback10ema')">🎯 Pullback 10 EMA</span>
+            <span class="chip" onclick="toggleChip(this, 'pullback20ema')">🎯 Pullback 20 EMA</span>
+            <span class="chip" onclick="toggleChip(this, 'closeVwap')">📊 Close > VWAP</span>
+            <span class="chip" onclick="toggleChip(this, 'near15D')">⏱️ Near 15D High</span>
+            <span class="chip" onclick="toggleChip(this, 'nearWeek')">⏱️ Near 1W High</span>
+            <span class="chip" onclick="toggleChip(this, 'nearMonth')">⏱️ Near 1M High</span>
+            <span class="chip" onclick="toggleChip(this, 'nearQuarter')">⏱️ Near 1Q High</span>
+            <span class="chip" onclick="toggleChip(this, 'nearYear')">⏱️ Near 1Y High</span>
+          </div>
+
+          <div class="filter-group-row">
+            <span class="filter-group-title fund-title"><i data-lucide="shield-check" style="width:10px;height:10px;display:inline-block;"></i> Fundamental</span>
+            <span class="chip" onclick="toggleChip(this, 'roceFilter')">🔥 High ROCE</span>
+            <span class="chip" onclick="toggleChip(this, 'epsFilter')">💰 EPS > X</span>
+            <span class="chip" onclick="toggleChip(this, 'currentRatioLess')">💧 Current Ratio < X</span>
+            <span class="chip" onclick="toggleChip(this, 'pbFilter')">🏷️ P/B < X</span>
+            <span class="chip" onclick="toggleChip(this, 'lowDebt')">🛡️ Low Debt</span>
+            <span class="chip" onclick="toggleChip(this, 'peFilter')">🏷️ P/E <= Max</span>
+            <span class="chip" onclick="toggleChip(this, 'undervaluedBV')">💎 Book Value > CMP</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Summary Bar -->
+      <div class="summary-strip">
+        <div>Universe: <b>NSE Capital Markets (Master Matrix)</b></div>
+        <div>Showing <span class="count-highlight" id="shown-count">0</span> of <span class="count-highlight" id="total-count">0</span> Stocks</div>
+      </div>
+
+      <!-- Master Table Card -->
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table id="master-table">
+            <thead><tr id="master-table-headers"></tr></thead>
+            <tbody id="master-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: RELATIVE RETURNS MODULE (POINT 3: 3 BENCHMARK TILES)              -->
+    <!-- ========================================================================= -->
+    <div id="view-relative-returns" class="app-view-container" style="display: none;">
+      
+      <!-- 3 Columns Interactive Benchmark Tiles (CNX SmallCap Default) -->
+<div class="benchmark-tiles-grid">
+  <div class="bench-tile" id="tile-n500" onclick="selectRelativeBenchmark('Relative Returns (N500)', 'NIFTY 500')">
+    <div class="bench-tile-left">
+      <div class="bench-tile-name">📊 NIFTY 500</div>
+      <div class="bench-tile-sub">Broad Market Alpha (500 Stocks)</div>
+    </div>
+    <span class="bench-badge-tag" style="display:none;">ACTIVE BENCHMARK</span>
+  </div>
+
+  <div class="bench-tile active" id="tile-cnxsmall" onclick="selectRelativeBenchmark('Relative Returns (CNX SMALLCAP)', 'CNX SMALLCAP')">
+    <div class="bench-tile-left">
+      <div class="bench-tile-name">🚀 CNX SMALLCAP</div>
+      <div class="bench-tile-sub">SmallCap Outperformance Alpha</div>
+    </div>
+    <span class="bench-badge-tag">ACTIVE BENCHMARK</span>
+  </div>
+
+        <div class="bench-tile" id="tile-midsmall" onclick="selectRelativeBenchmark('Relative Returns (MIDSMALL 400)', 'MIDSMALL 400')">
+          <div class="bench-tile-left">
+            <div class="bench-tile-name">⚡ MIDSMALL 400</div>
+            <div class="bench-tile-sub">Mid & SmallCap Combined Alpha</div>
+          </div>
+          <span class="bench-badge-tag" style="display:none;">ACTIVE</span>
+        </div>
+      </div>
+
+      <!-- Live Benchmark Performance Strip -->
+      <div class="benchmark-strip" id="benchmarkStatsBanner">
+        <div class="benchmark-title-sub">
+          <i data-lucide="trending-up" style="width:13px;height:13px;"></i>
+          <span id="benchDisplayName">NIFTY 500</span> BENCHMARK INDEX RETURNS
+        </div>
+        <div class="bench-grid">
+          <div class="bench-box"><span class="bench-lbl">Daily %</span><span class="bench-val" id="bm-d">-</span></div>
+          <div class="bench-box"><span class="bench-lbl">Weekly %</span><span class="bench-val" id="bm-w">-</span></div>
+          <div class="bench-box"><span class="bench-lbl">15 Days %</span><span class="bench-val" id="bm-15d">-</span></div>
+          <div class="bench-box"><span class="bench-lbl">1 Month %</span><span class="bench-val" id="bm-m">-</span></div>
+          <div class="bench-box"><span class="bench-lbl">Quarterly %</span><span class="bench-val" id="bm-q">-</span></div>
+          <div class="bench-box"><span class="bench-lbl">Half Yearly %</span><span class="bench-val" id="bm-h">-</span></div>
+          <div class="bench-box"><span class="bench-lbl">Yearly %</span><span class="bench-val" id="bm-y">-</span></div>
+        </div>
+      </div>
+
+      <!-- Relative Returns Filter Bar -->
+      <div class="control-panel-card" style="padding: 10px 14px; margin-bottom: 8px;">
+        <div style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr auto; gap: 8px; align-items: center; margin-bottom: 8px;">
+          <div class="search-wrap">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="relative-search-input" class="search-input" placeholder="Search Company / Symbol..." oninput="filterRelativeReturnsTable()">
+          </div>
+
+          <select id="relative-sector-select" class="filter-select" onchange="filterRelativeReturnsTable()">
+            <option value="ALL">All Sectors</option>
+          </select>
+
+          <select id="relative-industry-select" class="filter-select" onchange="filterRelativeReturnsTable()">
+            <option value="ALL">All Industries</option>
+          </select>
+
+          <div class="action-btn-group">
+            <button class="btn-tool" onclick="resetRelativeFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
+            <button class="btn-tool" onclick="copyRelativeSymbols()"><i data-lucide="copy"></i> Copy</button>
+            <button class="btn-tool btn-tool-success" onclick="exportRelativeCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+          </div>
+        </div>
+
+        <!-- Outperformance Multi-Select Chips -->
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--s2);">
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--c-slate);">Beat Benchmark:</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatD')">⚡ Daily (&gt;0%)</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatW')">📈 Weekly (&gt;0%)</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beat15D')">🚀 15-Day (&gt;0%)</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatM')">💎 1-Month (&gt;0%)</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatQ')">🔥 Quarterly (&gt;0%)</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatY')">☀️ Yearly (&gt;0%)</span>
+        </div>
+      </div>
+
+      <!-- Relative Summary Strip -->
+      <div class="summary-strip">
+        <div>Relative Baseline: <b id="relativeCurrentTabName" style="color:var(--accent-cyan);">Relative Returns (N500)</b></div>
+        <div>Showing <span class="count-highlight" id="rel-shown-count">0</span> of <span class="count-highlight" id="rel-total-count">0</span> Stocks</div>
+      </div>
+
+      <!-- Relative Table Card -->
+      <div class="table-card">
+        <div class="table-wrapper" style="max-height: calc(100vh - 350px);">
+          <table>
+            <thead>
+              <tr>
+                <th class="sticky-col" onclick="sortRelativeTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
+                <th class="sticky-sec" onclick="sortRelativeTable('Sector')">SECTOR / INDUSTRY ⇅</th>
+                <th onclick="sortRelativeTable('Daily Relative % Change')">1D REL % ⇅</th>
+                <th onclick="sortRelativeTable('Weekly Relative % Change')">1W REL % ⇅</th>
+                <th onclick="sortRelativeTable('15 Days Relative % Change')">15D REL % ⇅</th>
+                <th onclick="sortRelativeTable('1 Month Relative % Change')">1M REL % ⇅</th>
+                <th onclick="sortRelativeTable('Quarterly Relative % Change')">Q REL % ⇅</th>
+                <th onclick="sortRelativeTable('Half Yearly Relative % Change')">HY REL % ⇅</th>
+                <th onclick="sortRelativeTable('Yearly Relative % Change')">1Y REL % ⇅</th>
+              </tr>
+            </thead>
+            <tbody id="relative-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: RS RANKING MATRIX (EXACT FULL CONTAINER)                          -->
+    <!-- ========================================================================= -->
+    <div id="view-ranking" class="app-view-container" style="display: none;">
+      
+      <!-- 6 Top 10 Leader Cards (Sequence: Overall -> T1 -> T2 -> T3 -> T4 -> T5) -->
+      <div class="rs-leaders-grid" id="rsLeadersCardsGrid">
+        <div class="rs-leader-card">
+          <div class="rs-leader-title" style="color:var(--c-amber);"><i data-lucide="crown" style="width:12px;height:12px;"></i> OVERALL RS (TOP 10)</div>
+          <div class="rs-leader-content" id="lead-overall">Loading...</div>
+        </div>
+        <div class="rs-leader-card">
+          <div class="rs-leader-title" style="color:#f97316;"><i data-lucide="flame" style="width:12px;height:12px;"></i> T1: SELF NT (TOP 10)</div>
+          <div class="rs-leader-content" id="lead-snt">Loading...</div>
+        </div>
+        <div class="rs-leader-card">
+          <div class="rs-leader-title" style="color:#a855f7;"><i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i> T2: SELF DEF (TOP 10)</div>
+          <div class="rs-leader-content" id="lead-sdef">Loading...</div>
+        </div>
+        <div class="rs-leader-card">
+          <div class="rs-leader-title" style="color:#ec4899;"><i data-lucide="rocket" style="width:12px;height:12px;"></i> T3: REL NT (TOP 10)</div>
+          <div class="rs-leader-content" id="lead-rnt">Loading...</div>
+        </div>
+        <div class="rs-leader-card">
+          <div class="rs-leader-title" style="color:var(--accent-cyan);"><i data-lucide="gem" style="width:12px;height:12px;"></i> T4: REL DEF (TOP 10)</div>
+          <div class="rs-leader-content" id="lead-rdef">Loading...</div>
+        </div>
+        <div class="rs-leader-card">
+          <div class="rs-leader-title" style="color:var(--c-sky);"><i data-lucide="zap" style="width:12px;height:12px;"></i> T5: SHORT TERM (TOP 10)</div>
+          <div class="rs-leader-content" id="lead-st">Loading...</div>
+        </div>
+      </div>
+
+      <!-- RS Ranking Filter Bar + Formula Config Button -->
+      <div class="control-panel-card" style="padding: 10px 14px; margin-bottom: 8px;">
+        <div style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr auto; gap: 8px; align-items: center; margin-bottom: 8px;">
+          <div class="search-wrap">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="ranking-search-input" class="search-input" placeholder="Search Company / Symbol..." oninput="filterRSRankingTable()">
+          </div>
+
+          <select id="ranking-sector-select" class="filter-select" onchange="filterRSRankingTable()">
+            <option value="ALL">All Sectors</option>
+          </select>
+
+          <select id="ranking-industry-select" class="filter-select" onchange="filterRSRankingTable()">
+            <option value="ALL">All Industries</option>
+          </select>
+
+          <div class="action-btn-group">
+            <button class="btn-tool btn-tool-accent" onclick="openRSWeightModal()"><i data-lucide="sliders"></i> RS Weights Config</button>
+            <button class="btn-tool" onclick="resetRankingFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
+            <button class="btn-tool" onclick="copyRankingSymbols()"><i data-lucide="copy"></i> Copy</button>
+            <button class="btn-tool btn-tool-success" onclick="exportRankingCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+          </div>
+        </div>
+
+        <!-- RS Top Filter Chips -->
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--s2);">
+          <span style="font-size: 10px; font-weight: 700; color: var(--c-slate);">RS Top Filters:</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'overall50')">🏆 Overall Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'overall100')">💎 Overall Top 100</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'st50')">⚡ Short-Term Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'snt50')">🔥 Self NT Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'sdef50')">📦 Self Def Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'rnt50')">🚀 Rel NT Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'rdef50')">☀️ Rel Def Top 50</span>
+        </div>
+      </div>
+
+      <!-- Ranking Summary Strip -->
+      <div class="summary-strip">
+        <div>Relative Strength Benchmark: <b style="color:var(--accent-cyan);">CNX SMALLCAP</b> (5 Models Weighted Ensemble)</div>
+        <div>Showing <span class="count-highlight" id="rank-shown-count">0</span> of <span class="count-highlight" id="rank-total-count">0</span> Stocks</div>
+      </div>
+
+      <!-- RS Ranking Table Card (T1-T5 Sequence) -->
+      <div class="table-card">
+        <div class="table-wrapper" style="max-height: calc(100vh - 340px);">
+          <table>
+            <thead>
+              <tr>
+                <th class="sticky-col" onclick="sortRankingTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
+                <th class="sticky-sec" onclick="sortRankingTable('Sector')">SECTOR / INDUSTRY ⇅</th>
+                <th onclick="sortRankingTable('OVERALL_RANK')" style="color:var(--accent-cyan); background:var(--s2);">OVERALL RS RANK ⇅</th>
+                <th onclick="sortRankingTable('AVG_RANK')" style="color:var(--c-amber);">AVG RANK (5) ⇅</th>
+                <th onclick="sortRankingTable('SELF_NT_SCORE')">T1: SELF NT SCORE ⇅</th>
+                <th onclick="sortRankingTable('SELF_NT_RANK')">T1 RANK ⇅</th>
+                <th onclick="sortRankingTable('SELF_DEF_SCORE')">T2: SELF DEF SCORE ⇅</th>
+                <th onclick="sortRankingTable('SELF_DEF_RANK')">T2 RANK ⇅</th>
+                <th onclick="sortRankingTable('REL_NT_SCORE')">T3: REL NT SCORE ⇅</th>
+                <th onclick="sortRankingTable('REL_NT_RANK')">T3 RANK ⇅</th>
+                <th onclick="sortRankingTable('REL_DEF_SCORE')">T4: REL DEF SCORE ⇅</th>
+                <th onclick="sortRankingTable('REL_DEF_RANK')">T4 RANK ⇅</th>
+                <th onclick="sortRankingTable('ST_SCORE')">T5: SHORT TERM SCORE ⇅</th>
+                <th onclick="sortRankingTable('ST_RANK')">T5 RANK ⇅</th>
+              </tr>
+            </thead>
+            <tbody id="ranking-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: 📈 RS GAINERS & TREND (POINT 5)                                   -->
+    <!-- ========================================================================= -->
+    <div id="view-gainers" class="app-view-container" style="display: none;">
+      <div class="control-panel-card" style="margin-bottom: 8px;">
+        <h2 style="color: var(--text-strong); font-size: 14px; margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+          📈 Top 100 Short-Term RS Gainers & Momentum Leaders
+        </h2>
+        <p style="color: var(--text-muted); font-size: 10.5px;">Tracks daily rank jumps, short-term momentum acceleration and leadership velocity.</p>
+      </div>
+
+      <div class="table-card">
+        <div class="table-wrapper" style="max-height: calc(100vh - 250px);">
+          <table>
+          <thead>
+            <tr>
+              <th class="sticky-col" onclick="sortGainersTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
+              <th class="sticky-sec" onclick="sortGainersTable('SECTOR')">SECTOR / INDUSTRY ⇅</th>
+              <th onclick="sortGainersTable('PREV_RANK')">PREV ST RANK ⇅</th>
+              <th onclick="sortGainersTable('CURRENT_RANK')">CURRENT ST RANK ⇅</th>
+              <th onclick="sortGainersTable('JUMP')" style="color:#10b981;">RANK JUMP (🔼) ⇅</th>
+              <th onclick="sortGainersTable('RATING')">ST RS RATING ⇅</th>
+              <th onclick="sortGainersTable('OVERALL_RANK')">OVERALL RS RANK ⇅</th>
+            </tr>
+          </thead>
+          <tbody id="gainers-table-body"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+<!-- VIEW 5: 🚀 EARLY TREND BREAKOUTS (COLORFUL & INTERACTIVE)                 -->
+<!-- ========================================================================= -->
+<div id="view-early" class="app-view-container" style="display: none;">
+  
+  <!-- Filter & Control Card -->
+  <div class="control-panel-card" style="padding: 10px 14px; margin-bottom: 8px;">
+    <div style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr auto; gap: 8px; align-items: center; margin-bottom: 8px;">
+      <div class="search-wrap">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="early-search-input" class="search-input" placeholder="Search Symbol / Company..." oninput="filterEarlyTrendTable()">
+      </div>
+
+      <select id="early-sector-select" class="filter-select" onchange="filterEarlyTrendTable()">
+        <option value="ALL">All Sectors</option>
+      </select>
+
+      <select id="early-stage-select" class="filter-select" onchange="filterEarlyTrendTable()">
+        <option value="ALL">All Stages</option>
+        <option value="Stage 2">Stage 2 - Advancing</option>
+        <option value="Stage 1">Stage 1 - Basing</option>
+        <option value="Stage 3">Stage 3 - Topping</option>
+        <option value="Stage 4">Stage 4 - Declining</option>
+      </select>
+
+      <div class="action-btn-group">
+        <button class="btn-tool" onclick="resetEarlyFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
+        <button class="btn-tool" onclick="copyEarlySymbols()"><i data-lucide="copy"></i> Copy</button>
+        <button class="btn-tool btn-tool-success" onclick="exportEarlyCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+      </div>
+    </div>
+
+    <!-- Quick Signal Filter Chips -->
+    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--s2);">
+      <span style="font-size: 10px; font-weight: 700; color: var(--c-slate);">Early Signals:</span>
+      <span class="chip" onclick="toggleEarlySignalChip(this, 'stage2')">🚀 Early Stage 2 Breakout</span>
+      <span class="chip" onclick="toggleEarlySignalChip(this, 'stage1')">🌱 Stage 1 Base Turnaround</span>
+      <span class="chip" onclick="toggleEarlySignalChip(this, 'fresh')">⚡ Fresh Uptrend Ignition</span>
+    </div>
+  </div>
+
+  <!-- Summary Strip -->
+  <div class="summary-strip">
+    <div>Early RS Breakouts Matrix: <b style="color:var(--accent-cyan);">Near-Term RS Acceleration Jump Ahead of Default RS</b></div>
+    <div>Showing <span class="count-highlight" id="early-shown-count">0</span> Stocks</div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div class="table-wrapper" style="max-height: calc(100vh - 280px);">
+      <table>
+        <thead>
+          <tr>
+            <th class="sticky-col" onclick="sortEarlyTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
+            <th class="sticky-sec" onclick="sortEarlyTable('SECTOR')">SECTOR ⇅</th>
+            <th onclick="sortEarlyTable('EARLY_SIGNAL')">EARLY SIGNAL ⇅</th>
+            <th onclick="sortEarlyTable('NEAR_TERM_RANK')">NEAR-TERM RS RANK ⇅</th>
+            <th onclick="sortEarlyTable('DEFAULT_RANK')">DEFAULT RS RANK ⇅</th>
+            <th onclick="sortEarlyTable('RS_VELOCITY')" style="color:#10b981;">RS VELOCITY (🔼) ⇅</th>
+            <th onclick="sortEarlyTable('AWAY_200_EMA')">AWAY 200 EMA ⇅</th>
+            <th onclick="sortEarlyTable('OFF_52W_HIGH')">% OFF 52W HIGH ⇅</th>
+            <th onclick="sortEarlyTable('RSI')">RSI (14) ⇅</th>
+            <th onclick="sortEarlyTable('STAGE')">STAGE ⇅</th>
+          </tr>
+        </thead>
+        <tbody id="early-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+   <!-- ========================================================================= -->
+<!-- VIEW 6: 📁 RS HISTORY LOG & TRAJECTORY CHART (EXACT SCREENSHOT MATCH)     -->
+<!-- ========================================================================= -->
+<div id="view-history" class="app-view-container" style="display: none;">
+  
+  <!-- Top Trajectory Chart Card -->
+  <div class="history-chart-card">
+    <div class="chart-controls-bar">
+      
+      <!-- Left Timeframes -->
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div class="tf-pills-wrap">
+          <span style="font-size: 9.5px; font-weight: 800; color: #64748b; margin-right: 4px; text-transform: uppercase;">Timeframe:</span>
+          <button class="tf-pill" onclick="changeHistoryTF(this, 7)">1W</button>
+          <button class="tf-pill" onclick="changeHistoryTF(this, 15)">15D</button>
+          <button class="tf-pill" onclick="changeHistoryTF(this, 30)">1M</button>
+          <button class="tf-pill" onclick="changeHistoryTF(this, 90)">3M (Q)</button>
+          <button class="tf-pill" onclick="changeHistoryTF(this, 180)">6M</button>
+          <button class="tf-pill active" onclick="changeHistoryTF(this, 365)">All (1Y)</button>
+        </div>
+      </div>
+
+      <!-- Right Dropdowns: RS Model & Top Stocks Count -->
+      <div class="chart-select-group">
+        <select id="historyModelSelect" class="history-select" onchange="renderHistoryChartAndTable()">
+  <option value="Overall" selected>🏆 Overall RS Rank</option>
+  <option value="Short Term">⚡ Short Term RS Rank</option>
+  <option value="Self Near">🔥 Self RS (Near-Term)</option>
+  <option value="Self Def">📊 Self RS (Default)</option>
+  <option value="Rel Near">🚀 Relative RS (Near-Term)</option>
+  <option value="Rel Def">💎 Relative RS (Default)</option>
+</select>
+
+        <select id="historyTopCountSelect" class="history-select" onchange="renderHistoryChartAndTable()">
+          <option value="10" selected>Top 10 Stocks</option>
+          <option value="20">Top 20 Stocks</option>
+          <option value="50">Top 50 Stocks</option>
+          <option value="100">Top 100 Stocks</option>
+          <option value="300">All 300 Stocks</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="chart-title-tag">
+      <i data-lucide="trending-up" style="width:13px;height:13px;"></i>
+      <span>RANK TREND TRAJECTORY (RANK 1 = TOP LEADER)</span>
+    </div>
+
+    <!-- Dynamic Stock Legend Chips -->
+    <div class="chart-legend-bar" id="historyChartLegend"></div>
+
+    <!-- Chart Canvas -->
+    <div class="chart-wrapper-box">
+      <canvas id="rsTrajectoryCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Date-Wise Historical Heatmap Matrix Table -->
+  <div class="heatmap-table-card">
+    <div style="padding: 10px 14px; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 11px; font-weight: 800; color: var(--text-strong); display: flex; align-items: center; gap: 6px;">
+        <i data-lucide="calendar" style="width:12px;height:12px;color:var(--accent-cyan);"></i> Date-Wise Historical Heatmap Matrix
+      </span>
+      <span style="font-size: 10px; color: var(--text-muted);" id="historySnapshotCount">0 Snapshots Shown</span>
+    </div>
+    <div class="table-wrapper" style="max-height: 420px;">
+      <table>
+        <thead id="history-matrix-thead"></thead>
+        <tbody id="history-matrix-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+  <!-- ========================================================================= -->
+  <!-- ⚙️ RS WEIGHTS CONFIGURATION MODAL (POINT 1)                               -->
+  <!-- ========================================================================= -->
+  <div id="rsWeightModal">
+    <div class="rs-modal-content">
+      <div class="modal-header">
+        <h3><i data-lucide="sliders" style="color:var(--accent-cyan); width:16px; height:16px;"></i> RS Model Weight Configuration</h3>
+        <button class="btn-tool btn-tool-danger" onclick="closeRSWeightModal()"><i data-lucide="x"></i></button>
+      </div>
+      <div class="rs-weight-grid">
+        <!-- Type 1 -->
+        <div class="rs-weight-card">
+          <div class="rs-w-title"><span>TYPE 1: Self RS (Near-Term)</span><span>100%</span></div>
+          <div class="rs-w-row"><span>Weekly % Change</span><span class="rs-w-val">40.0%</span></div>
+          <div class="rs-w-row"><span>15 Days % Change</span><span class="rs-w-val">30.0%</span></div>
+          <div class="rs-w-row"><span>1 Month % Change</span><span class="rs-w-val">20.0%</span></div>
+          <div class="rs-w-row"><span>Quarterly % Change</span><span class="rs-w-val">10.0%</span></div>
+        </div>
+        <!-- Type 2 -->
+        <div class="rs-weight-card">
+          <div class="rs-w-title"><span>TYPE 2: Self RS (Default)</span><span>100%</span></div>
+          <div class="rs-w-row"><span>Weekly % Change</span><span class="rs-w-val">10.0%</span></div>
+          <div class="rs-w-row"><span>1 Month % Change</span><span class="rs-w-val">20.0%</span></div>
+          <div class="rs-w-row"><span>Quarterly % Change</span><span class="rs-w-val">25.0%</span></div>
+          <div class="rs-w-row"><span>Half Yearly % Change</span><span class="rs-w-val">25.0%</span></div>
+          <div class="rs-w-row"><span>Yearly % Change</span><span class="rs-w-val">20.0%</span></div>
+        </div>
+        <!-- Type 3 -->
+        <div class="rs-weight-card">
+          <div class="rs-w-title"><span>TYPE 3: Relative RS (Near-Term)</span><span>vs CNX SmallCap</span></div>
+          <div class="rs-w-row"><span>Weekly Relative %</span><span class="rs-w-val">40.0%</span></div>
+          <div class="rs-w-row"><span>15 Days Relative %</span><span class="rs-w-val">30.0%</span></div>
+          <div class="rs-w-row"><span>1 Month Relative %</span><span class="rs-w-val">20.0%</span></div>
+          <div class="rs-w-row"><span>Quarterly Relative %</span><span class="rs-w-val">10.0%</span></div>
+        </div>
+        <!-- Type 4 -->
+        <div class="rs-weight-card">
+          <div class="rs-w-title"><span>TYPE 4: Relative RS (Default)</span><span>vs CNX SmallCap</span></div>
+          <div class="rs-w-row"><span>Weekly Relative %</span><span class="rs-w-val">10.0%</span></div>
+          <div class="rs-w-row"><span>1 Month Relative %</span><span class="rs-w-val">20.0%</span></div>
+          <div class="rs-w-row"><span>Quarterly Relative %</span><span class="rs-w-val">25.0%</span></div>
+          <div class="rs-w-row"><span>Half Yearly Relative %</span><span class="rs-w-val">25.0%</span></div>
+          <div class="rs-w-row"><span>Yearly Relative %</span><span class="rs-w-val">20.0%</span></div>
+        </div>
+        <!-- Type 5 & Overall -->
+        <div class="rs-weight-card" style="grid-column: 1 / -1;">
+          <div class="rs-w-title"><span>TYPE 5: Short-Term RS & Overall Rank Score</span><span>Ensemble</span></div>
+          <div class="rs-w-row"><span>Type 5 (Short Term RS)</span><span class="rs-w-val">Weekly (40%) + 15D (35%) + 1M (25%) Momentum</span></div>
+          <div class="rs-w-row"><span>Overall RS Calculation</span><span class="rs-w-val">Average Rank of (Type 1 + Type 2 + Type 3 + Type 4 + Type 5) / 5</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column Selector Modal -->
+  <div id="columnModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i data-lucide="sliders-horizontal" style="color:var(--accent-cyan); width:16px; height:16px;"></i> Select Columns to Display</h3>
+        <button class="btn-tool btn-tool-danger" onclick="closeColumnModal()"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" id="columnCheckboxesList"></div>
+      <div class="modal-footer">
+        <div style="display:flex; gap:6px;">
+          <button class="btn-tool" onclick="toggleAllColumns(true)">Select All</button>
+          <button class="btn-tool" onclick="toggleAllColumns(false)">Deselect All</button>
+        </div>
+        <button class="btn-tool btn-tool-success" onclick="applyCustomColumns()"><i data-lucide="check"></i> Apply Selection</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /.container -->
+
+    </main>
+
+    <footer class="mk-footer">
+      <div class="mk-foot-brand">
+        <svg viewBox="0 0 100 100"><use href="#mick-icon"/></svg>
+        <strong>Mickkk<b>.com</b></strong>
+        <span class="mk-foot-sub">• Market Intelligence &amp; Trading Platform</span>
+      </div>
+      <div class="mk-foot-links">
+        <a href="index.html">Home</a>
+        <a href="journal.html">Trading Journal</a>
+        <a href="guide.html">Guide</a>
+        <a href="index.html#pricing">Pricing</a>
+      </div>
+      <div class="mk-foot-copy">© 2026 Mickkk.com. All rights reserved.</div>
+    </footer>
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="mk-modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="mk-modal-card">
+      <button class="mk-modal-close" onclick="closeLoginModal()" aria-label="Close"><i data-lucide="x"></i></button>
+      <div class="mk-modal-icon"><i data-lucide="user-round"></i></div>
+      <h3 id="loginTitle">Login to Mickkk</h3>
+      <p class="sub">Sign in to personalise your terminal and unlock your plan.</p>
+      <form onsubmit="return submitLogin(event)" novalidate>
+        <label class="mk-field"><span>Name (optional)</span><input id="loginName" type="text" autocomplete="name" placeholder="Your name"></label>
+        <label class="mk-field"><span>Email</span><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+        <div id="loginErr" class="mk-modal-err"></div>
+        <button type="submit" class="mk-modal-btn"><i data-lucide="log-in"></i><span>Login</span></button>
+      </form>
+      <p class="mk-modal-note">Session is saved on this device only.</p>
+    </div>
+  </div>
+
+  <!-- PRO UPGRADE MODAL -->
+  <div id="proModal" class="mk-modal" role="dialog" aria-modal="true">
+    <div class="mk-modal-card">
+      <button class="mk-modal-close" onclick="closeProModal()" aria-label="Close"><i data-lucide="x"></i></button>
+      <div class="mk-modal-icon"><i data-lucide="zap"></i></div>
+      <h3>Upgrade to Pro Institutional</h3>
+      <p class="sub">Unlock the full Stock Master universe, deep RS history, extended trend analytics and complete unblurred market archives.</p>
+      <button onclick="openWhatsAppTrialModal()" class="mk-modal-btn"><i data-lucide="message-circle"></i><span>Claim 7-Day Free Pro on WhatsApp</span></button>
+      <p class="mk-modal-note">Instant verification • Zero fees</p>
+    </div>
+  </div>
+
+  <script src="./mickkk-shell.js"></script>
+  <script src="./screener.js"></script>
+</body>
+</html>
