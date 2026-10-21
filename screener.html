@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stock Master Screener — Mickkk.com</title>
 
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN for Trajectory Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -27,16 +38,7 @@
     }
   </script>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap');
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
-    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
-    
     :root {
       --bg-dark: #070d18;
       --card-bg: #0c1527;
@@ -44,6 +46,12 @@
       --text-main: #f8fafc;
       --text-muted: #8da2c0;
       --accent-cyan: #00d4ff;
+      --accent-emerald: #10b981;
+      --accent-purple: #c084fc;
+      --accent-rose: #f43f5e;
+      --accent-blue: #38bdf8;
+      --accent-yellow: #fbbf24;
+      --accent-orange: #fb923c;
     }
 
     .light {
@@ -54,7 +62,10 @@
       --text-muted: #64748b;
     }
 
-    /* Scrollbars */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
@@ -99,31 +110,81 @@
       z-index: 60;
     }
 
-    /* Page Tab Buttons */
-    .page-tab-btn { background: #0c1527; border: 1px solid #1c2b44; color: #94a3b8; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+    /* Page Navigation Tab Buttons */
+    .page-tab-btn { background: #0c1527; border: 1px solid #1c2b44; color: #94a3b8; padding: 5px 11px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
     .page-tab-btn:hover { border-color: #38bdf8; color: #ffffff; background: #132238; }
     .page-tab-btn.active { background: #003759; color: #ffffff; border: 1px solid var(--accent-cyan); box-shadow: 0 0 10px rgba(0, 212, 255, 0.35); }
 
-    /* Sticky Columns */
-    th.sticky-col { position: sticky; left: 0; z-index: 25; background: #081324; box-shadow: 2px 0 6px rgba(0,0,0,0.5); width: 175px; text-align: left; }
-    th.sticky-sec { position: sticky; left: 175px; z-index: 24; background: #081324; width: 140px; text-align: left; box-shadow: 2px 0 6px rgba(0,0,0,0.4); }
-    td.sticky-col { position: sticky; left: 0; z-index: 5; background: #0c1527; box-shadow: 2px 0 6px rgba(0,0,0,0.5); text-align: left; }
-    td.sticky-sec { position: sticky; left: 175px; z-index: 4; background: #0c1527; box-shadow: 2px 0 6px rgba(0,0,0,0.4); text-align: left; }
+    /* Control Panel Box */
+    .control-panel-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+    .primary-filter-row { display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .search-wrap { position: relative; display: flex; align-items: center; }
+    .search-input { width: 100%; background: #0f1c30; border: 1px solid var(--card-border); color: #ffffff; padding: 6px 10px 6px 28px; border-radius: 5px; font-size: 11px; outline: none; }
+    .search-input:focus { border-color: var(--accent-cyan); }
+    .search-icon { position: absolute; left: 8px; color: var(--text-muted); width: 13px; height: 13px; }
 
-    .val-pos { color: #34d399; font-weight: 700; }
-    .val-neg { color: #f87171; font-weight: 700; }
+    .filter-select { background: #0f1c30; border: 1px solid var(--card-border); color: #ffffff; padding: 6px 8px; border-radius: 5px; font-size: 11px; font-weight: 600; outline: none; cursor: pointer; }
+    .filter-select:focus { border-color: var(--accent-cyan); }
 
+    .btn-tool { background: #132238; border: 1px solid var(--card-border); color: #ffffff; padding: 5px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+    .btn-tool:hover { border-color: var(--accent-cyan); }
+    .btn-tool-danger { color: #fb7185; }
+    .btn-tool-danger:hover { background: #4c0519; }
+    .btn-tool-success { color: #34d399; }
+    .btn-tool-success:hover { background: #064e3b; }
+    .btn-tool-accent { color: var(--accent-cyan); }
+
+    .view-matrix-row { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #132238; flex-wrap: wrap; }
     .matrix-btn { background: #0f1c30; border: 1px solid var(--card-border); color: #94a3b8; padding: 4px 10px; border-radius: 6px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
     .matrix-btn.active { background: #004d7a; color: #ffffff; border: 1px solid var(--accent-cyan); box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
 
+    .parameters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .param-box { background: #0f1c30; border: 1px solid var(--card-border); border-radius: 4px; padding: 2px 6px; display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; color: #cbd5e1; font-weight: 600; }
+    .param-input { width: 40px; background: transparent; border: none; border-bottom: 1px solid #334155; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 10.5px; text-align: center; outline: none; }
+
     .chip { background: #0f1c30; border: 1px solid var(--card-border); color: #94a3b8; padding: 2.5px 6px; border-radius: 4px; font-size: 9.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
     .chip.active { background: #1e3a5f; color: #ffffff; border-color: var(--accent-cyan); }
-    
-    .rs-pill { display: inline-block; min-width: 38px; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 9.5px; text-align: center; }
-    .rs-pill-pos { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .rs-pill-neg { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+    .chip-scanner-vip { background: #0f1c30; border: 1px solid #1c3154; color: #93c5fd; padding: 2.5px 6px; border-radius: 5px; font-size: 9.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+    .chip-scanner-vip.active { background: #0284c7; color: #ffffff; border-color: #00f0ff; }
+    .chip-outperform { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; }
+    .chip-outperform.active { background: #064e3b; border-color: #10b981; color: #fff; }
 
-    /* Loader */
+    /* Tables Sticky Positioning */
+    .table-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
+    .table-wrapper { overflow-x: auto; max-height: calc(100vh - 350px); }
+    table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; }
+    
+    th { background: #081324; color: #8da2c0; font-weight: 700; padding: 6px 5px; text-transform: uppercase; font-size: 9px; letter-spacing: 0.3px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--card-border); white-space: nowrap; cursor: pointer; user-select: none; }
+    th.sticky-col { position: sticky; left: 0; z-index: 25; background: #081324; box-shadow: 2px 0 6px rgba(0,0,0,0.5); width: 180px; text-align: left; }
+    th.sticky-sec { position: sticky; left: 180px; z-index: 24; background: #081324; width: 140px; text-align: left; box-shadow: 2px 0 6px rgba(0,0,0,0.4); }
+
+    td { padding: 4.5px 6px; border-bottom: 1px solid #132238; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+    td.sticky-col { position: sticky; left: 0; z-index: 5; background: #0c1527; box-shadow: 2px 0 6px rgba(0,0,0,0.5); text-align: left; }
+    td.sticky-sec { position: sticky; left: 180px; z-index: 4; background: #0c1527; box-shadow: 2px 0 6px rgba(0,0,0,0.4); text-align: left; }
+    tr:hover td { background: #132238; }
+
+    .val-pos { color: #34d399; font-weight: 700; }
+    .val-neg { color: #f87171; font-weight: 700; }
+    .val-turnover { color: #fbbf24; font-weight: 700; }
+    .val-range { color: #38bdf8; font-weight: 700; }
+    .val-price { color: #ffffff; font-weight: 700; }
+
+    .rs-pill { display: inline-block; min-width: 40px; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 9.5px; text-align: center; }
+    .rs-pill-pos { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .rs-pill-neg { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    .benchmark-tiles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+    .bench-tile { background: #0c1527; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+    .bench-tile.active { background: linear-gradient(135deg, #092642 0%, #0c1b30 100%); border: 1.5px solid var(--accent-cyan); }
+
+    .rs-leaders-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 10px; }
+    .rs-leader-card { background: #081120; border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 10px; font-size: 10.5px; }
+    .rs-leader-row { display: grid; grid-template-columns: 22px 65px 1fr; align-items: center; gap: 4px; font-size: 9.5px; padding: 2px 4px; border-radius: 4px; background: rgba(15, 28, 48, 0.4); margin-bottom: 3px; }
+
+    .history-chart-card { background: #081120; border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+    .tf-pill { background: transparent; border: none; color: #94a3b8; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+    .tf-pill.active { background: #004d7a; color: #00f0ff; border: 1px solid var(--accent-cyan); }
+
     #loader { position: fixed; inset: 0; background: rgba(7, 13, 24, 0.94); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
     .spinner { width: 36px; height: 36px; border: 3px solid #1e293b; border-top-color: var(--accent-cyan); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -131,7 +192,7 @@
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen">
 
-  <!-- SVG Mickkk Shared Logo Symbol -->
+  <!-- Shared Mickkk SVG Symbol -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <linearGradient id="mkM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
@@ -156,7 +217,7 @@
     <p style="margin-top: 10px; font-weight: 600; color: #94a3b8; font-size: 11px;" id="loader-msg">Loading Live Stock Terminal Universe...</p>
   </div>
 
-  <!-- ================= 1. SIDEBAR ================= -->
+  <!-- ================= 1. SIDEBAR (MATCHES HOMEPAGE EXACTLY) ================= -->
   <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
     <button onclick="toggleSidebar()" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
       <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
@@ -207,7 +268,7 @@
       </nav>
     </div>
 
-    <!-- Bottom User Strip -->
+    <!-- Bottom User Strip (SCREENSHOT EXACT MATCH) -->
     <div>
       <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
@@ -243,10 +304,10 @@
     </div>
   </aside>
 
-  <!-- ================= 2. MAIN WORKSPACE ================= -->
+  <!-- ================= 2. MAIN CONTENT ================= -->
   <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
     
-    <!-- Top Header Bar -->
+    <!-- Top Header Bar: Clean & Direct -->
     <header class="h-14 bg-white dark:bg-sidebarDark border-b border-slate-200 dark:border-borderDark px-6 flex items-center justify-between sticky top-0 z-40">
       <div class="flex items-center gap-3">
         <h1 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -255,93 +316,284 @@
         <span class="text-[10px] font-mono-num bg-slate-100 dark:bg-cardSubDark px-2 py-0.5 rounded text-emerald-500 font-bold" id="last-updated-time">Just Now</span>
       </div>
 
-      <div class="flex items-center gap-3">
-        <!-- Direct Refresh Button (No Auto-Refresh) -->
-        <button onclick="loadMasterStockDataViaJSONP()" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
-          <i data-lucide="refresh-cw" id="refresh-spin-icon" class="w-3.5 h-3.5"></i> Refresh Data
+      <!-- Right Nav Buttons Group -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button class="page-tab-btn active" id="tab-master" onclick="switchAppView('master')"><i data-lucide="layout-grid" class="w-3 h-3"></i> Master</button>
+        <button class="page-tab-btn" id="tab-relative" onclick="switchAppView('relative')"><i data-lucide="activity" class="w-3 h-3"></i> Relative Returns</button>
+        <button class="page-tab-btn" id="tab-ranking" onclick="switchAppView('ranking')"><i data-lucide="grid" class="w-3 h-3"></i> RS Ranking</button>
+        <button class="page-tab-btn" id="tab-gainers" onclick="switchAppView('gainers')"><i data-lucide="trending-up" class="w-3 h-3"></i> RS Gainers</button>
+        <button class="page-tab-btn" id="tab-early" onclick="switchAppView('early')"><i data-lucide="rocket" class="w-3 h-3"></i> Early Trend</button>
+        <button class="page-tab-btn" id="tab-history" onclick="switchAppView('history')"><i data-lucide="history" class="w-3 h-3"></i> RS History</button>
+
+        <button onclick="triggerActiveViewRefresh()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all ml-1">
+          <i data-lucide="refresh-cw" id="refresh-spin-icon" class="w-3 h-3"></i> Refresh Data
         </button>
       </div>
     </header>
 
     <!-- Main Container -->
     <main class="p-4 space-y-3 flex-grow">
-      
-      <!-- Filters Card -->
-      <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-xl p-3 shadow-sm space-y-2.5">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
-          <div class="relative">
-            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="search-input" placeholder="Search Stock / Symbol (e.g. RELIANCE, TCS)..." oninput="applyAllFilters()" class="w-full bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 font-semibold">
+
+      <!-- ================= VIEW 1: MASTER SCREENER ================= -->
+      <div id="view-master" class="app-view-container space-y-3">
+        
+        <!-- Controls & Filters Card (Original 102 Columns & Scanners Intact) -->
+        <div class="control-panel-card">
+          <div class="primary-filter-row">
+            <div class="search-wrap">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="search-input" class="search-input" placeholder="Search Stock / Symbol (e.g. RELIANCE, TCS)..." oninput="applyAllFilters()">
+            </div>
+
+            <select id="sector-select" class="filter-select" onchange="populateIndustriesDropdown(); applyAllFilters();">
+              <option value="ALL">All Sectors</option>
+            </select>
+
+            <select id="industry-select" class="filter-select" onchange="applyAllFilters()">
+              <option value="ALL">All Industries</option>
+            </select>
+
+            <select id="marketcap-select" class="filter-select" onchange="applyAllFilters()">
+              <option value="ALL">All Market Caps</option>
+              <option value="Large Cap">Large Cap</option>
+              <option value="Mid Cap">Mid Cap</option>
+              <option value="Small Cap">Small Cap</option>
+              <option value="Micro Cap">Micro Cap</option>
+            </select>
+
+            <div class="action-btn-group">
+              <button class="btn-tool btn-tool-accent" onclick="openColumnModal()"><i data-lucide="columns"></i> Columns</button>
+              <button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
+              <button class="btn-tool btn-tool-danger" onclick="clearAllFilterChips()"><i data-lucide="x"></i> Clear</button>
+              <button class="btn-tool" onclick="copyTableData()"><i data-lucide="copy"></i> Copy</button>
+              <button class="btn-tool btn-tool-success" onclick="exportToCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+            </div>
           </div>
 
-          <select id="sector-select" class="bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none" onchange="populateIndustriesDropdown(); applyAllFilters();">
-            <option value="ALL">All Sectors</option>
-          </select>
+          <!-- View Matrix Toolbar -->
+          <div class="view-matrix-row">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">VIEW MATRIX:</span>
+            <button class="matrix-btn active" onclick="switchMatrixView(this, 'all')"><i data-lucide="layout-grid" class="w-3 h-3"></i> All 102 Columns</button>
+            <button class="matrix-btn" onclick="switchMatrixView(this, 'technicals')"><i data-lucide="trending-up" class="w-3 h-3"></i> Technicals &amp; Returns</button>
+            <button class="matrix-btn" onclick="switchMatrixView(this, 'valuation')"><i data-lucide="pie-chart" class="w-3 h-3"></i> Valuation &amp; Ratios</button>
+            <button class="matrix-btn" onclick="switchMatrixView(this, 'sales_profit')"><i data-lucide="banknote" class="w-3 h-3"></i> Sales &amp; Net Profits</button>
+            <button class="matrix-btn" onclick="switchMatrixView(this, 'shareholding')"><i data-lucide="users" class="w-3 h-3"></i> FII / DII / Promoters</button>
+          </div>
 
-          <select id="industry-select" class="bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none" onchange="applyAllFilters()">
-            <option value="ALL">All Industries</option>
-          </select>
+          <!-- Quick Parameters Inputs -->
+          <div class="parameters-row">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">PARAMETERS:</span>
+            <div class="param-box">
+              <span>🎯 Pullback &lt;=</span>
+              <input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()">
+              <span>%</span>
+            </div>
+            <div class="param-box">
+              <span>Away 52WH &gt;=</span>
+              <input type="number" id="param-away-52wh" class="param-input" value="-20" step="5" onchange="applyAllFilters()">
+              <span>%</span>
+            </div>
+            <div class="param-box">
+              <span>Turnover &gt;=</span>
+              <input type="number" id="param-turnover" class="param-input" value="0" step="5" onchange="applyAllFilters()">
+              <span>Cr</span>
+            </div>
+            <div class="param-box">
+              <span>RSI &gt;=</span>
+              <input type="number" id="param-rsi" class="param-input" value="60" step="5" onchange="applyAllFilters()">
+            </div>
+            <div class="param-box">
+              <span>ROCE &gt;=</span>
+              <input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()">
+              <span>%</span>
+            </div>
+          </div>
 
-          <select id="marketcap-select" class="bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none" onchange="applyAllFilters()">
-            <option value="ALL">All Market Caps</option>
-            <option value="Large Cap">Large Cap</option>
-            <option value="Mid Cap">Mid Cap</option>
-            <option value="Small Cap">Small Cap</option>
-            <option value="Micro Cap">Micro Cap</option>
-          </select>
+          <!-- Patterns & Technical Chips -->
+          <div class="space-y-1.5 pt-1">
+            <div class="flex items-center gap-1.5 flex-wrap" id="chartinkScannersRow">
+              <span class="text-[9.5px] font-black uppercase text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">PATTERNS &amp; SCANNERS</span>
+              <span style="font-size: 10px; color:#8492a6;" id="scannerLoaderText">Loading live scanners from 2nd sheet...</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[9.5px] font-black uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">TECHNICAL</span>
+              <span class="chip" onclick="toggleChip(this, 'rsi60')">⚡ RSI &gt; 60</span>
+              <span class="chip" onclick="toggleChip(this, 'near52wh')">🎯 Near 52W High</span>
+              <span class="chip" onclick="toggleChip(this, 'closeEma20')">📈 Close &gt; EMA 20</span>
+              <span class="chip" onclick="toggleChip(this, 'closeEma200')">📈 Close &gt; EMA 200</span>
+              <span class="chip" onclick="toggleChip(this, 'pullback20ema')">🎯 Pullback 20 EMA</span>
+              <span class="chip" onclick="toggleChip(this, 'closeVwap')">📊 Close &gt; VWAP</span>
+            </div>
+          </div>
         </div>
 
-        <!-- View Matrix Toolbar -->
-        <div class="flex items-center gap-2 flex-wrap border-t border-b border-slate-100 dark:border-borderDark py-2">
-          <span class="text-[10px] font-extrabold uppercase text-slate-400">VIEW MATRIX:</span>
-          <button class="matrix-btn active" onclick="switchMatrixView(this, 'all')"><i data-lucide="layout-grid" class="w-3 h-3"></i> All Columns</button>
-          <button class="matrix-btn" onclick="switchMatrixView(this, 'technicals')"><i data-lucide="trending-up" class="w-3 h-3"></i> Technicals &amp; Returns</button>
-          <button class="matrix-btn" onclick="switchMatrixView(this, 'valuation')"><i data-lucide="pie-chart" class="w-3 h-3"></i> Valuation &amp; Ratios</button>
+        <!-- Summary Count Bar -->
+        <div class="flex items-center justify-between text-xs font-bold px-1 text-slate-400">
+          <div>Universe: <span class="text-slate-800 dark:text-slate-200 font-extrabold">NSE Capital Markets (Master Matrix)</span></div>
+          <div>Showing <span class="text-sky-400 font-mono-num font-extrabold" id="shown-count">0</span> of <span class="text-sky-400 font-mono-num font-extrabold" id="total-count">0</span> Stocks</div>
         </div>
 
-        <!-- Quick Parameters Inputs -->
-        <div class="flex items-center gap-2 flex-wrap text-xs font-semibold">
-          <span class="text-[10px] font-extrabold uppercase text-slate-400">PARAMETERS:</span>
-          <div class="flex items-center gap-1 bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark px-2 py-0.5 rounded">
-            <span class="text-[10px]">🎯 Pullback &lt;=</span>
-            <input type="number" id="param-pullback" value="1.5" step="0.5" class="w-10 bg-transparent text-center font-bold text-sky-400 outline-none" onchange="applyAllFilters()">
-            <span class="text-[10px]">%</span>
+        <!-- Master 102 Columns Table -->
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table id="master-table">
+              <thead><tr id="master-table-headers"></tr></thead>
+              <tbody id="master-table-body"></tbody>
+            </table>
           </div>
-          <div class="flex items-center gap-1 bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark px-2 py-0.5 rounded">
-            <span class="text-[10px]">Away 52WH &gt;=</span>
-            <input type="number" id="param-away-52wh" value="-20" step="5" class="w-10 bg-transparent text-center font-bold text-sky-400 outline-none" onchange="applyAllFilters()">
-            <span class="text-[10px]">%</span>
+        </div>
+
+      </div>
+
+      <!-- ================= VIEW 2: RELATIVE RETURNS ================= -->
+      <div id="view-relative-returns" class="app-view-container space-y-3" style="display:none;">
+        <div class="benchmark-tiles-grid">
+          <div class="bench-tile" id="tile-n500" onclick="selectRelativeBenchmark('Relative Returns (N500)', 'NIFTY 500')">
+            <div class="bench-tile-name">📊 NIFTY 500</div>
+            <span class="bench-badge-tag text-xs font-bold text-sky-400">Select</span>
           </div>
-          <div class="flex items-center gap-1 bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark px-2 py-0.5 rounded">
-            <span class="text-[10px]">Turnover &gt;=</span>
-            <input type="number" id="param-turnover" value="0" step="5" class="w-10 bg-transparent text-center font-bold text-sky-400 outline-none" onchange="applyAllFilters()">
-            <span class="text-[10px]">Cr</span>
+          <div class="bench-tile active" id="tile-cnxsmall" onclick="selectRelativeBenchmark('Relative Returns (CNX SMALLCAP)', 'CNX SMALLCAP')">
+            <div class="bench-tile-name text-sky-400">🚀 CNX SMALLCAP</div>
+            <span class="bench-badge-tag text-xs font-bold text-sky-400">ACTIVE</span>
           </div>
-          <div class="flex items-center gap-1 bg-slate-50 dark:bg-cardSubDark border border-slate-200 dark:border-borderDark px-2 py-0.5 rounded">
-            <span class="text-[10px]">RSI &gt;=</span>
-            <input type="number" id="param-rsi" value="60" step="5" class="w-10 bg-transparent text-center font-bold text-sky-400 outline-none" onchange="applyAllFilters()">
+          <div class="bench-tile" id="tile-midsmall" onclick="selectRelativeBenchmark('Relative Returns (MIDSMALL 400)', 'MIDSMALL 400')">
+            <div class="bench-tile-name">⚡ MIDSMALL 400</div>
+            <span class="bench-badge-tag text-xs font-bold text-sky-400">Select</span>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-col">Stock / Symbol</th>
+                  <th class="sticky-sec">Sector / Industry</th>
+                  <th>1D Rel %</th><th>1W Rel %</th><th>15D Rel %</th><th>1M Rel %</th><th>Q Rel %</th><th>HY Rel %</th><th>1Y Rel %</th>
+                </tr>
+              </thead>
+              <tbody id="relative-table-body"></tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- Summary Count Bar -->
-      <div class="flex items-center justify-between text-xs font-bold px-1 text-slate-400">
-        <div>Universe: <span class="text-slate-800 dark:text-slate-200 font-extrabold">NSE Capital Markets (Master Matrix)</span></div>
-        <div>Showing <span class="text-sky-400 font-mono-num font-extrabold" id="shown-count">0</span> of <span class="text-sky-400 font-mono-num font-extrabold" id="total-count">0</span> Stocks</div>
-      </div>
+      <!-- ================= VIEW 3: RS RANKING MATRIX ================= -->
+      <div id="view-ranking" class="app-view-container space-y-3" style="display:none;">
+        <div class="rs-leaders-grid" id="rsLeadersCardsGrid">
+          <div class="rs-leader-card"><div class="font-bold text-amber-400 mb-1">OVERALL RS</div><div id="lead-overall">Loading...</div></div>
+          <div class="rs-leader-card"><div class="font-bold text-orange-400 mb-1">T1: SELF NT</div><div id="lead-snt">Loading...</div></div>
+          <div class="rs-leader-card"><div class="font-bold text-purple-400 mb-1">T2: SELF DEF</div><div id="lead-sdef">Loading...</div></div>
+          <div class="rs-leader-card"><div class="font-bold text-pink-400 mb-1">T3: REL NT</div><div id="lead-rnt">Loading...</div></div>
+          <div class="rs-leader-card"><div class="font-bold text-sky-400 mb-1">T4: REL DEF</div><div id="lead-rdef">Loading...</div></div>
+          <div class="rs-leader-card"><div class="font-bold text-emerald-400 mb-1">T5: SHORT TERM</div><div id="lead-st">Loading...</div></div>
+        </div>
 
-      <!-- Master 102 Columns Table -->
-      <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-xl overflow-hidden shadow-sm">
-        <div class="overflow-x-auto max-h-[calc(100vh-340px)] custom-scroll">
-          <table class="w-full text-xs text-left border-collapse" id="master-table">
-            <thead><tr id="master-table-headers"></tr></thead>
-            <tbody id="master-table-body" class="divide-y divide-slate-100 dark:divide-borderDark font-semibold"></tbody>
-          </table>
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-col">Stock / Symbol</th>
+                  <th class="sticky-sec">Sector / Industry</th>
+                  <th class="text-sky-400">Overall RS</th>
+                  <th class="text-amber-400">Avg Rank</th>
+                  <th>T1 Score</th><th>T1 Rank</th>
+                  <th>T2 Score</th><th>T2 Rank</th>
+                  <th>T3 Score</th><th>T3 Rank</th>
+                  <th>T4 Score</th><th>T4 Rank</th>
+                  <th>T5 Score</th><th>T5 Rank</th>
+                </tr>
+              </thead>
+              <tbody id="ranking-table-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      <!-- ================= VIEW 4: RS GAINERS & TREND ================= -->
+      <div id="view-gainers" class="app-view-container space-y-3" style="display:none;">
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-col">Stock / Symbol</th>
+                  <th class="sticky-sec">Sector / Industry</th>
+                  <th>Prev ST Rank</th><th>Current ST Rank</th><th class="text-emerald-500">Rank Jump 🔼</th><th>ST RS Rating</th><th>Overall RS</th>
+                </tr>
+              </thead>
+              <tbody id="gainers-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 5: EARLY TREND BREAKOUTS ================= -->
+      <div id="view-early" class="app-view-container space-y-3" style="display:none;">
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-col">Stock / Symbol</th>
+                  <th class="sticky-sec">Sector</th>
+                  <th>Early Signal</th><th>Near-Term Rank</th><th>Default Rank</th><th class="text-emerald-500">RS Velocity 🔼</th><th>Away 200 EMA</th><th>% Off 52W High</th><th>RSI</th><th>Stage</th>
+                </tr>
+              </thead>
+              <tbody id="early-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 6: RS HISTORY TRAJECTORY ================= -->
+      <div id="view-history" class="app-view-container space-y-3" style="display:none;">
+        <div class="history-chart-card">
+          <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+            <div class="flex items-center gap-1 bg-[#0c1527] p-1 rounded-lg border border-slate-800">
+              <button class="tf-pill" onclick="changeHistoryTF(this, 7)">1W</button>
+              <button class="tf-pill" onclick="changeHistoryTF(this, 15)">15D</button>
+              <button class="tf-pill" onclick="changeHistoryTF(this, 30)">1M</button>
+              <button class="tf-pill" onclick="changeHistoryTF(this, 90)">3M</button>
+              <button class="tf-pill active" onclick="changeHistoryTF(this, 365)">1Y</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <select id="historyModelSelect" class="bg-[#0c1527] border border-slate-800 rounded px-2.5 py-1 text-xs font-bold text-slate-200" onchange="renderHistoryChartAndTable()">
+                <option value="Overall" selected>🏆 Overall RS Rank</option>
+                <option value="Short Term">⚡ Short Term RS Rank</option>
+                <option value="Self Near">🔥 Self RS (Near-Term)</option>
+                <option value="Self Def">📊 Self RS (Default)</option>
+              </select>
+
+              <select id="historyTopCountSelect" class="bg-[#0c1527] border border-slate-800 rounded px-2.5 py-1 text-xs font-bold text-slate-200" onchange="renderHistoryChartAndTable()">
+                <option value="10" selected>Top 10 Stocks</option>
+                <option value="20">Top 20 Stocks</option>
+                <option value="50">Top 50 Stocks</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chart-wrapper-box" style="height:320px; position:relative;">
+            <canvas id="rsTrajectoryCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead id="history-matrix-thead"></thead>
+              <tbody id="history-matrix-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </main>
 
-    <!-- ================= 3. FOOTER ================= -->
+    <!-- ================= 3. FOOTER (SCREENSHOT EXACT MATCH) ================= -->
     <footer class="mt-auto px-6 py-4 border-t border-slate-200 dark:border-borderDark flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-sidebarDark">
       <div class="flex items-center gap-2">
         <svg viewBox="0 0 100 100" class="w-5 h-5 shrink-0"><use href="#mick-icon"/></svg>
@@ -363,10 +615,31 @@
 
   </div>
 
-  <!-- ================= 4. JAVASCRIPT: BULLETPROOF JSONP LOADER ================= -->
+  <!-- Column Selector Modal -->
+  <div id="columnModal" style="display:none;" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-cardDark border border-borderDark rounded-xl max-w-2xl w-full p-4 space-y-3">
+      <div class="flex justify-between items-center border-b border-borderDark pb-2">
+        <h3 class="font-bold text-sm">Select Visible Columns</h3>
+        <button onclick="closeColumnModal()" class="text-rose-400 font-bold">&times;</button>
+      </div>
+      <div id="columnCheckboxesList" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto custom-scroll text-xs"></div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-borderDark">
+        <button onclick="applyCustomColumns()" class="px-4 py-1.5 rounded-lg bg-emerald-500 text-white font-bold text-xs">Apply Selection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 4. JAVASCRIPT: ORIGINAL FULL LOGIC ENGINE ================= -->
   <script>
     const SPREADSHEET_ID = "13SG0bcfTGXLQfq14hb_rRrTUALq5GYUQuNegP_AH42Y";
-    const SHEET_NAME = "Chartink Data";
+    const GVIZ_BASE = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+    const GVIZ_URL = `${GVIZ_BASE}&sheet=${encodeURIComponent("Chartink Data")}`;
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwyf03hzfg05WOcl_TImieFbqTb7djfEuAmM5v31CVqMS2Du1-2GYX72xd26e4jsbFm8g/exec";
+    const SCANNER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzVL6f0CG_zF7c19DscTYxgAaDgKpS7ZQJc3NESbtdvwcyNESl08H3b-QoKuJfqFSOdXg/exec";
+
+    let currentAppView = 'master';
+    let currentRelativeSheet = 'Relative Returns (CNX SMALLCAP)';
+    let currentRelativeBenchmarkName = 'CNX SMALLCAP';
 
     let rawHeaders = [];
     let availableColumns = [];
@@ -375,24 +648,42 @@
     let rawDataset = [];
     let filteredDataset = [];
 
+    let relativeCache = {};
+    let benchmarkIndexData = {};
+    let rawRelativeDataset = [];
+    let filteredRelativeDataset = [];
+
+    let rawRankingDataset = [];
+    let filteredRankingDataset = [];
+    let symbolRsRatingMap = {};
+
+    let chartinkScanners = {};
+    let stockToScannersMap = {};
+    let activeScannerChips = new Set();
+    let activeChips = new Set();
+
     let currentSortCol = 'D';
     let currentSortAsc = false;
+    let masterSelectedRsType = 'overall';
     let activeMatrixView = 'all';
 
     window.onload = function() {
       initTheme();
       if (window.lucide) lucide.createIcons();
       loadMasterStockDataViaJSONP();
+      loadBenchmarkIndexData();
     };
 
     function initTheme() {
       const isDark = localStorage.getItem("theme") !== "light";
       document.documentElement.classList.toggle("dark", isDark);
+      document.documentElement.classList.toggle("light", !isDark);
       updateThemeIcons(isDark);
     }
 
     function toggleTheme() {
       const isDark = document.documentElement.classList.toggle("dark");
+      document.documentElement.classList.toggle("light", !isDark);
       localStorage.setItem("theme", isDark ? "dark" : "light");
       updateThemeIcons(isDark);
     }
@@ -439,36 +730,21 @@
       `;
     }
 
-    /**
-     * 🚀 100% BULLETPROOF JSONP LOADER (BYPASSES ALL CORS & CLOUDFLARE BLOCKS)
-     */
+    // JSONP Failsafe Dynamic Loader (Never blocks on Cloudflare/Local)
     function loadMasterStockDataViaJSONP() {
       document.getElementById('loader').style.display = 'flex';
       const spin = document.getElementById('refresh-spin-icon');
       if (spin) spin.classList.add('animate-spin');
 
-      // Create Dynamic Script Tag for JSONP
       const script = document.createElement("script");
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetJSONP&sheet=${encodeURIComponent(SHEET_NAME)}&_ts=${new Date().getTime()}`;
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetJSONP&sheet=${encodeURIComponent("Chartink Data")}&_ts=${new Date().getTime()}`;
       script.src = url;
-
       document.body.appendChild(script);
 
-      script.onload = () => {
-        if (spin) spin.classList.remove('animate-spin');
-        script.remove();
-      };
-      script.onerror = () => {
-        if (spin) spin.classList.remove('animate-spin');
-        script.remove();
-        console.error("JSONP fetch failed.");
-        document.getElementById('loader').style.display = 'none';
-      };
+      script.onload = () => { if (spin) spin.classList.remove('animate-spin'); script.remove(); };
+      script.onerror = () => { if (spin) spin.classList.remove('animate-spin'); script.remove(); document.getElementById('loader').style.display = 'none'; };
     }
 
-    /**
-     * Global JSONP Callback
-     */
     window.handleGoogleSheetJSONP = function(gviz) {
       if (!gviz || !gviz.table || !gviz.table.rows) {
         document.getElementById('loader').style.display = 'none';
@@ -481,46 +757,32 @@
         return;
       }
 
-      // Headers are on Row 3 (Index 2)
       const headerCells = rows[2].c;
       rawHeaders = headerCells.map(c => (c && c.v !== null) ? String(c.f || c.v).trim() : '').filter(Boolean);
 
       const parsed = [];
-
       for (let i = 3; i < rows.length; i++) {
         const c = rows[i].c;
         if (!c || !c[1]) continue;
 
         let symVal = (c[1] && c[1].v !== null) ? String(c[1].f || c[1].v).trim().toUpperCase() : '';
         let nameVal = (c[2] && c[2].v !== null) ? String(c[2].f || c[2].v).trim() : symVal;
-
         if (!symVal || symVal === 'NSE SYMBOL' || symVal === 'SYMBOL' || symVal.includes('NOTE')) continue;
 
-        const rowObj = {
-          'Symbol': symVal,
-          'Stock Name': nameVal,
-          'NSE Symbol': symVal
-        };
+        const rowObj = { 'Symbol': symVal, 'Stock Name': nameVal, 'NSE Symbol': symVal };
 
         for (let colIdx = 0; colIdx < rawHeaders.length; colIdx++) {
           const hName = rawHeaders[colIdx];
           const cell = c[colIdx];
 
-          if (!cell || cell.v === null) {
-            rowObj[hName] = '';
-          } else if (typeof cell.v === 'number') {
-            rowObj[hName] = cell.v;
-          } else {
+          if (!cell || cell.v === null) rowObj[hName] = '';
+          else if (typeof cell.v === 'number') rowObj[hName] = cell.v;
+          else {
             const strVal = String(cell.f || cell.v).trim();
             const num = parseFloat(strVal.replace(/[%,\s₹]/g, ''));
-            if (strVal !== '' && !isNaN(num) && isFinite(num) && (/^[-+]?\d+(\.\d+)?%?$/.test(strVal))) {
-              rowObj[hName] = num;
-            } else {
-              rowObj[hName] = strVal;
-            }
+            rowObj[hName] = (strVal !== '' && !isNaN(num) && isFinite(num) && (/^[-+]?\d+(\.\d+)?%?$/.test(strVal))) ? num : strVal;
           }
         }
-
         parsed.push(rowObj);
       }
 
@@ -546,6 +808,15 @@
       populateSectorsDropdown();
       populateIndustriesDropdown();
       applyAllFilters();
+
+      loadRSRankingData().then(() => {
+        if (rawRankingDataset && rawRankingDataset.length > 0) {
+          rawRankingDataset.forEach(item => { symbolRsRatingMap[item.SYMBOL] = item; });
+          renderMasterTable();
+        }
+      });
+
+      fetchChartinkScannerData();
     }
 
     function filterDisplayHeadersByMatrix() {
@@ -553,6 +824,8 @@
       if (activeMatrixView === 'all') displayHeaders = base;
       else if (activeMatrixView === 'technicals') displayHeaders = base.filter(h => /Close|Volume|TURNOVER|RS|RSI|ema|high|low|D|W|15D|M|Q|H|Y|range|Away|VWAP|ATR/i.test(h) && !/Sales|Profit|PE|PB|ROCE|ROE|Debt|Ratio/i.test(h));
       else if (activeMatrixView === 'valuation') displayHeaders = base.filter(h => /Market Cap|PE|P\/E|PB|P\/B|ROCE|ROE|Networth|Debt|Asset|Cap Category|Book|EPS|Ratio/i.test(h));
+      else if (activeMatrixView === 'sales_profit') displayHeaders = base.filter(h => /Sales|Profit|Revenue|OPM|Margin|TURNOVER|EBIT/i.test(h));
+      else if (activeMatrixView === 'shareholding') displayHeaders = base.filter(h => /FII|DII|Promoter|Public|Holding|Shareholding/i.test(h));
     }
 
     function switchMatrixView(el, viewKey) {
@@ -591,6 +864,7 @@
 
       filteredDataset = rawDataset.filter(r => {
         const sym = String(r['Symbol'] || r['NSE Symbol'] || '').toLowerCase();
+        const symUpper = sym.toUpperCase();
         const name = String(r['Stock Name'] || '').toLowerCase();
         const sectorFormatted = toTitleCase(r['Sector']);
         const industryFormatted = toTitleCase(r['Industry']);
@@ -600,13 +874,14 @@
         if (ind !== 'ALL' && industryFormatted !== ind) return false;
         if (cap !== 'ALL' && String(r['Market Cap Category'] || '').toLowerCase() !== cap.toLowerCase()) return false;
 
+        const close = Number(r['Close']) || 0;
         const rsiVal = Number(r['RSI']) || 0;
         const turn20 = (Number(r['20D AVG TURNOVER']) > 100000 ? Number(r['20D AVG TURNOVER']) / 10000000 : Number(r['20D AVG TURNOVER'])) || 0;
         const away52 = Number(r['52WH Away']) || 0;
 
         if (pTurnover > 0 && turn20 < pTurnover) return false;
-        if (rsiVal < pRSI && pRSI > 60) return false;
-        if (away52 < pAway52) return false;
+        if (activeChips.has('rsi60') && rsiVal < pRSI) return false;
+        if (activeChips.has('near52wh') && away52 < pAway52) return false;
 
         return true;
       });
@@ -663,7 +938,9 @@
         const sec = toTitleCase(r['Sector']);
         const ind = toTitleCase(r['Industry']);
 
-        let rsVal = parseFloat(r['RS RATING']) || 70;
+        let rsVal = 50;
+        if (symbolRsRatingMap[sym]) rsVal = symbolRsRatingMap[sym].OVERALL_RATING || 50;
+        else rsVal = parseFloat(r['RS RATING']) || 50;
         rsVal = Math.max(1, Math.min(99, Math.round(rsVal)));
         let pillCls = rsVal >= 70 ? 'rs-pill-pos' : (rsVal >= 40 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'rs-pill-neg');
 
@@ -698,6 +975,398 @@
       }).join('');
 
       if (window.lucide) lucide.createIcons();
+    }
+
+    function switchAppView(viewName) {
+      currentAppView = viewName;
+      document.querySelectorAll('.page-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.app-view-container').forEach(v => v.style.display = 'none');
+
+      document.getElementById('tab-' + viewName)?.classList.add('active');
+      document.getElementById('view-' + (viewName === 'master' ? 'master' : (viewName === 'relative' ? 'relative-returns' : viewName)))?.style.display = 'block';
+
+      if (viewName === 'relative') loadRelativeReturnsData(currentRelativeSheet);
+      else if (viewName === 'ranking') loadRSRankingData();
+      else if (viewName === 'gainers') loadGainersData();
+      else if (viewName === 'early') loadEarlyTrendData();
+      else if (viewName === 'history') loadHistoryLogData();
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function triggerActiveViewRefresh() {
+      if (currentAppView === 'master') loadMasterStockDataViaJSONP();
+      else if (currentAppView === 'relative') loadRelativeReturnsData(currentRelativeSheet);
+      else if (currentAppView === 'ranking') loadRSRankingData();
+      else if (currentAppView === 'gainers') loadGainersData();
+      else if (currentAppView === 'early') loadEarlyTrendData();
+      else if (currentAppView === 'history') loadHistoryLogData();
+    }
+
+    // Relative Returns Engine
+    async function loadBenchmarkIndexData() {
+      try {
+        const res = await fetch(`${WEBAPP_URL}?action=getBenchmarkIndex`);
+        const json = await res.json();
+        if (json && json.success && json.data) parseBenchmarkRows(json.data);
+      } catch (e) {}
+    }
+
+    function parseBenchmarkRows(rows) {
+      rows.forEach(r => {
+        const name = String(r['Index'] || '').trim().toUpperCase();
+        const getPct = v => typeof v === 'number' ? v * 100 : parseFloat(String(v || 0).replace(/[%,\s]/g, '')) || 0;
+        if (name.includes('500')) benchmarkIndexData['NIFTY 500'] = { d: getPct(r['Daily % Change']) };
+        if (name.includes('SMALLCAP')) benchmarkIndexData['CNX SMALLCAP'] = { d: getPct(r['Daily % Change']) };
+        if (name.includes('MIDSMALL')) benchmarkIndexData['MIDSMALL 400'] = { d: getPct(r['Daily % Change']) };
+      });
+    }
+
+    async function loadRelativeReturnsData(sheetName) {
+      document.getElementById('loader').style.display = 'flex';
+      try {
+        const res = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent(sheetName)}`);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        if (json && json.table && json.table.rows) {
+          filteredRelativeDataset = json.table.rows.slice(1).map(r => {
+            const c = r.c;
+            if (!c || !c[1]) return null;
+            return {
+              'NAME': c[0] ? (c[0].f || c[0].v) : '',
+              'SYMBOL': c[1] ? String(c[1].f || c[1].v).toUpperCase() : '',
+              'Sector': c[2] ? c[2].v : '-',
+              'Industry': c[3] ? c[3].v : '-',
+              '1D': c[4] ? Number(c[4].v) * 100 : 0,
+              '1W': c[5] ? Number(c[5].v) * 100 : 0,
+              '15D': c[6] ? Number(c[6].v) * 100 : 0,
+              '1M': c[7] ? Number(c[7].v) * 100 : 0,
+              'Q': c[8] ? Number(c[8].v) * 100 : 0,
+              'HY': c[9] ? Number(c[9].v) * 100 : 0,
+              '1Y': c[10] ? Number(c[10].v) * 100 : 0
+            };
+          }).filter(Boolean);
+          renderRelativeTable();
+        }
+      } catch (err) {}
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    function renderRelativeTable() {
+      const tbody = document.getElementById('relative-table-body');
+      const fmt = v => `<td class="p-2 text-center font-mono-num ${v>=0?'val-pos':'val-neg'}">${v>=0?'+':''}${v.toFixed(2)}%</td>`;
+      tbody.innerHTML = filteredRelativeDataset.slice(0, 300).map(r => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="sticky-col p-2">${renderStockWith3Links(r.SYMBOL, r.NAME)}</td>
+          <td class="sticky-sec p-2"><span class="capitalize text-slate-400">${r.Sector}</span></td>
+          ${fmt(r['1D'])}${fmt(r['1W'])}${fmt(r['15D'])}${fmt(r['1M'])}${fmt(r['Q'])}${fmt(r['HY'])}${fmt(r['1Y'])}
+        </tr>
+      `).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function selectRelativeBenchmark(sheetName, displayName) {
+      currentRelativeSheet = sheetName;
+      document.querySelectorAll('.bench-tile').forEach(t => t.classList.remove('active'));
+      if (displayName.includes('500')) document.getElementById('tile-n500').classList.add('active');
+      else if (displayName.includes('SMALLCAP')) document.getElementById('tile-cnxsmall').classList.add('active');
+      else document.getElementById('tile-midsmall').classList.add('active');
+      loadRelativeReturnsData(sheetName);
+    }
+
+    // RS Ranking Loader
+    async function loadRSRankingData() {
+      try {
+        const res = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('RS Ranking')}`);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        if (json && json.table && json.table.rows) {
+          rawRankingDataset = json.table.rows.slice(1).map(r => {
+            const c = r.c;
+            if (!c || !c[1]) return null;
+            return {
+              'NAME': c[0] ? (c[0].f || c[0].v) : '',
+              'SYMBOL': c[1] ? String(c[1].f || c[1].v).toUpperCase() : '',
+              'Sector': c[2] ? c[2].v : '-',
+              'OVERALL_RANK': c[20] ? Number(c[20].v) : 999,
+              'OVERALL_RATING': c[21] ? Number(c[21].v) : 50,
+              'AVG_RANK': c[19] ? Number(c[19].v) : 999,
+              'T1_SCORE': c[4] ? Number(c[4].v) : 0,
+              'T1_RANK': c[5] ? Number(c[5].v) : 999,
+              'T2_SCORE': c[7] ? Number(c[7].v) : 0,
+              'T2_RANK': c[8] ? Number(c[8].v) : 999,
+              'T3_SCORE': c[10] ? Number(c[10].v) : 0,
+              'T3_RANK': c[11] ? Number(c[11].v) : 999,
+              'T4_SCORE': c[13] ? Number(c[13].v) : 0,
+              'T4_RANK': c[14] ? Number(c[14].v) : 999,
+              'T5_SCORE': c[16] ? Number(c[16].v) : 0,
+              'T5_RANK': c[17] ? Number(c[17].v) : 999
+            };
+          }).filter(Boolean);
+          renderRankingTable();
+          renderRSLeadersCards();
+        }
+      } catch (e) {}
+    }
+
+    function renderRankingTable() {
+      const tbody = document.getElementById('ranking-table-body');
+      tbody.innerHTML = rawRankingDataset.slice(0, 300).map(r => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="sticky-col p-2">${renderStockWith3Links(r.SYMBOL, r.NAME)}</td>
+          <td class="sticky-sec p-2"><span class="capitalize text-slate-400">${r.Sector}</span></td>
+          <td class="p-2 text-center font-bold text-sky-400">#${r.OVERALL_RANK}</td>
+          <td class="p-2 text-center text-amber-400">${r.AVG_RANK.toFixed(1)}</td>
+          <td class="p-2 text-center font-mono-num">${r.T1_SCORE.toFixed(2)}</td>
+          <td class="p-2 text-center">#${r.T1_RANK}</td>
+          <td class="p-2 text-center font-mono-num">${r.T2_SCORE.toFixed(2)}</td>
+          <td class="p-2 text-center">#${r.T2_RANK}</td>
+          <td class="p-2 text-center font-mono-num">${r.T3_SCORE.toFixed(2)}</td>
+          <td class="p-2 text-center">#${r.T3_RANK}</td>
+          <td class="p-2 text-center font-mono-num">${r.T4_SCORE.toFixed(2)}</td>
+          <td class="p-2 text-center">#${r.T4_RANK}</td>
+          <td class="p-2 text-center font-mono-num">${r.T5_SCORE.toFixed(2)}</td>
+          <td class="p-2 text-center">#${r.T5_RANK}</td>
+        </tr>
+      `).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderRSLeadersCards() {
+      const top = prop => [...rawRankingDataset].sort((a,b) => a[prop] - b[prop]).slice(0, 5);
+      const render = arr => arr.map((item, i) => `
+        <div class="rs-leader-row">
+          <span class="text-slate-500 font-bold">#${i+1}</span>
+          <span class="font-bold text-sky-400 truncate">${item.SYMBOL}</span>
+          <span class="text-[9px] text-slate-400 truncate">${item.NAME}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('lead-overall').innerHTML = render(top('OVERALL_RANK'));
+      document.getElementById('lead-snt').innerHTML = render(top('T1_RANK'));
+      document.getElementById('lead-sdef').innerHTML = render(top('T2_RANK'));
+      document.getElementById('lead-rnt').innerHTML = render(top('T3_RANK'));
+      document.getElementById('lead-rdef').innerHTML = render(top('T4_RANK'));
+      document.getElementById('lead-st').innerHTML = render(top('T5_RANK'));
+    }
+
+    // RS Gainers & Trend
+    async function loadGainersData() {
+      document.getElementById('loader').style.display = 'flex';
+      try {
+        const res = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('📈 RS Gainers & Trend')}`);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        if (json && json.table && json.table.rows) {
+          const list = json.table.rows.slice(2).map(r => {
+            const c = r.c;
+            if (!c || !c[0]) return null;
+            return {
+              sym: String(c[0].f || c[0].v).toUpperCase(),
+              name: c[1] ? (c[1].f || c[1].v) : '',
+              sec: c[2] ? c[2].v : '-',
+              prev: c[3] ? c[3].v : '>300',
+              curr: c[4] ? c[4].v : 999,
+              jump: c[5] ? c[5].v : '+0',
+              rating: c[6] ? c[6].v : 50
+            };
+          }).filter(Boolean);
+
+          document.getElementById('gainers-table-body').innerHTML = list.map(r => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="sticky-col p-2">${renderStockWith3Links(r.sym, r.name)}</td>
+              <td class="sticky-sec p-2"><span class="capitalize text-slate-400">${r.sec}</span></td>
+              <td class="p-2 text-center text-slate-400 font-mono-num">${r.prev}</td>
+              <td class="p-2 text-center font-bold text-sky-400 font-mono-num">#${r.curr}</td>
+              <td class="p-2 text-center font-bold text-emerald-500 font-mono-num">${r.jump}</td>
+              <td class="p-2 text-center text-amber-400 font-bold">${r.rating}</td>
+              <td class="p-2 text-center"><span class="overall-glow-badge">#${r.curr}</span></td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {}
+      document.getElementById('loader').style.display = 'none';
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Early Trend Breakouts
+    async function loadEarlyTrendData() {
+      document.getElementById('loader').style.display = 'flex';
+      try {
+        const res = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('🚀 Early Trend & RS Turnarounds')}`);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        if (json && json.table && json.table.rows) {
+          const list = json.table.rows.slice(3).map(r => {
+            const c = r.c;
+            if (!c || !c[0]) return null;
+            return {
+              sym: String(c[0].f || c[0].v).toUpperCase(),
+              name: c[1] ? (c[1].f || c[1].v) : '',
+              sec: c[2] ? c[2].v : '-',
+              sig: c[3] ? c[3].v : 'Fresh Uptrend',
+              nearR: c[4] ? c[4].v : 999,
+              defR: c[5] ? c[5].v : 999,
+              jump: c[6] ? c[6].v : '+0',
+              ema200: c[7] ? Number(c[7].v) * 100 : 0,
+              off52: c[8] ? Number(c[8].v) * 100 : 0,
+              rsi: c[9] ? Number(c[9].v) : 50,
+              stg: c[10] ? c[10].v : 'Stage 2'
+            };
+          }).filter(Boolean);
+
+          document.getElementById('early-tbody').innerHTML = list.map(r => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td class="sticky-col p-2">${renderStockWith3Links(r.sym, r.name)}</td>
+              <td class="sticky-sec p-2"><span class="capitalize text-slate-400">${r.sec}</span></td>
+              <td class="p-2 text-center font-bold text-sky-400">${r.sig}</td>
+              <td class="p-2 text-center font-bold">#${r.nearR}</td>
+              <td class="p-2 text-center text-slate-400">${r.defR}</td>
+              <td class="p-2 text-center font-bold text-emerald-500">${r.jump}</td>
+              <td class="p-2 text-center font-mono-num ${r.ema200>=0?'val-pos':'val-neg'}">${r.ema200.toFixed(1)}%</td>
+              <td class="p-2 text-center font-mono-num text-slate-400">${r.off52.toFixed(1)}%</td>
+              <td class="p-2 text-center font-mono-num text-sky-400 font-bold">${r.rsi.toFixed(1)}</td>
+              <td class="p-2 text-center font-bold text-emerald-400">${r.stg}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {}
+      document.getElementById('loader').style.display = 'none';
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // RS History & Trajectory Chart
+    async function loadHistoryLogData() {
+      document.getElementById('loader').style.display = 'flex';
+      try {
+        const res = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('_RS_History_Log_')}`);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        if (json && json.table && json.table.rows) {
+          const headers = json.table.rows[0].c.map(c => c ? c.v : '');
+          const rows = json.table.rows.slice(1);
+          renderHistoryHeatmap(headers, rows);
+        }
+      } catch (e) {}
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    function renderHistoryHeatmap(headers, rows) {
+      const thead = document.getElementById('history-matrix-thead');
+      const tbody = document.getElementById('history-matrix-tbody');
+      thead.innerHTML = `<tr><th class="p-2 sticky-col">Rank</th>${headers.slice(0, 15).map(h => `<th class="p-2 text-center">${h}</th>`).join('')}</tr>`;
+      tbody.innerHTML = rows.slice(0, 50).map((r, i) => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="p-2 sticky-col font-bold">#${i+1}</td>
+          ${r.c.slice(0, 15).map(c => `<td class="p-2 text-center font-bold text-sky-400">${c ? (c.f || c.v) : '-'}</td>`).join('')}
+        </tr>
+      `).join('');
+    }
+
+    function changeHistoryTF(btn, days) {
+      document.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Technical Scanner Chips
+    async function fetchChartinkScannerData() {
+      try {
+        const res = await fetch(SCANNER_WEBAPP_URL);
+        const json = await res.json();
+        if (json && json.success && json.data) {
+          chartinkScanners = json.data.scanners || {};
+          stockToScannersMap = json.data.stockToScannersMap || {};
+          renderScannerChips();
+        }
+      } catch (err) {}
+    }
+
+    function renderScannerChips() {
+      const container = document.getElementById('chartinkScannersRow');
+      const keys = Object.keys(chartinkScanners);
+      if (keys.length === 0) return;
+
+      container.innerHTML = `<span class="text-[9.5px] font-black uppercase text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">PATTERNS &amp; SCANNERS</span>` +
+        keys.map(k => `
+          <span class="chip-scanner-vip" onclick="toggleScannerChip(this, '${k}')">
+            <span>⚡ ${k.replace(/\(\d+\)/g, '').trim()}</span>
+            <span class="bg-black/40 text-sky-400 text-[9px] px-1 rounded">${chartinkScanners[k].length}</span>
+          </span>
+        `).join('');
+    }
+
+    function toggleScannerChip(el, name) {
+      if (activeScannerChips.has(name)) { activeScannerChips.delete(name); el.classList.remove('active'); }
+      else { activeScannerChips.add(name); el.classList.add('active'); }
+      applyAllFilters();
+    }
+
+    function toggleChip(el, key) {
+      if (activeChips.has(key)) { activeChips.delete(key); el.classList.remove('active'); }
+      else { activeChips.add(key); el.classList.add('active'); }
+      applyAllFilters();
+    }
+
+    function clearAllFilterChips() {
+      activeChips.clear();
+      activeScannerChips.clear();
+      document.querySelectorAll('.chip, .chip-scanner-vip').forEach(c => c.classList.remove('active'));
+      applyAllFilters();
+    }
+
+    function resetAllFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('sector-select').value = 'ALL';
+      document.getElementById('industry-select').value = 'ALL';
+      document.getElementById('marketcap-select').value = 'ALL';
+      document.getElementById('param-pullback').value = '1.5';
+      document.getElementById('param-away-52wh').value = '-20';
+      document.getElementById('param-turnover').value = '0';
+      document.getElementById('param-rsi').value = '60';
+      clearAllFilterChips();
+    }
+
+    function copyTableData() {
+      if (filteredDataset.length === 0) return;
+      const symbols = filteredDataset.map(r => r['Symbol']).filter(Boolean).join(', ');
+      navigator.clipboard.writeText(symbols).then(() => alert(`Copied ${filteredDataset.length} Symbols!`));
+    }
+
+    function exportToCSV() {
+      if (filteredDataset.length === 0) return;
+      const exportCols = ['Symbol', 'Stock Name', 'Sector', 'Industry', ...displayHeaders];
+      let csv = exportCols.map(h => `"${h}"`).join(',') + '\n';
+      filteredDataset.forEach(r => {
+        csv += exportCols.map(h => `"${r[h] !== undefined ? String(r[h]).replace(/"/g, '""') : ''}"`).join(',') + '\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `Mickkk_Master_Screener_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function openColumnModal() {
+      const modal = document.getElementById('columnModal');
+      const list = document.getElementById('columnCheckboxesList');
+      modal.style.display = 'flex';
+      list.innerHTML = availableColumns.map(col => `
+        <label class="flex items-center gap-2 p-1.5 rounded bg-cardSubDark cursor-pointer">
+          <input type="checkbox" value="${col}" ${visibleColumnsSet.has(col) ? 'checked' : ''} class="accent-emerald-500">
+          <span class="truncate">${col}</span>
+        </label>
+      `).join('');
+    }
+
+    function closeColumnModal() { document.getElementById('columnModal').style.display = 'none'; }
+    function applyCustomColumns() {
+      visibleColumnsSet.clear();
+      document.querySelectorAll('#columnCheckboxesList input[type="checkbox"]:checked').forEach(cb => visibleColumnsSet.add(cb.value));
+      filterDisplayHeadersByMatrix();
+      renderMasterTable();
+      closeColumnModal();
     }
   </script>
 </body>
