@@ -35,20 +35,8 @@ const SPREADSHEET_ID = "13SG0bcfTGXLQfq14hb_rRrTUALq5GYUQuNegP_AH42Y";
       SCANNERS: 'MICKKK_CACHE_SCANNERS'
     };
 
-    function getLocalCache(key) {
-      try {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : null;
-      } catch(e) { return null; }
-    }
-
-    function setLocalCache(key, data) {
-      try {
-        localStorage.setItem(key, JSON.stringify(data));
-      } catch(e) {
-        try { localStorage.clear(); localStorage.setItem(key, JSON.stringify(data)); } catch(err) {}
-      }
-    }
+    function getLocalCache(key) { return MKC.get(key); }
+    function setLocalCache(key, data) { MKC.set(key, data); }
     const SHEET_NAME = "Chartink Data";
     const GVIZ_BASE = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
     const GVIZ_URL = `${GVIZ_BASE}&sheet=${encodeURIComponent(SHEET_NAME)}`;
@@ -106,33 +94,6 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
         .join(' ');
     }
 
-// 🔗 3 Direct Chart Links Helper (MICKKK, TradingView, Chartink)
-  function renderStockWith3Links(sym, name) {
-    const s = String(sym || '').toUpperCase();
-    return `
-      <div style="display:flex; align-items:center; gap:4px;">
-        <span style="font-weight:800; font-family:'JetBrains Mono'; font-size:11px; color:var(--c-sky);">${s}</span>
-        <span class="stock-action-links">
-          <a href="charts.html?symbol=${s}" target="_blank" class="chart-icon-link link-mickkk" title="Open MICKKK Chart">
-            <i data-lucide="line-chart" style="width:11px; height:11px;"></i>
-          </a>
-          <a href="https://www.tradingview.com/chart/?symbol=NSE:${s}" target="_blank" class="chart-icon-link link-tv" title="Open TradingView Chart">
-            <i data-lucide="external-link" style="width:10px; height:10px;"></i>
-          </a>
-          <a href="https://chartink.com/stocks/${s}.html" target="_blank" class="chart-icon-link link-chartink" title="Open Chartink Chart">
-            <i data-lucide="candlestick-chart" style="width:11px; height:11px;"></i>
-          </a>
-        </span>
-      </div>
-      <div class="company-name" title="${name}">${name}</div>
-    `;
-  }
-
-  function changeMasterRsType(val) {
-    masterSelectedRsType = val;
-    renderMasterTable();
-  }
-
     function getScannerIcon(scannerKey) {
       const k = scannerKey.toUpperCase();
       if (k.includes('DOUBLE BOTTOM')) return '📈';
@@ -166,46 +127,49 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
       return `<div class="pattern-badges-row">${pillsHTML}</div>`;
     }
 
-    window.onload = function() {
-    lucide.createIcons();
+    // ===== START (runs only after Google login — see mickkk-gate.js) =====
+    async function startScreener() {
+      lucide.createIcons();
 
-    // 1. INSTANT 0-SECOND CACHE HYDRATION (Pehle Cache Se Turant Load Hoga)
-    const cachedMaster = getLocalCache(CACHE_KEYS.MASTER);
-    const cachedHeaders = getLocalCache(CACHE_KEYS.HEADERS);
-    const cachedUpdated = getLocalCache(CACHE_KEYS.UPDATED);
-    const cachedBenchmark = getLocalCache(CACHE_KEYS.BENCHMARK);
-    const cachedRanking = getLocalCache(CACHE_KEYS.RANKING);
-    const cachedScanners = getLocalCache(CACHE_KEYS.SCANNERS);
+      // 1) instant hydration from IndexedDB (0-second paint)
+      const cachedMaster = getLocalCache(CACHE_KEYS.MASTER);
+      const cachedHeaders = getLocalCache(CACHE_KEYS.HEADERS);
+      const cachedUpdated = getLocalCache(CACHE_KEYS.UPDATED);
+      const cachedBenchmark = getLocalCache(CACHE_KEYS.BENCHMARK);
+      const cachedRanking = getLocalCache(CACHE_KEYS.RANKING);
+      const cachedScanners = getLocalCache(CACHE_KEYS.SCANNERS);
 
-    if (cachedBenchmark) benchmarkIndexData = cachedBenchmark;
-    if (cachedRanking) {
-      rawRankingDataset = cachedRanking;
-      cachedRanking.forEach(item => { symbolRsRatingMap[item.SYMBOL] = item; });
-    }
-    if (cachedScanners) {
-      chartinkScanners = cachedScanners.scanners || {};
-      stockToScannersMap = cachedScanners.stockToScannersMap || {};
+      if (cachedBenchmark) benchmarkIndexData = cachedBenchmark;
+      if (cachedRanking) { rawRankingDataset = cachedRanking; cachedRanking.forEach(item => { symbolRsRatingMap[item.SYMBOL] = item; }); }
+      if (cachedScanners) { chartinkScanners = cachedScanners.scanners || {}; stockToScannersMap = cachedScanners.stockToScannersMap || {}; }
       renderScannerChips();
-    }
-
-    if (cachedMaster && cachedHeaders && cachedMaster.length > 0) {
-      rawHeaders = cachedHeaders;
-      handleMasterDataSuccess(cachedMaster, cachedUpdated || 'Cached');
-      // Hide full screen loader instantly!
-      document.getElementById('loader').style.display = 'none';
-    }
-
-    // 2. BACKGROUND LIVE SYNC (Background Me New Data Fetch Karega)
-    loadMasterStockData();
-    loadBenchmarkIndexData();
-    setupAutoRefreshTimer();
-
-    window.addEventListener('click', function(e) {
-      if (!e.target.closest('.dropdown')) {
-        const _dd = document.getElementById('relativeDropdownMenu'); if (_dd) _dd.classList.remove('show');
+      if (cachedMaster && cachedHeaders && cachedMaster.length > 0) {
+        rawHeaders = cachedHeaders;
+        handleMasterDataSuccess(cachedMaster, cachedUpdated || 'Cached', false);
+        document.getElementById('loader').style.display = 'none';
       }
-    });
-  };
+
+      // 2) fresh data (worker edge cache) — all in parallel, swaps in silently
+      loadMasterStockData();
+      loadRSRankingData(true);
+      fetchChartinkScannerData();
+      loadBenchmarkIndexData();
+
+      window.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+          const _dd = document.getElementById('relativeDropdownMenu'); if (_dd) _dd.classList.remove('show');
+        }
+      });
+    }
+    let __screenerStarted = false;
+    async function bootScreener() {
+      if (__screenerStarted) return; __screenerStarted = true;
+      await MKC.init();
+      startScreener();
+    }
+    if (window.MickkkGate && window.MickkkGate.ready) bootScreener();
+    else window.addEventListener('mickkk:authed', bootScreener);
+
     // =========================================================================
     // 🔀 APP VIEW SWITCHER & NAVIGATION
     // =========================================================================
@@ -285,6 +249,8 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
     }
 
     function triggerActiveViewRefresh() {
+      MKC.forceFor(8000);
+      if (typeof mkToast === 'function') mkToast('Refreshing data…');
       if (currentAppView === 'master') {
         loadMasterStockData();
       } else if (currentAppView === 'relative') {
@@ -310,7 +276,7 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
 
     async function loadBenchmarkIndexData() {
       try {
-        const res = await fetch(`${WEBAPP_URL}?action=getBenchmarkIndex`);
+        const res = await MKC.fetch('screener', { action: 'getBenchmarkIndex' });
         const json = await res.json();
         if (json && json.success && json.data) {
           parseBenchmarkRows(json.data);
@@ -319,7 +285,7 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
       } catch (e) {}
 
       try {
-        const gvizRes = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('NIFTY 500 Index')}`);
+        const gvizRes = await MKC.gviz('NIFTY 500 Index');
         const text = await gvizRes.text();
         const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const gviz = JSON.parse(jsonString);
@@ -401,7 +367,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
       let fetchedData = null;
 
       try {
-        const res = await fetch(`${WEBAPP_URL}?action=getRelativeReturns&sheetName=${encodeURIComponent(sheetName)}`);
+        const res = await MKC.fetch('screener', { action: 'getRelativeReturns', sheetName: sheetName });
         const json = await res.json();
         if (json && json.success && json.data) {
           fetchedData = json.data;
@@ -410,7 +376,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
 
       if (!fetchedData) {
         try {
-          const gvizRes = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent(sheetName)}`);
+          const gvizRes = await MKC.gviz(sheetName);
           const text = await gvizRes.text();
           const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
           const gviz = JSON.parse(jsonString);
@@ -640,30 +606,29 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
     // 🏆 2. RS RANKING MATRIX ENGINE (POINT 4: T1-T5 SEQUENCE)
     // =========================================================================
 
-    async function loadRSRankingData() {
-      document.getElementById('loader').style.display = 'flex';
-      document.getElementById('loader-msg').innerText = 'Loading RS Ranking Matrix...';
+    async function loadRSRankingData(silent) {
+      if (!silent) { document.getElementById('loader').style.display = 'flex'; document.getElementById('loader-msg').innerText = 'Loading RS Ranking Matrix...'; }
 
       let data = null;
 
       try {
-        const res = await fetch(`${WEBAPP_URL}?action=getRSRanking`);
+        const res = await MKC.fetch('screener', { action: 'getRSRanking' });
         const json = await res.json();
-        if (json && json.success && json.data) {
+        if (json && json.success && json.data && json.data.length && json.data[0]['Overall RS Rating'] !== undefined) {
           data = json.data;
         }
       } catch (e) {}
 
       if (!data) {
         try {
-          const gvizRes = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('RS Ranking')}`);
+          const gvizRes = await MKC.gviz('RS Ranking');
           const text = await gvizRes.text();
           const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
           const gviz = JSON.parse(jsonString);
           if (gviz && gviz.table && gviz.table.rows) {
-            data = gviz.table.rows.slice(1).map(r => {
+            data = gviz.table.rows.map(r => {
               const c = r.c;
-              if (!c || !c[1]) return null;
+              if (!c || !c[1] || String(c[1].v).toUpperCase() === 'SYMBOL') return null;
               return {
                 'NAME OF COMPANY': c[0] ? (c[0].f || c[0].v) : '',
                 'SYMBOL': c[1] ? String(c[1].f || c[1].v).toUpperCase() : '',
@@ -681,7 +646,12 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
                 'Short Term RS Rank': c[17] ? c[17].v : 999,
                 'Avg Rank (all 5 types)': c[19] ? c[19].v : 999,
                 'Overall RS Rank': c[20] ? c[20].v : 999,
-                'Short Term RS Rating': c[18] ? c[18].v : 50
+                'Short Term RS Rating': c[18] ? c[18].v : 50,
+                'Self RS (Near-Term) Rating': c[6] ? c[6].v : 0,
+                'Self RS (Default) Rating': c[9] ? c[9].v : 0,
+                'Relative RS (Near-Term) Rating': c[12] ? c[12].v : 0,
+                'Relative RS (Default) Rating': c[15] ? c[15].v : 0,
+                'Overall RS Rating': c[21] ? c[21].v : 0
               };
             }).filter(Boolean);
           }
@@ -706,7 +676,12 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
             'REL_DEF_RANK': num(r['Relative RS (Default) Rank']) || 999,
             'ST_SCORE': num(r['Short Term RS Score']),
             'ST_RANK': num(r['Short Term RS Rank']) || 999,
-            'ST_RATING': num(r['Short Term RS Rating']) || 50,
+            'ST_RATING': num(r['Short Term RS Rating']),
+            'SELF_NT_RATING': num(r['Self RS (Near-Term) Rating']),
+            'SELF_DEF_RATING': num(r['Self RS (Default) Rating']),
+            'REL_NT_RATING': num(r['Relative RS (Near-Term) Rating']),
+            'REL_DEF_RATING': num(r['Relative RS (Default) Rating']),
+            'OVERALL_RATING': num(r['Overall RS Rating']),
             'AVG_RANK': num(r['Avg Rank (all 5 types)']),
             'OVERALL_RANK': num(r['Overall RS Rank']) || 999
           };
@@ -714,6 +689,8 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
 
  // ✅ Save RS Ranking Clean Dataset to Local Cache
         setLocalCache(CACHE_KEYS.RANKING, rawRankingDataset);
+        rawRankingDataset.forEach(item => { symbolRsRatingMap[item.SYMBOL] = item; });
+        if (typeof enrichDataset === 'function' && rawDataset.length) { enrichDataset(); buildFilterOptions(); applyAllFilters(); }
 
         document.getElementById('rank-total-count').innerText = rawRankingDataset.length;
         renderRSLeadersCards();
@@ -721,7 +698,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
         filterRSRankingTable();
       }
 
-      document.getElementById('loader').style.display = 'none';
+      if (!silent) document.getElementById('loader').style.display = 'none';
     }
 
    function renderRSLeadersCards() {
@@ -945,7 +922,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
       const sheetNamesToTry = ['📈 RS Gainers & Trend', 'RS Gainers & Trend'];
       for (let sName of sheetNamesToTry) {
         try {
-          const gvizRes = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent(sName)}`);
+          const gvizRes = await MKC.gviz(sName);
           const text = await gvizRes.text();
           const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
           const gviz = JSON.parse(jsonString);
@@ -1099,7 +1076,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
 
       // Method 1: Fetch via WebApp API (Bypasses Emoji Encoding Issues)
       try {
-        const res = await fetch(`${WEBAPP_URL}?action=getEarlyTrend`);
+        const res = await MKC.fetch('screener', { action: 'getEarlyTrend' });
         const json = await res.json();
         if (json && json.success && json.data && json.data.length > 0) {
           parsed = json.data.map(r => {
@@ -1138,7 +1115,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
         
         for (let sName of sheetNamesToTry) {
           try {
-            const gvizRes = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent(sName)}`);
+            const gvizRes = await MKC.gviz(sName);
             const text = await gvizRes.text();
             const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
             const gviz = JSON.parse(jsonString);
@@ -1384,7 +1361,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
 
       // Method 1: Fetch via GViz (Fastest)
       try {
-        const gvizRes = await fetch(`${GVIZ_BASE}&sheet=${encodeURIComponent('_RS_History_Log_')}`);
+        const gvizRes = await MKC.gviz('_RS_History_Log_');
         const text = await gvizRes.text();
         const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const gviz = JSON.parse(jsonString);
@@ -1419,7 +1396,7 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
 
       // Method 2: Fallback via WebApp API
       try {
-        const res = await fetch(`${WEBAPP_URL}?action=getSheetData&sheetName=${encodeURIComponent('_RS_History_Log_')}`);
+        const res = await MKC.fetch('screener', { action: 'getSheetData', sheetName: '_RS_History_Log_' });
         const json = await res.json();
         if (json && json.success && json.data && json.data.length > 0) {
           const headers = json.headers || Object.keys(json.data[0]);
@@ -1644,624 +1621,3 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
     // =========================================================================
     // ⚙️ 6. MASTER 100+ COLUMNS SCREENER ENGINE
     // =========================================================================
-
-    function loadMasterStockData() {
-      document.getElementById('loader').style.display = 'flex';
-      document.getElementById('loader-msg').innerText = 'Loading Stock Master Universe (100+ Columns Matrix)...';
-
-      fetch(GVIZ_URL)
-        .then(res => res.text())
-        .then(text => {
-          if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
-            fetchFromWebAppAPI();
-            return;
-          }
-          try {
-            const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-            const gvizData = JSON.parse(jsonString);
-            parseGVizMasterData(gvizData);
-          } catch(e) {
-            fetchFromWebAppAPI();
-          }
-        })
-        .catch(err => fetchFromWebAppAPI());
-    }
-
-    function fetchFromWebAppAPI() {
-      fetch(WEBAPP_URL + "?action=getMasterStockList")
-        .then(res => res.json())
-        .then(res => {
-          if (res && res.success && res.data) {
-            rawHeaders = res.headers;
-            handleMasterDataSuccess(res.data, res.updatedAt);
-          }
-        })
-        .catch(err => {
-          document.getElementById('loader').style.display = 'none';
-        });
-    }
-
-    function parseGVizMasterData(gviz) {
-      if (!gviz || !gviz.table || !gviz.table.rows) {
-        document.getElementById('loader').style.display = 'none';
-        return;
-      }
-
-      const rows = gviz.table.rows;
-      const headerCells = rows[2].c;
-      rawHeaders = headerCells.map(c => (c && c.v !== null) ? String(c.f || c.v).trim() : '').filter(Boolean);
-
-      const parsed = [];
-
-      for (let i = 3; i < rows.length; i++) {
-        const c = rows[i].c;
-        if (!c || c.length < 2) continue;
-
-        let symVal = (c[1] && c[1].v !== null) ? String(c[1].f || c[1].v).trim().toUpperCase() : '';
-        let nameVal = (c[2] && c[2].v !== null) ? String(c[2].f || c[2].v).trim() : symVal;
-
-        if (!symVal || symVal === 'NSE SYMBOL' || symVal === 'SYMBOL' || symVal.includes('NOTE')) continue;
-
-        const rowObj = {
-          'Symbol': symVal,
-          'Stock Name': nameVal,
-          'NSE Symbol': symVal
-        };
-
-        for (let colIdx = 0; colIdx < rawHeaders.length; colIdx++) {
-          const hName = rawHeaders[colIdx];
-          const cell = c[colIdx];
-
-          if (!cell || cell.v === null) {
-            rowObj[hName] = '';
-          } else if (typeof cell.v === 'number') {
-            rowObj[hName] = cell.v;
-          } else {
-            const strVal = String(cell.f || cell.v).trim();
-            const num = parseFloat(strVal.replace(/[%,\s₹]/g, ''));
-            if (strVal !== '' && !isNaN(num) && isFinite(num) && (/^[-+]?\d+(\.\d+)?%?$/.test(strVal))) {
-              rowObj[hName] = num;
-            } else {
-              rowObj[hName] = strVal;
-            }
-          }
-        }
-
-        parsed.push(rowObj);
-      }
-
-      handleMasterDataSuccess(parsed, new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
-    }
-
-    function handleMasterDataSuccess(dataList, updatedAt) {
-      document.getElementById('loader').style.display = 'none';
-      if (!dataList || dataList.length === 0) return;
-
-      rawDataset = dataList;
-
-// Auto-save fresh live data to local cache
-  setLocalCache(CACHE_KEYS.MASTER, dataList);
-  setLocalCache(CACHE_KEYS.HEADERS, rawHeaders);
-  setLocalCache(CACHE_KEYS.UPDATED, updatedAt);
-
-      document.getElementById('total-count').innerText = rawDataset.length;
-      document.getElementById('last-updated-time').innerHTML = `<i data-lucide="clock" style="width:11px;height:11px;"></i> ${updatedAt || 'Just Now'}`;
-
-      const excluded = ['S.No', 'BSE Code', 'NSE Symbol', 'Stock Name', 'Sector', 'Industry', 'Detected Patterns'];
-      availableColumns = rawHeaders.filter(h => !excluded.includes(h));
-      availableColumns.push('Detected Patterns');
-
-      if (visibleColumnsSet.size === 0) {
-        availableColumns.forEach(c => visibleColumnsSet.add(c));
-      }
-
-      filterDisplayHeadersByMatrix();
-      populateSectorsDropdown();
-      populateIndustriesDropdown();
-      applyAllFilters();
-      lucide.createIcons();
-
-// Preload RS ranking map for Master view
-    loadRSRankingData().then(() => {
-      if (rawRankingDataset && rawRankingDataset.length > 0) {
-        rawRankingDataset.forEach(item => {
-          symbolRsRatingMap[item.SYMBOL] = item;
-        });
-        renderMasterTable();
-      }
-    });
-
-      fetchChartinkScannerData();
-    }
-
-    async function fetchChartinkScannerData() {
-      try {
-        const res = await fetch(SCANNER_WEBAPP_URL);
-        const json = await res.json();
-        if (json && json.success && json.data) {
-          chartinkScanners = json.data.scanners || {};
-          stockToScannersMap = json.data.stockToScannersMap || {};
-setLocalCache(CACHE_KEYS.SCANNERS, { scanners: chartinkScanners, stockToScannersMap: stockToScannersMap });
-          renderScannerChips();
-          renderMasterTable();
-        }
-      } catch (err) {}
-    }
-
-    function renderScannerChips() {
-      const container = document.getElementById('chartinkScannersRow');
-      const keys = Object.keys(chartinkScanners);
-      if (keys.length === 0) return;
-
-      let html = `<span class="filter-group-title scanner-title-glow"><i data-lucide="sparkles" style="width:11px;height:11px;display:inline-block;"></i> PATTERNS & SCANNERS</span>`;
-      
-      keys.forEach(k => {
-        const count = chartinkScanners[k].length;
-        const icon = getScannerIcon(k);
-        const cleanName = k.replace(/\(\d+\)/g, '').trim();
-        html += `
-          <span class="chip-scanner-vip" data-scanner="${k}" onclick="toggleScannerChip(this, '${k}')">
-            <span>${icon}</span>
-            <span>${cleanName}</span>
-            <span class="scanner-count-badge">${count}</span>
-          </span>
-        `;
-      });
-
-      container.innerHTML = html;
-      lucide.createIcons();
-    }
-
-    function toggleScannerChip(el, scannerName) {
-      if (activeScannerChips.has(scannerName)) {
-        activeScannerChips.delete(scannerName);
-        el.classList.remove('active');
-      } else {
-        activeScannerChips.add(scannerName);
-        el.classList.add('active');
-      }
-      applyAllFilters();
-    }
-
-    function switchMatrixView(el, viewKey) {
-      document.querySelectorAll('.matrix-btn').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
-      activeMatrixView = viewKey;
-      filterDisplayHeadersByMatrix();
-      renderMasterTable();
-    }
-
-    function filterDisplayHeadersByMatrix() {
-      const base = availableColumns.filter(h => visibleColumnsSet.has(h));
-      if (activeMatrixView === 'all') displayHeaders = base;
-      else if (activeMatrixView === 'technicals') displayHeaders = base.filter(h => /Detected Patterns|Close|Volume|TURNOVER|RS|RSI|ema|high|low|D|W|15D|M|Q|H|Y|range|Away|VWAP|ATR/i.test(h) && !/Sales|Profit|PE|PB|ROCE|ROE|Debt|Ratio/i.test(h));
-      else if (activeMatrixView === 'valuation') displayHeaders = base.filter(h => /Market Cap|PE|P\/E|PB|P\/B|ROCE|ROE|Networth|Debt|Asset|Cap Category|Book|EPS|Ratio/i.test(h));
-      else if (activeMatrixView === 'sales_profit') displayHeaders = base.filter(h => /Sales|Profit|Revenue|OPM|Margin|TURNOVER|EBIT/i.test(h));
-      else if (activeMatrixView === 'shareholding') displayHeaders = base.filter(h => /FII|DII|Promoter|Public|Holding|Shareholding/i.test(h));
-    }
-
-    function openColumnModal() {
-      const modal = document.getElementById('columnModal');
-      const list = document.getElementById('columnCheckboxesList');
-      modal.style.display = 'flex';
-
-      list.innerHTML = availableColumns.map(col => {
-        const isChecked = visibleColumnsSet.has(col) ? 'checked' : '';
-        return `
-          <label class="col-checkbox-label">
-            <input type="checkbox" value="${col}" ${isChecked}>
-            <span>${col}</span>
-          </label>
-        `;
-      }).join('');
-      lucide.createIcons();
-    }
-
-    function closeColumnModal() { document.getElementById('columnModal').style.display = 'none'; }
-    function toggleAllColumns(select) { document.querySelectorAll('#columnCheckboxesList input[type="checkbox"]').forEach(cb => { cb.checked = select; }); }
-    function applyCustomColumns() {
-      visibleColumnsSet.clear();
-      document.querySelectorAll('#columnCheckboxesList input[type="checkbox"]:checked').forEach(cb => { visibleColumnsSet.add(cb.value); });
-      filterDisplayHeadersByMatrix();
-      renderMasterTable();
-      closeColumnModal();
-    }
-
-    function populateSectorsDropdown() {
-      const select = document.getElementById('sector-select');
-      const sectors = Array.from(new Set(rawDataset.map(r => toTitleCase(r['Sector'])))).filter(s => s && s !== '-').sort();
-      select.innerHTML = `<option value="ALL">All Sectors (${sectors.length})</option>` + sectors.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-
-    function populateIndustriesDropdown() {
-      const select = document.getElementById('industry-select');
-      const selectedSec = document.getElementById('sector-select').value;
-      let filtered = selectedSec !== 'ALL' ? rawDataset.filter(r => toTitleCase(r['Sector']) === selectedSec) : rawDataset;
-
-      const industries = Array.from(new Set(filtered.map(r => toTitleCase(r['Industry'])))).filter(i => i && i !== '-').sort();
-      select.innerHTML = `<option value="ALL">All Industries (${industries.length})</option>` + industries.map(ind => `<option value="${ind}">${ind}</option>`).join('');
-    }
-
-    function toggleChip(el, chipKey) {
-      if (activeChips.has(chipKey)) {
-        activeChips.delete(chipKey);
-        el.classList.remove('active');
-      } else {
-        activeChips.add(chipKey);
-        el.classList.add('active');
-      }
-      applyAllFilters();
-    }
-
-    function clearAllFilterChips() {
-      activeChips.clear();
-      activeScannerChips.clear();
-      document.querySelectorAll('.chip, .chip-scanner-vip').forEach(c => c.classList.remove('active'));
-      applyAllFilters();
-    }
-
-    function resetAllFilters() {
-      document.getElementById('search-input').value = '';
-      document.getElementById('sector-select').value = 'ALL';
-      document.getElementById('industry-select').value = 'ALL';
-      document.getElementById('marketcap-select').value = 'ALL';
-      
-      document.getElementById('param-pullback').value = '1.5';
-      document.getElementById('param-away-52wh').value = '-20';
-      document.getElementById('param-turnover').value = '0';
-      document.getElementById('param-rsi').value = '60';
-      document.getElementById('param-roce').value = '15';
-      document.getElementById('param-eps').value = '0';
-      document.getElementById('param-cr-less').value = '3.0';
-      document.getElementById('param-pb-less').value = '5.0';
-      document.getElementById('param-de').value = '1.0';
-      document.getElementById('param-pe').value = '40';
-
-      clearAllFilterChips();
-    }
-
-    function applyAllFilters() {
-      const q = document.getElementById('search-input').value.trim().toLowerCase();
-      const sec = document.getElementById('sector-select').value;
-      const ind = document.getElementById('industry-select').value;
-      const cap = document.getElementById('marketcap-select').value;
-
-      const pPullback = parseFloat(document.getElementById('param-pullback').value) || 1.5;
-      const pAway52 = parseFloat(document.getElementById('param-away-52wh').value) || -20;
-      const pTurnover = parseFloat(document.getElementById('param-turnover').value) || 0;
-      const pRSI = parseFloat(document.getElementById('param-rsi').value) || 60;
-      const pROCE = parseFloat(document.getElementById('param-roce').value) || 15;
-      const pEPS = parseFloat(document.getElementById('param-eps').value) || 0;
-      const pCRLess = parseFloat(document.getElementById('param-cr-less').value) || 3.0;
-      const pPBLess = parseFloat(document.getElementById('param-pb-less').value) || 5.0;
-      const pDE = parseFloat(document.getElementById('param-de').value) || 1.0;
-      const pPE = parseFloat(document.getElementById('param-pe').value) || 40;
-
-      filteredDataset = rawDataset.filter(r => {
-        const sym = String(r['Symbol'] || r['NSE Symbol'] || '').toLowerCase();
-        const symUpper = sym.toUpperCase();
-        const name = String(r['Stock Name'] || '').toLowerCase();
-        const sectorFormatted = toTitleCase(r['Sector']);
-        const industryFormatted = toTitleCase(r['Industry']);
-
-        if (q && !sym.includes(q) && !name.includes(q)) return false;
-        if (sec !== 'ALL' && sectorFormatted !== sec) return false;
-        if (ind !== 'ALL' && industryFormatted !== ind) return false;
-        if (cap !== 'ALL' && String(r['Market Cap Category'] || '').toLowerCase() !== cap.toLowerCase()) return false;
-
-        if (activeScannerChips.size > 0) {
-          const stockScanners = stockToScannersMap[symUpper] || [];
-          for (let sc of activeScannerChips) {
-            if (!stockScanners.includes(sc)) return false;
-          }
-        }
-
-        const close = Number(r['Close']) || 0;
-        const rsiVal = Number(r['RSI']) || 0;
-        const turn20 = (Number(r['20D AVG TURNOVER']) > 100000 ? Number(r['20D AVG TURNOVER']) / 10000000 : Number(r['20D AVG TURNOVER'])) || 0;
-        const away52 = Number(r['52WH Away']) || 0;
-        const vwap = Number(r['VWAP']) || 0;
-
-        const ema10 = Number(r['10ema']) || 0;
-        const ema20 = Number(r['20ema']) || 0;
-        const ema50 = Number(r['50ema']) || 0;
-        const ema200 = Number(r['200ema']) || 0;
-
-        const high15D = Number(r['15D high'] || r['15D High'] || r['15D ago high']) || 0;
-        const highW = Number(r['1W high'] || r['W high'] || r['W ago high']) || 0;
-        const highM = Number(r['1M high'] || r['M high'] || r['M ago high']) || 0;
-        const highQ = Number(r['1Q high'] || r['Q high'] || r['Q ago high']) || 0;
-        const highY = Number(r['1Y high'] || r['Y high'] || r['Y ago high']) || 0;
-
-        const roce = Number(r['ROCE'] || r['ROCE %']) || 0;
-        const currentRatio = Number(r['Current Ratio'] || r['CR']) || 0;
-        const eps = Number(r['EPS'] || r['TTM EPS']) || 0;
-        const debtToEq = Number(r['Debt to Equity'] || r['D/E'] || r['Debt/Equity']) || 0;
-        const pe = Number(r['P/E'] || r['PE']) || 0;
-        const pb = Number(r['P/B'] || r['PB']) || 0;
-        const bookValue = Number(r['Book Value'] || r['BV']) || 0;
-
-        if (pTurnover > 0 && turn20 < pTurnover) return false;
-
-        if (activeChips.has('rsi60') && rsiVal < pRSI) return false;
-        if (activeChips.has('rsi70') && rsiVal < 70) return false;
-        if (activeChips.has('near52wh') && away52 < pAway52) return false;
-
-        if (activeChips.has('closeEma10') && close < ema10) return false;
-        if (activeChips.has('closeEma20') && close < ema20) return false;
-        if (activeChips.has('closeEma50') && close < ema50) return false;
-        if (activeChips.has('closeEma200') && close < ema200) return false;
-
-        if (activeChips.has('pullback10ema')) {
-          if (ema10 === 0 || (Math.abs(close - ema10) / ema10 * 100) > pPullback) return false;
-        }
-        if (activeChips.has('pullback20ema')) {
-          if (ema20 === 0 || (Math.abs(close - ema20) / ema20 * 100) > pPullback) return false;
-        }
-
-        if (activeChips.has('closeVwap') && vwap > 0 && close < vwap) return false;
-
-        if (activeChips.has('near15D') && high15D > 0 && ((high15D - close) / high15D * 100) > 3) return false;
-        if (activeChips.has('nearWeek') && highW > 0 && ((highW - close) / highW * 100) > 3) return false;
-        if (activeChips.has('nearMonth') && highM > 0 && ((highM - close) / highM * 100) > 3) return false;
-        if (activeChips.has('nearQuarter') && highQ > 0 && ((highQ - close) / highQ * 100) > 3) return false;
-        if (activeChips.has('nearYear') && highY > 0 && ((highY - close) / highY * 100) > 3) return false;
-
-        if (activeChips.has('roceFilter') && roce < pROCE) return false;
-        if (activeChips.has('epsFilter') && eps < pEPS) return false;
-        if (activeChips.has('currentRatioLess') && (currentRatio <= 0 || currentRatio >= pCRLess)) return false;
-        if (activeChips.has('pbFilter') && (pb <= 0 || pb >= pPBLess)) return false;
-        if (activeChips.has('lowDebt') && debtToEq > pDE) return false;
-        if (activeChips.has('peFilter') && (pe <= 0 || pe > pPE)) return false;
-        if (activeChips.has('undervaluedBV') && (bookValue <= 0 || bookValue < close)) return false;
-
-        return true;
-      });
-
-      sortDataset();
-      renderMasterTable();
-    }
-
-    function sortTable(colKey) {
-      if (currentSortCol === colKey) {
-        currentSortAsc = !currentSortAsc;
-      } else {
-        currentSortCol = colKey;
-        currentSortAsc = false;
-      }
-      sortDataset();
-      renderMasterTable();
-    }
-
-    function sortDataset() {
-      filteredDataset.sort((a, b) => {
-        let vA = a[currentSortCol], vB = b[currentSortCol];
-        if (vA === undefined || vA === '') return 1;
-        if (vB === undefined || vB === '') return -1;
-        if (typeof vA === 'string' && typeof vB === 'string') {
-          return currentSortAsc ? vA.localeCompare(vB) : vB.localeCompare(vA);
-        }
-        return currentSortAsc ? (Number(vA) - Number(vB)) : (Number(vB) - Number(vA));
-      });
-    }
-
-    function renderMasterTable() {
-    const headerRow = document.getElementById('master-table-headers');
-    const tbody = document.getElementById('master-table-body');
-    document.getElementById('shown-count').innerText = filteredDataset.length;
-
-    let headersHTML = `
-      <th class="sticky-col" onclick="sortTable('Symbol')">STOCK / SYMBOL ⇅</th>
-      <th style="min-width: 90px; text-align:center;">
-        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-          <span>RS RATING 🏆</span>
-          <select class="master-rs-select" onchange="changeMasterRsType(this.value)">
-            <option value="overall" ${masterSelectedRsType==='overall'?'selected':''}>Overall RS</option>
-            <option value="st" ${masterSelectedRsType==='st'?'selected':''}>Short Term RS</option>
-            <option value="snt" ${masterSelectedRsType==='snt'?'selected':''}>Self RS (NT)</option>
-            <option value="sdef" ${masterSelectedRsType==='sdef'?'selected':''}>Self RS (Def)</option>
-            <option value="rnt" ${masterSelectedRsType==='rnt'?'selected':''}>Rel RS (NT)</option>
-            <option value="rdef" ${masterSelectedRsType==='rdef'?'selected':''}>Rel RS (Def)</option>
-          </select>
-        </div>
-      </th>
-      <th class="sticky-sec" onclick="sortTable('Sector')">SECTOR / INDUSTRY ⇅</th>
-    `;
-    
-    headersHTML += displayHeaders.map(h => {
-      return `<th onclick="sortTable('${h}')">${h} ${currentSortCol === h ? (currentSortAsc ? '▲' : '▼') : '⇅'}</th>`;
-    }).join('');
-    headerRow.innerHTML = headersHTML;
-
-    if (filteredDataset.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${displayHeaders.length + 3}" style="padding: 24px; color: var(--c-slate); font-size: 12px;">No stocks match the selected filter criteria.</td></tr>`;
-      return;
-    }
-
-    const displayRows = filteredDataset.slice(0, 300);
-
-    const fmtPct = (val) => {
-      if (val === '' || val === null || isNaN(val)) return '-';
-      const num = Number(val);
-      const sign = num > 0 ? '+' : '';
-      const cls = num > 0 ? 'val-pos' : (num < 0 ? 'val-neg' : '');
-      return `<span class="${cls}">${sign}${num.toFixed(2)}%</span>`;
-    };
-
-    const fmtPrice = (val) => {
-      if (val === '' || val === null || isNaN(val)) return '-';
-      return '₹' + Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    const getMasterRSPill = (sym, fallbackVal) => {
-      const s = sym.toUpperCase();
-      let rating = 50;
-      if (symbolRsRatingMap[s]) {
-        const m = symbolRsRatingMap[s];
-        if (masterSelectedRsType === 'overall') rating = m.OVERALL_RATING || (100 - m.OVERALL_RANK / 20);
-        else if (masterSelectedRsType === 'st') rating = m.ST_RATING || (100 - m.ST_RANK / 20);
-        else if (masterSelectedRsType === 'snt') rating = 100 - (m.SELF_NT_RANK / 20);
-        else if (masterSelectedRsType === 'sdef') rating = 100 - (m.SELF_DEF_RANK / 20);
-        else if (masterSelectedRsType === 'rnt') rating = 100 - (m.REL_NT_RANK / 20);
-        else if (masterSelectedRsType === 'rdef') rating = 100 - (m.REL_DEF_RANK / 20);
-      } else {
-        rating = parseFloat(fallbackVal) || 50;
-      }
-
-      rating = Math.max(1, Math.min(99, Math.round(rating)));
-      let pillCls = 'rs-pill-neg';
-      if (rating >= 70) pillCls = 'rs-pill-pos';
-      else if (rating >= 40) pillCls = 'rank-p-top50';
-
-      return `<span class="rs-pill ${pillCls}">${rating}</span>`;
-    };
-
-    tbody.innerHTML = displayRows.map(r => {
-      const sym = r['Symbol'] || r['NSE Symbol'] || 'STOCK';
-      const symUpper = sym.toUpperCase();
-      const name = r['Stock Name'] || sym;
-      const sec = toTitleCase(r['Sector']);
-      const ind = toTitleCase(r['Industry']);
-
-      let rowHTML = `
-        <tr>
-          <td class="sticky-col">
-            ${renderStockWith3Links(sym, name)}
-          </td>
-          <td>
-            ${getMasterRSPill(sym, r['RS RATING'])}
-          </td>
-          <td class="sticky-sec">
-            <div class="sector-wrap">
-              <span class="sec-txt" title="${sec}">${sec}</span>
-              <span class="ind-txt" title="${ind}">${ind}</span>
-            </div>
-          </td>
-      `;
-
-      rowHTML += displayHeaders.map(h => {
-        const val = r[h];
-
-        if (h === 'Detected Patterns') {
-          const scList = stockToScannersMap[symUpper] || [];
-          return `<td>${formatPatternPills(scList)}</td>`;
-        }
-
-        if (h === 'Sector' || h === 'Industry') {
-          return `<td><span style="font-family:'Inter', sans-serif; font-weight:600; color:var(--c-text2);">${toTitleCase(val)}</span></td>`;
-        }
-
-        if (/^RS RATING|^Abs RS/i.test(h)) {
-          if (val === '' || val === null || isNaN(val)) return `<td>-</td>`;
-          const numVal = parseFloat(val);
-          const isPos = numVal >= 0;
-          const sign = isPos ? '+' : '';
-          const pillCls = isPos ? 'rs-pill-pos' : 'rs-pill-neg';
-          return `<td><span class="rs-pill ${pillCls}">${sign}${numVal.toFixed(2)}</span></td>`;
-        }
-
-        if (h === 'Market Cap Category') {
-          const capStr = String(val || 'Mid Cap');
-          let capClass = 'cap-mid';
-          if (capStr.includes('Large')) capClass = 'cap-large';
-          else if (capStr.includes('Small')) capClass = 'cap-small';
-          else if (capStr.includes('Micro')) capClass = 'cap-micro';
-          return `<td><span class="cap-badge ${capClass}">${val}</span></td>`;
-        }
-
-        if (h === 'Close' || h === 'VWAP' || /ema|ago high|high|low|ATR/i.test(h)) {
-          return `<td><span class="val-price">${fmtPrice(val)}</span></td>`;
-        }
-
-        if (h === 'Volume') {
-          return `<td><span>${typeof val === 'number' ? val.toLocaleString('en-IN') : (val || '-')}</span></td>`;
-        }
-
-        if (h === 'Market Cap') {
-          return `<td style="color:var(--c-text3); font-weight:600;">${typeof val === 'number' ? val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (val || '-')}</td>`;
-        }
-
-        if (/TURNOVER|SALES|Sales|Profit/i.test(h)) {
-          if (typeof val === 'number') {
-            const crVal = val > 10000 ? (val / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : val.toFixed(2);
-            return `<td><span class="${h.includes('TURNOVER') ? 'val-turnover' : ''}">₹${crVal} Cr</span></td>`;
-          }
-          return `<td>${val || '-'}</td>`;
-        }
-
-        if (/D|W|15D|M|Q|H|Y|Away|ROCE|Ratio|Return|OPM|FII|DII|Promoter|Networth|Assets|range/i.test(h) && typeof val === 'number' && !h.includes('TURNOVER')) {
-          if (h.includes('range')) return `<td><span class="val-range">+${val.toFixed(2)}%</span></td>`;
-          return `<td>${fmtPct(val)}</td>`;
-        }
-
-        if (/PE|P\/E|PB|P\/B|EPS|Debt|Current Ratio/i.test(h) && typeof val === 'number') {
-          return `<td style="color:var(--c-text3); font-weight:600;">${val.toFixed(2)}</td>`;
-        }
-
-        return `<td>${typeof val === 'number' ? val.toFixed(2) : (val || '-')}</td>`;
-      }).join('');
-
-      rowHTML += `</tr>`;
-      return rowHTML;
-    }).join('');
-
-    lucide.createIcons();
-  }
-
-    // =========================================================================
-    // ⏱️ AUTO REFRESH TIMER & EXPORT UTILITIES
-    // =========================================================================
-
-    function setupAutoRefreshTimer() {
-      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-      const intervalSec = parseInt(document.getElementById('auto-refresh-interval').value);
-      const badge = document.getElementById('timer-badge');
-
-      if (intervalSec === 0) {
-        badge.innerText = '';
-        return;
-      }
-
-      refreshCountdown = intervalSec;
-      badge.innerText = `(${refreshCountdown}s)`;
-
-      autoRefreshTimer = setInterval(() => {
-        refreshCountdown--;
-        badge.innerText = `(${refreshCountdown}s)`;
-
-        if (refreshCountdown <= 0) {
-          refreshCountdown = intervalSec;
-          triggerActiveViewRefresh();
-        }
-      }, 1000);
-    }
-
-    function copyTableData() {
-      if (filteredDataset.length === 0) return;
-      const symbols = filteredDataset.map(r => r['Symbol']).filter(Boolean).join(', ');
-      navigator.clipboard.writeText(symbols).then(() => {
-        alert(`Copied ${filteredDataset.length} Symbols to clipboard!`);
-      });
-    }
-
-    function exportToCSV() {
-      if (filteredDataset.length === 0) return;
-      const exportCols = ['Symbol', 'Stock Name', 'Sector', 'Industry', ...displayHeaders];
-      let csv = exportCols.map(h => `"${h}"`).join(',') + '\n';
-
-      filteredDataset.forEach(r => {
-        const rowVals = exportCols.map(h => {
-          let cellVal = r[h] !== undefined ? String(r[h]).replace(/"/g, '""') : '';
-          return `"${cellVal}"`;
-        });
-        csv += rowVals.join(',') + '\n';
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.setAttribute("download", `MICKKK_Master_Screener_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
