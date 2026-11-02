@@ -81,6 +81,10 @@
         try {
           var res = await fetch(url, { cache: force ? 'reload' : 'default' });
           if (!res.ok) throw new Error('worker ' + res.status);
+          if (route === 'gviz') {           // worker must return a real sheet answer, not an HTML/login page
+            var t = await res.clone().text();
+            if (!/setResponse\s*\(|"table"\s*:/.test(t)) throw new Error('worker returned non-sheet data');
+          }
           return res;
         } catch (e) {
           // fallback: straight to Google
