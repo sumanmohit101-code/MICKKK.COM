@@ -199,7 +199,7 @@
       <!-- ===================== FILTER PANEL ===================== -->
       <div class="flt-card">
         <div class="flt-head">
-          <div class="flt-title"><i data-lucide="sliders-horizontal"></i> Filters <span class="flt-badge" id="activeFilterCount">No filters</span></div>
+          <div class="flt-title"><i data-lucide="sliders-horizontal"></i> Filters <span class="flt-badge" id="activeFilterCount">No filters</span><button type="button" class="flt-collapse" id="fltToggle" onclick="toggleFilterPanel()">Hide filters ▴</button></div>
           <div class="flt-actions">
             <button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
             <button class="btn-tool btn-tool-danger" onclick="clearAllFilterChips()"><i data-lucide="x"></i> Clear</button>
@@ -218,41 +218,58 @@
           <div class="flt-field"><label>Market Cap</label><div id="ms-cap"></div></div>
         </div>
 
-        <div class="flt-sections">
-          <section class="flt-sec flt-wide">
-            <div class="flt-sec-head">
-              <span class="flt-sec-title t-scan"><i data-lucide="sparkles"></i> Patterns &amp; Scanners <em id="scanTotal"></em></span>
-              <div class="flt-sec-tools">
+        <div class="rf-card">
+          <div class="rf-head"><i data-lucide="sliders-horizontal"></i> Range Filters <span class="rf-hint">type a Min and/or Max — blank = no limit</span></div>
+          <div class="rf-grid" id="rangeFilters"></div>
+        </div>
+
+        <div class="flt-rows">
+          <div class="fr">
+            <div class="fr-label t-scan"><i data-lucide="sparkles"></i><span>Patterns &amp; Scanners</span><em id="scanTotal"></em></div>
+            <div class="fr-body">
+              <div class="fr-tools">
                 <div class="seg" id="scanMode"><button class="on" data-mode="all" onclick="setScannerMode('all')">Match ALL</button><button data-mode="any" onclick="setScannerMode('any')">Match ANY</button></div>
                 <input id="scanSearch" class="flt-mini-search" type="text" placeholder="Find pattern…" oninput="renderScannerChips()">
                 <button class="flt-link" id="scanToggle" onclick="toggleScanExpand()">Show all</button>
               </div>
+              <div class="scan-grid collapsed" id="chartinkScannersRow"><span class="flt-hint">Loading live scanners…</span></div>
             </div>
-            <div class="scan-grid collapsed" id="chartinkScannersRow"><span class="flt-hint">Loading live scanners…</span></div>
-          </section>
+          </div>
 
-          <section class="flt-sec">
-            <div class="flt-sec-head"><span class="flt-sec-title t-tech"><i data-lucide="line-chart"></i> Technical</span>
-              <span class="cg-liq">Min turnover <input type="number" id="param-turnover" class="param-input" value="0" step="5" onchange="applyAllFilters()"> Cr</span></div>
-            <div class="flt-group"><h5>Momentum</h5><div class="flt-chips">
-              <span class="cg"><span class="chip" onclick="toggleChip(this, 'rsi60')">⚡ RSI ≥</span><input type="number" id="param-rsi" class="param-input" value="60" step="5" onchange="applyAllFilters()"></span><span class="chip" onclick="toggleChip(this, 'rsi70')">⚡ RSI > 70</span></div></div>
-            <div class="flt-group"><h5>Trend</h5><div class="flt-chips">
-              <span class="chip" onclick="toggleChip(this, 'closeEma10')">📈 Close > EMA 10</span><span class="chip" onclick="toggleChip(this, 'closeEma20')">📈 Close > EMA 20</span><span class="chip" onclick="toggleChip(this, 'closeEma50')">📈 Close > EMA 50</span><span class="chip" onclick="toggleChip(this, 'closeEma200')">📈 Close > EMA 200</span><span class="chip" onclick="toggleChip(this, 'closeVwap')">📊 Close > VWAP</span></div></div>
-            <div class="flt-group"><h5>Pullback <span class="h5-note">within</span> <input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"><i class="sfx">%</i></h5><div class="flt-chips">
-              <span class="chip" onclick="toggleChip(this, 'pullback10ema')">🎯 Pullback 10 EMA</span><span class="chip" onclick="toggleChip(this, 'pullback20ema')">🎯 Pullback 20 EMA</span></div></div>
-            <div class="flt-group"><h5>Near Highs</h5><div class="flt-chips">
-              <span class="cg"><span class="chip" onclick="toggleChip(this, 'near52wh')">🎯 52W High ≥</span><input type="number" id="param-away-52wh" class="param-input" value="-20" step="5" onchange="applyAllFilters()"><i class=sfx>%</i></span><span class="chip" onclick="toggleChip(this, 'near15D')">⏱️ 15D High</span><span class="chip" onclick="toggleChip(this, 'nearWeek')">⏱️ 1W High</span><span class="chip" onclick="toggleChip(this, 'nearMonth')">⏱️ 1M High</span><span class="chip" onclick="toggleChip(this, 'nearQuarter')">⏱️ 1Q High</span><span class="chip" onclick="toggleChip(this, 'nearYear')">⏱️ 1Y High</span></div></div>
-          </section>
+          <div class="fr">
+            <div class="fr-label t-tech"><i data-lucide="line-chart"></i><span>Technical</span></div>
+            <div class="fr-body fr-groups">
+              <div class="fg"><span class="fg-t">Momentum</span><span class="chip" onclick="toggleChip(this, 'rsi60')">RSI ≥ 60</span><span class="chip" onclick="toggleChip(this, 'rsi70')">RSI ≥ 70</span><span class="chip" onclick="toggleChip(this, 'rsiLow')">RSI ≤ 30</span></div>
+              <div class="fg"><span class="fg-t">Price above</span><span class="chip" onclick="toggleChip(this, 'closeEma10')">EMA 10</span><span class="chip" onclick="toggleChip(this, 'closeEma20')">EMA 20</span><span class="chip" onclick="toggleChip(this, 'closeEma50')">EMA 50</span><span class="chip" onclick="toggleChip(this, 'closeEma200')">EMA 200</span><span class="chip" onclick="toggleChip(this, 'closeVwap')">VWAP</span><span class="chip" onclick="toggleChip(this, 'emaStack')">Bullish EMA stack</span></div>
+              <div class="fg"><span class="fg-t">Pullback to</span><span class="chip" onclick="toggleChip(this, 'pullback10ema')">EMA 10</span><span class="chip" onclick="toggleChip(this, 'pullback20ema')">EMA 20</span><span class="cg-note">within</span><input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"><i class="sfx solo">%</i></div>
+              <div class="fg"><span class="fg-t">Near high (≤3%)</span><span class="chip" onclick="toggleChip(this, 'near15D')">15D</span><span class="chip" onclick="toggleChip(this, 'nearWeek')">1W</span><span class="chip" onclick="toggleChip(this, 'nearMonth')">1M</span><span class="chip" onclick="toggleChip(this, 'nearQuarter')">1Q</span><span class="chip" onclick="toggleChip(this, 'nearYear')">1Y</span><span class="chip" onclick="toggleChip(this, 'near52wh')">52W (≤5%)</span></div>
+            </div>
+          </div>
 
-          <section class="flt-sec">
-            <div class="flt-sec-head"><span class="flt-sec-title t-fund"><i data-lucide="shield-check"></i> Fundamental</span></div>
-            <div class="flt-group"><h5>Quality &amp; Growth</h5><div class="flt-chips">
-              <span class="cg"><span class="chip" onclick="toggleChip(this, 'roceFilter')">🔥 ROCE ≥</span><input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class=sfx>%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'epsFilter')">💰 EPS ></span><input type="number" id="param-eps" class="param-input" value="0" step="5" onchange="applyAllFilters()"></span></div></div>
-            <div class="flt-group"><h5>Valuation</h5><div class="flt-chips">
-              <span class="cg"><span class="chip" onclick="toggleChip(this, 'peFilter')">🏷️ P/E ≤</span><input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'pbFilter')">🏷️ P/B <</span><input type="number" id="param-pb-less" class="param-input" value="5.0" step="0.5" onchange="applyAllFilters()"></span><span class="chip" onclick="toggleChip(this, 'undervaluedBV')">💎 Book Value > CMP</span></div></div>
-            <div class="flt-group"><h5>Safety</h5><div class="flt-chips">
-              <span class="cg"><span class="chip" onclick="toggleChip(this, 'lowDebt')">🛡️ Debt/Eq ≤</span><input type="number" id="param-de" class="param-input" value="1.0" step="0.1" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'currentRatioLess')">💧 Current Ratio <</span><input type="number" id="param-cr-less" class="param-input" value="3.0" step="0.5" onchange="applyAllFilters()"></span></div></div>
-          </section>
+          <div class="fr">
+            <div class="fr-label t-fund"><i data-lucide="shield-check"></i><span>Fundamental</span></div>
+            <div class="fr-body fr-groups">
+              <div class="fg"><span class="fg-t">Quality</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'roceFilter')">ROCE ≥</span><input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'opmFilter')">OPM ≥</span><input type="number" id="param-opm" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'epsFilter')">EPS &gt;</span><input type="number" id="param-eps" class="param-input" value="0" step="1" onchange="applyAllFilters()"></span></div>
+              <div class="fg"><span class="fg-t">Growth (YoY)</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'salesGrowth')">Sales ≥</span><input type="number" id="param-sg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'profitGrowth')">Profit ≥</span><input type="number" id="param-pg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span></div>
+              <div class="fg"><span class="fg-t">Valuation</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'peFilter')">P/E ≤</span><input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'pbFilter')">P/B &lt;</span><input type="number" id="param-pb" class="param-input" value="5" step="0.5" onchange="applyAllFilters()"></span><span class="chip" onclick="toggleChip(this, 'undervaluedBV')">Book Value &gt; CMP</span></div>
+              <div class="fg"><span class="fg-t">Safety</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'lowDebt')">Debt/Eq ≤</span><input type="number" id="param-de" class="param-input" value="1" step="0.1" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'currentRatioMin')">Current Ratio ≥</span><input type="number" id="param-cr" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"></span></div>
+              <div class="fg"><span class="fg-t">Holding</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'promoFilter')">Promoter ≥</span><input type="number" id="param-promo" class="param-input" value="50" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="chip" onclick="toggleChip(this, 'fiiRising')">FII rising</span><span class="chip" onclick="toggleChip(this, 'diiRising')">DII rising</span></div>
+            </div>
+          </div>
+
+          <div class="fr">
+            <div class="fr-label t-cust"><i data-lucide="plus-circle"></i><span>Custom Filter</span></div>
+            <div class="fr-body">
+              <div class="cf-builder">
+                <select id="cfCol" class="cf-sel"></select>
+                <select id="cfOp" class="cf-sel cf-op"><option value="&gt;=">≥</option><option value="&lt;=">≤</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select>
+                <input type="number" id="cfVal" class="cf-val" placeholder="Value" step="any" onkeydown="if(event.key==='Enter')addCustomFilter()">
+                <button class="btn-tool btn-tool-success" onclick="addCustomFilter()"><i data-lucide="plus"></i> Add</button>
+                <span class="cf-help">Pick any sheet column (ROCE, Sales, FII, ATR…) — all added filters apply together.</span>
+              </div>
+              <div class="cf-list" id="cfList"></div>
+            </div>
+          </div>
         </div>
       </div>
 
