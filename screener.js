@@ -94,36 +94,14 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
         .join(' ');
     }
 
-    function getScannerIcon(scannerKey) {
-      const k = scannerKey.toUpperCase();
-      if (k.includes('DOUBLE BOTTOM')) return '📈';
-      if (k.includes('HEAD & SHOULDER')) return '📉';
-      if (k.includes('CUP & HANDLE')) return '☕';
-      if (k.includes('BULL FLAG')) return '🚩';
-      if (k.includes('PULLBACK')) return '🎯';
-      if (k.includes('VOLUME SHOCKER') || k.includes('VOL >')) return '🌊';
-      if (k.includes('GAP & GO') || k.includes('GAP')) return '🚀';
-      if (k.includes('52 WEEK') || k.includes('52WH')) return '🎯';
-      return '⚡';
-    }
+    function getScannerIcon(scannerKey) { return patternInfo(scannerKey).icon; }
 
     function formatPatternPills(scannerList) {
-      if (!scannerList || scannerList.length === 0) return '<span style="color:var(--c-slate3);">-</span>';
-
+      if (!scannerList || scannerList.length === 0) return '<span style="color:var(--c-slate3);">–</span>';
       const pillsHTML = scannerList.map(item => {
-        const sc = item.toUpperCase();
-        if (sc.includes('DOUBLE BOTTOM')) return `<span class="pat-pill pat-blue">📈 DB</span>`;
-        if (sc.includes('HEAD & SHOULDER')) return `<span class="pat-pill pat-purple">📉 H&S</span>`;
-        if (sc.includes('CUP & HANDLE')) return `<span class="pat-pill pat-orange">☕ C&H</span>`;
-        if (sc.includes('PULLBACK')) return `<span class="pat-pill pat-yellow">🎯 Pullback</span>`;
-        if (sc.includes('VOLUME SHOCKER') || sc.includes('VOL >')) return `<span class="pat-pill pat-orange">📢 Vol 50D</span>`;
-        if (sc.includes('GAP & GO') || sc.includes('GAP')) return `<span class="pat-pill pat-cyan">⚡ Gap 50D</span>`;
-        if (sc.includes('52 WEEK') || sc.includes('52WH')) return `<span class="pat-pill pat-green">🎯 52WH</span>`;
-
-        const shortName = item.replace(/\(\d+\)/g, '').trim().slice(0, 12);
-        return `<span class="pat-pill pat-cyan">${shortName}</span>`;
+        const p = patternInfo(item);
+        return `<span class="pat-pill ${p.cls}" data-tip="${p.tip.replace(/"/g, '&quot;')}">${p.icon} ${p.label}</span>`;
       }).join('');
-
       return `<div class="pattern-badges-row">${pillsHTML}</div>`;
     }
 
@@ -185,37 +163,37 @@ let currentRelativeBenchmarkName = 'CNX SMALLCAP';
       if (viewName === 'master') {
         document.getElementById('tab-master').classList.add('active');
         document.getElementById('view-master').style.display = 'block';
-        titleEl.innerHTML = `⚙️ Stock Master Screener`;
-        subTitleEl.innerText = `NSE Stock Universe — Complete Technical, Fundamental, Shareholding & Valuation Matrix`;
+        titleEl.innerHTML = `Stock Screener`;
+        subTitleEl.innerText = `Screen the NSE universe by price, momentum, relative strength, fundamentals and chart patterns`;
       } else if (viewName === 'relative') {
         document.getElementById('tab-relative').classList.add('active');
         document.getElementById('view-relative-returns').style.display = 'block';
-        titleEl.innerHTML = `⚖️ Relative Returns Analysis`;
-        subTitleEl.innerText = `Stock Alpha Performance Relative to Selected Benchmark (+% Outperforming / -% Underperforming)`;
+        titleEl.innerHTML = `Relative Performance`;
+        subTitleEl.innerText = `How each stock is performing versus the selected benchmark (positive = outperforming, negative = underperforming)`;
         loadRelativeReturnsData(currentRelativeSheet);
       } else if (viewName === 'ranking') {
         document.getElementById('tab-ranking').classList.add('active');
         document.getElementById('view-ranking').style.display = 'block';
-        titleEl.innerHTML = `🏆 RS Ranking Matrix`;
-        subTitleEl.innerText = `Relative Strength Ranks Across 5 Multi-Timeframe Scoring Models (Calculated Live)`;
+        titleEl.innerHTML = `RS Rankings`;
+        subTitleEl.innerText = `Relative strength rankings from five scoring models, combined into one overall rank`;
         loadRSRankingData();
       } else if (viewName === 'gainers') {
         document.getElementById('tab-gainers').classList.add('active');
         document.getElementById('view-gainers').style.display = 'block';
-        titleEl.innerHTML = `📈 RS Gainers & Momentum Trends`;
-        subTitleEl.innerText = `Top 100 Short-Term RS Gainers, Leadership Velocity and Momentum Igniters`;
+        titleEl.innerHTML = `RS Movers`;
+        subTitleEl.innerText = `Top 100 stocks with the biggest short-term RS improvement and rising leadership`;
         loadGainersData();
       } else if (viewName === 'early') {
         document.getElementById('tab-early').classList.add('active');
         document.getElementById('view-early').style.display = 'block';
-        titleEl.innerHTML = `🚀 Early Trend & RS Turnarounds`;
-        subTitleEl.innerText = `Ground-Floor RS Breakouts & Fresh Uptrend Ignition Detector`;
+        titleEl.innerHTML = `Early Leaders`;
+        subTitleEl.innerText = `Stocks whose relative strength is turning up early, before they become obvious leaders`;
         loadEarlyTrendData();
       } else if (viewName === 'history') {
   document.getElementById('tab-history').classList.add('active');
   document.getElementById('view-history').style.display = 'block';
-  titleEl.innerHTML = `📁 RS History`;
-  subTitleEl.innerText = `1-Year Rolling Historical RS Leaderboards & Archive`;
+  titleEl.innerHTML = `RS History`;
+  subTitleEl.innerText = `One-year history of RS rankings, with rank trend and day-by-day heatmap`;
   loadHistoryLogData();
 }
       lucide.createIcons();
@@ -1261,8 +1239,8 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
       const getSignalBadge = (sig) => {
         const s = String(sig || '').toLowerCase();
         if (s.includes('stage 2')) return `<span class="early-signal-pill sig-stage2"><i data-lucide="rocket" style="width:11px;height:11px;"></i> Early Stage 2 Breakout</span>`;
-        if (s.includes('stage 1')) return `<span class="early-signal-pill sig-stage1"><i data-lucide="sprout" style="width:11px;height:11px;"></i> Stage 1 Base Turnaround</span>`;
-        return `<span class="early-signal-pill sig-fresh"><i data-lucide="zap" style="width:11px;height:11px;"></i> Fresh Uptrend Ignition</span>`;
+        if (s.includes('stage 1')) return `<span class="early-signal-pill sig-stage1"><i data-lucide="sprout" style="width:11px;height:11px;"></i> Stage 1 Base Reversal</span>`;
+        return `<span class="early-signal-pill sig-fresh"><i data-lucide="zap" style="width:11px;height:11px;"></i> New Uptrend Start</span>`;
       };
 
       const getStageBadge = (stg) => {
@@ -1570,42 +1548,49 @@ setLocalCache(CACHE_KEYS.BENCHMARK, benchmarkIndexData);
       renderHistoryHeatmapTable(activeCols, topStocks);
     }
 
+    // ---------- Day-by-day rank heatmap (stocks = rows, dates = columns, newest first) ----------
+    let HM = { cols: [], maps: [], stocks: [] };
     function renderHistoryHeatmapTable(activeCols, topStocks) {
-      const thead = document.getElementById('history-matrix-thead');
-      const tbody = document.getElementById('history-matrix-tbody');
-      document.getElementById('historySnapshotCount').innerText = `${activeCols.length} Snapshots Shown`;
+      // symbol -> rank, once per snapshot (fast, no nested searching)
+      const newestFirst = [...activeCols].reverse();
+      const maps = newestFirst.map(col => {
+        const m = new Map();
+        for (let r = 0; r < rawHistoryLogData.rows.length; r++) { const s = rawHistoryLogData.rows[r][col.colIdx]; if (s && !m.has(s)) m.set(s, r + 1); }
+        return m;
+      });
+      HM = { cols: newestFirst, maps, stocks: topStocks };
+      document.getElementById('historySnapshotCount').innerText = `${activeCols.length} date snapshots`;
+      paintHistoryHeatmap();
+    }
+    function paintHistoryHeatmap() {
+      const thead = document.getElementById('history-matrix-thead'), tbody = document.getElementById('history-matrix-tbody');
+      if (!thead || !HM.cols.length) return;
+      const q = (document.getElementById('hmSearch').value || '').trim().toLowerCase();
+      const sortBy = document.getElementById('hmSort').value, limit = document.getElementById('hmRows').value;
 
-      thead.innerHTML = `
-        <tr>
-          <th class="sticky-col" style="width:120px;">DATE</th>
-          ${topStocks.map(s => `<th>${s}</th>`).join('')}
-        </tr>
-      `;
+      let rows = HM.stocks.map(sym => {
+        const ranks = HM.maps.map(m => m.get(sym) || null);
+        const latest = ranks.find(x => x != null) || 9999;
+        const oldest = [...ranks].reverse().find(x => x != null) || null;
+        const change = (oldest && latest !== 9999) ? oldest - latest : 0;       // positive = moved up the table
+        return { sym, ranks, latest, change };
+      });
+      if (q) rows = rows.filter(r => r.sym.toLowerCase().includes(q));
+      if (sortBy === 'name') rows.sort((a, b) => a.sym.localeCompare(b.sym));
+      else if (sortBy === 'gain') rows.sort((a, b) => b.change - a.change);
+      else if (sortBy === 'drop') rows.sort((a, b) => a.change - b.change);
+      else rows.sort((a, b) => a.latest - b.latest);
+      if (limit !== 'all') rows = rows.slice(0, parseInt(limit, 10));
 
-      // Newest Date at Top for Table
-      const revCols = [...activeCols].reverse();
-
-      tbody.innerHTML = revCols.map(col => {
-        return `
-          <tr>
-            <td class="sticky-col" style="font-family:'JetBrains Mono'; font-weight:700; color:var(--c-sky);">${col.dateStr}</td>
-            ${topStocks.map(sym => {
-              let rank = '-';
-              for (let r = 0; r < rawHistoryLogData.rows.length; r++) {
-                if (rawHistoryLogData.rows[r][col.colIdx] === sym) {
-                  rank = r + 1;
-                  break;
-                }
-              }
-              if (rank === '-') return `<td style="color:var(--c-slate3);">-</td>`;
-              let badgeCls = 'rank-lower';
-              if (rank <= 5) badgeCls = 'rank-top5';
-              else if (rank <= 15) badgeCls = 'rank-top15';
-              return `<td><span class="rank-cell-pill ${badgeCls}">${rank}</span></td>`;
-            }).join('')}
-          </tr>
-        `;
-      }).join('');
+      const dates = HM.cols.map(c => String(c.dateStr).toUpperCase());
+      thead.innerHTML = `<tr><th class="hm-first">STOCK (${rows.length})</th><th class="hm-chg" data-tip="Places gained (▲) or lost (▼) between the oldest and newest snapshot shown.">CHANGE</th>${dates.map(d => `<th>${d}</th>`).join('')}</tr>`;
+      const tier = r => r <= 10 ? 'hm-t1' : r <= 30 ? 'hm-t2' : r <= 100 ? 'hm-t3' : 'hm-t4';
+      tbody.innerHTML = rows.map(r => {
+        const rk = symbolRsRatingMap[r.sym], sec = rk && rk.Sector ? toTitleCase(rk.Sector) : '';
+        const chg = r.change > 0 ? `<span class="val-pos">▲ ${r.change}</span>` : r.change < 0 ? `<span class="val-neg">▼ ${Math.abs(r.change)}</span>` : '<span class="nil">–</span>';
+        return `<tr><td class="hm-first"><span class="hm-sym">${r.sym}</span>${sec ? `<span class="hm-sec">${sec}</span>` : ''}</td><td class="hm-chg">${chg}</td>${
+          r.ranks.map(x => x == null ? '<td class="nil">–</td>' : `<td><span class="hm-pill ${tier(x)}">#${x}</span></td>`).join('')}</tr>`;
+      }).join('') || `<tr><td colspan="${dates.length + 2}" class="empty-row">No stocks match your search.</td></tr>`;
     }
 
     function parseCustomHistoryDate(str) {
