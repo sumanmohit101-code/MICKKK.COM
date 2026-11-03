@@ -97,31 +97,52 @@ const growth = (r, a, b) => { const x = nv(r, a), y = nv(r, b); if (x == null ||
 // DATA LOAD
 // =========================================================================
 const HEADER_KEYS = ['nsesymbol', 'symbol', 'stockname', 'close', 'volume', 'rsi', 'sector', 'industry', 'marketcap', 'marketcapcategory', '52whaway'];
+// Real headers of the "Chartink Data" sheet. gviz sometimes glues the title rows in front of a label
+// ("1168 NSE Symbol"), so every label is mapped back to the clean header by its ending.
+const KNOWN_HEADERS = ['S.No', 'NSE Symbol', 'Stock Name', 'BSE Code', 'Market Cap Category', 'Sector', 'Industry', 'Close', 'Volume', 'Market Cap', '20D AVG TURNOVER', '30D AVG TURNOVER',
+  'RS RATING', 'RS RATING_M', 'Abs RS', 'Abs RS_M', 'D', 'W', '15D', 'M', 'Q', 'H', 'Y', '52WH Away', '52W High', '52W Low', 'RSI', 'Away EMA 200', 'D range', '3D range', '5D range', '10D range', '20D range', '30D range',
+  '5ema', '10ema', '20ema', '50ema', '100ema', '150ema', '200ema', '15D ago high', '1W ago high', '1M ago high', '1Q ago high', '1Y ago high', 'ROCE', 'ROCE 1Y ago', 'ROCE 2Y ago', 'Current Ratio', 'Debt to equity',
+  'EPS', 'Prev Year EPS', 'Y SALES', 'Sales 1Y ago', 'Sales 2Y ago', 'Sales 3Y ago', 'Q Sales', 'Sales 1Q ago', 'Sales 2Q ago', 'Sales 3Q ago', 'Sales 4Q ago', 'Net Profit Q', 'Net Profit 1Q ago', 'Net Profit 2Q ago',
+  'Net Profit 3Q ago', 'Net Profit 4Q ago', 'Net Profit Y', 'Net Profit 1Y ago', 'Net Profit 2Y ago', 'Net Profit 3Y ago', 'PB', 'ADX(14)', 'ATR(14)', 'VWAP', 'Book Value', 'Yearly PE', 'MMS-MS', 'MMS - M EMA', 'OPM', 'OPM 1Y ago',
+  'OPM 2Y ago', 'OPM 3Y ago', 'Total FII', 'Total FII 1Q ago', 'Total DII', 'Total DII 1Q ago', 'Total Promoter', 'Return on Networth %', 'Return on Assets %', 'P/B Yearly', 'EV/EBITDA', 'EV/EBITDA 1Q ago'];
+const KNOWN_SORTED = KNOWN_HEADERS.slice().sort((a, b) => b.length - a.length);
+const squash = x => String(x == null ? '' : x).replace(/\s+/g, ' ').trim();
+function cleanLabel(raw) {
+  let l = squash(raw); if (!l) return '';
+  const low = l.toLowerCase();
+  const exact = KNOWN_HEADERS.find(k => k.toLowerCase() === low); if (exact) return exact;
+  for (const k of KNOWN_SORTED) {                        // ends with a known header, and nothing glued to it
+    const kl = k.toLowerCase();
+    if (low.length > kl.length && low.endsWith(kl) && /[^a-z0-9]/.test(low.charAt(low.length - kl.length - 1))) return k;
+  }
+  return l.replace(/CHARTINK SCREENER\s*[—–-]\s*NSE STOCKS LIST/i, '').replace(/Total\s*Fil\w*/i, '').replace(/Last Updated:?\s*[\d\-A-Za-z: ]*\d{2}:\d{2}/i, '').replace(/^[\d,.]+\s+/, '').trim();
+}
 function cellText(c) { return (c && c.v !== null && c.v !== undefined) ? String(c.f != null ? c.f : c.v).trim() : ''; }
 
 function parseGVizMasterData(gviz) {
   if (!gviz || !gviz.table || !gviz.table.rows) return null;
-  const cols = (gviz.table.cols || []).map(c => (c && c.label ? String(c.label).trim() : ''));
+  const labels = (gviz.table.cols || []).map(c => (c && c.label ? cleanLabel(c.label) : ''));
   const rows = gviz.table.rows;
   const score = arr => arr.filter(v => HEADER_KEYS.includes(NORM(v))).length;
-  let best = { s: score(cols), arr: cols, dataStart: 0 };
+  let best = { s: score(labels), arr: labels, dataStart: 0, shape: 'labels' };
   for (let i = 0; i < Math.min(rows.length, 20); i++) {
-    const arr = (rows[i].c || []).map(cellText);
+    const arr = (rows[i].c || []).map(x => cleanLabel(cellText(x)));
     const s = score(arr);
-    if (s > best.s) best = { s, arr, dataStart: i + 1 };
+    if (s > best.s) best = { s, arr, dataStart: i + 1, shape: 'row ' + (i + 1) };
   }
   const names = best.arr;                                  // keeps column POSITIONS (blank headers stay blank)
   const symIdx = (() => { let i = names.findIndex(n => NORM(n) === 'nsesymbol'); if (i < 0) i = names.findIndex(n => NORM(n) === 'symbol'); return i; })();
-  if (symIdx < 0 || best.s < 2) return null;
+  window.__masterDebug = { shape: best.shape, score: best.s, symIdx, sampleLabels: (gviz.table.cols || []).slice(0, 8).map(c => c && c.label), cleaned: names.slice(0, 12), rows: rows.length };
+  if (symIdx < 0 || best.s < 2) { console.warn('[Screener] header row not recognised', window.__masterDebug); return null; }
   const nameIdx = names.findIndex(n => ['stockname', 'companyname', 'nameofcompany'].includes(NORM(n)));
-  const idxs = [], headers = [];
-  names.forEach((n, i) => { if (n) { idxs.push(i); headers.push(n); } });
+  const idxs = [], headers = [], seen = new Set();
+  names.forEach((n, i) => { if (n && !seen.has(n)) { seen.add(n); idxs.push(i); headers.push(n); } });
 
   const pct = new Set(), out = [];
   for (let i = best.dataStart; i < rows.length; i++) {
     const c = rows[i].c; if (!c) continue;
     const sym = cellText(c[symIdx]).toUpperCase();
-    if (!sym || sym === 'NSE SYMBOL' || sym === 'SYMBOL') continue;
+    if (!sym || sym === 'NSE SYMBOL' || sym === 'SYMBOL' || !/^[A-Z0-9&\-_.]+$/.test(sym)) continue;
     const row = { 'Symbol': sym, 'Stock Name': nameIdx >= 0 ? (cellText(c[nameIdx]) || sym) : sym, 'NSE Symbol': sym };
     for (let k = 0; k < idxs.length; k++) {
       const cell = c[idxs[k]], h = headers[k];
@@ -159,11 +180,12 @@ async function loadMasterStockData() {
     try {
       const res = await MKC.fetch('screener', { action: 'getMasterStockList' });
       const j = await res.json();
-      if (j && j.success && j.data && j.data.length) { parsed = { headers: j.headers || Object.keys(j.data[0]), rows: j.data, pct: [] }; updated = j.updatedAt; console.warn('[Screener] using web-app fallback (fewer columns)'); }
+      if (j && j.success && j.data && j.data.length) { parsed = { headers: j.headers || Object.keys(j.data[0]), rows: j.data, pct: [], backup: true }; updated = j.updatedAt; console.warn('[Screener] using web-app backup (fewer columns). Debug:', window.__masterDebug); }
     } catch (e) { console.warn('[Screener] web-app fallback failed', e); }
   }
   if (!parsed || !parsed.rows.length) { $id('loader').style.display = 'none'; mkToast('Could not load stock data. Please refresh.'); return false; }
   rawHeaders = parsed.headers;
+  window.__dataSource = parsed.pct ? (parsed.fromSheet ? 'sheet' : 'sheet') : 'backup';
   COLMETA = { pct: parsed.pct || [] };
   MKC.set('MICKKK_CACHE_COLMETA', COLMETA);
   handleMasterDataSuccess(parsed.rows, updated || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }), true);
@@ -182,6 +204,7 @@ function handleMasterDataSuccess(dataList, updatedAt, fresh) {
   $id('total-count').innerText = rawDataset.length;
 
   resolveColumns();
+  showDataSource();
   const excluded = new Set(['sno', 'bsecode', 'nsesymbol', 'symbol', 'stockname', 'sector', 'industry', 'detectedpatterns']);
   availableColumns = rawHeaders.filter(h => !excluded.has(NORM(h)));
   availableColumns.push('Detected Patterns');
@@ -195,6 +218,7 @@ function handleMasterDataSuccess(dataList, updatedAt, fresh) {
   if (!availableColumns.includes(currentSortCol)) currentSortCol = COL.d || 'Symbol';
 
   enrichDataset();
+  markChipAvailability();
   initRangeFilters();
   buildCustomFilterColumns();
   buildFilterOptions();
@@ -389,10 +413,10 @@ function renderScannerChips() {
   const total = $id('scanTotal'); if (total) total.textContent = keys.length ? keys.length : '';
   if (!keys.length) { box.innerHTML = '<span class="flt-hint">Loading live scanners…</span>'; return; }
   const q = ($id('scanSearch') || {}).value ? $id('scanSearch').value.trim().toLowerCase() : '';
-  const list = keys.filter(k => !q || k.toLowerCase().includes(q));
+  const list = keys.filter(k => !q || k.toLowerCase().includes(q) || patternInfo(k).label.toLowerCase().includes(q));
   box.innerHTML = list.map(k => {
-    const count = chartinkScanners[k].length, cleanName = esc(k.replace(/\(\d+\)/g, '').trim());
-    return `<span class="chip-scanner-vip${activeScannerChips.has(k) ? ' active' : ''}" data-scanner="${esc(k)}"><span>${getScannerIcon(k)}</span><span>${cleanName}</span><span class="scanner-count-badge">${count}</span></span>`;
+    const count = chartinkScanners[k].length, p = patternInfo(k);
+    return `<span class="chip-scanner-vip${activeScannerChips.has(k) ? ' active' : ''}" data-scanner="${esc(k)}" data-tip="${esc(p.tip)} (${count} stocks)"><span>${p.icon}</span><span>${esc(p.label)}</span><span class="scanner-count-badge">${count}</span></span>`;
   }).join('') || '<span class="flt-hint">No pattern matches your search.</span>';
 }
 document.addEventListener('click', e => {
@@ -429,7 +453,7 @@ function applyAllFilters() {
   if (!rawDataset.length) return;
   const q = $id('search-input').value.trim().toLowerCase();
   const secs = msSector ? msSector.selected : new Set(), inds = msIndustry ? msIndustry.selected : new Set(), caps = msCap ? msCap.selected : new Set();
-  const A = activeChips, scn = [...activeScannerChips], anyMode = scannerMode === 'any';
+  const A = new Set([...activeChips].filter(chipAvailable)), scn = [...activeScannerChips], anyMode = scannerMode === 'any';
   const ranges = activeRanges(), cfs = customFilters;
   const P = { pull: paramNum('param-pullback', 1.5), roce: paramNum('param-roce', 15), eps: paramNum('param-eps', 0), pe: paramNum('param-pe', 40), pb: paramNum('param-pb', 5),
     de: paramNum('param-de', 1), cr: paramNum('param-cr', 1.5), sg: paramNum('param-sg', 15), pg: paramNum('param-pg', 15), opm: paramNum('param-opm', 15), promo: paramNum('param-promo', 50) };
@@ -644,12 +668,12 @@ function renderMasterTable() {
 
   const arrow = k => currentSortCol === k ? (currentSortAsc ? '▲' : '▼') : '⇅';
   let hh = `<th class="sticky-col" data-sort="Symbol">STOCK / SYMBOL ${arrow('Symbol')}</th>
-    <th class="sticky-rs"><div class="rs-th"><span data-sort="__RS" class="rs-th-t">RS RATING ${arrow('__RS')}</span>
+    <th class="sticky-rs" data-tip="${esc(colTip('RS RATING'))}"><div class="rs-th"><span data-sort="__RS" class="rs-th-t">RS RATING ${arrow('__RS')}</span>
       <select class="master-rs-select" onchange="changeMasterRsType(this.value)">
-        ${[['overall', 'Overall RS'], ['st', 'Short Term RS'], ['snt', 'Self RS (NT)'], ['sdef', 'Self RS (Def)'], ['rnt', 'Rel RS (NT)'], ['rdef', 'Rel RS (Def)']].map(([v, t]) => `<option value="${v}"${masterSelectedRsType === v ? ' selected' : ''}>${t}</option>`).join('')}
+        ${[['overall', 'Overall RS'], ['st', 'Short-Term RS'], ['snt', 'Absolute · Near-Term'], ['sdef', 'Absolute · Standard'], ['rnt', 'Relative · Near-Term'], ['rdef', 'Relative · Standard']].map(([v, t]) => `<option value="${v}"${masterSelectedRsType === v ? ' selected' : ''}>${t}</option>`).join('')}
       </select></div></th>
     <th data-sort="__SECTOR">SECTOR / INDUSTRY ${arrow('__SECTOR')}</th>`;
-  hh += displayHeaders.map(h => `<th data-sort="${esc(h)}"><span class="th-t">${esc(HDR_LABEL[h] || h)} ${arrow(h)}</span><i class="th-x" data-hide="${esc(h)}" title="Hide this column">×</i></th>`).join('');
+  hh += displayHeaders.map(h => `<th data-sort="${esc(h)}" data-tip="${esc(colTip(HDR_LABEL[h] || h))}"><span class="th-t">${esc(HDR_LABEL[h] || h)} ${arrow(h)}</span><i class="th-x" data-hide="${esc(h)}" title="Hide this column">×</i></th>`).join('');
   hh += '<th class="th-add" title="Add / remove columns" onclick="openColumnModal()">＋</th>';
   headerRow.innerHTML = hh;
 
@@ -719,3 +743,27 @@ function toggleFilterPanel(force) {
   try { localStorage.setItem('mickkk_filters_hidden', hide ? '1' : '0'); } catch (e) {}
 }
 document.addEventListener('DOMContentLoaded', () => { try { if (localStorage.getItem('mickkk_filters_hidden') === '1') toggleFilterPanel(true); } catch (e) {} });
+
+// small status line so it is obvious which source the table is using
+function showDataSource() {
+  const el = $id('dataSource'); if (!el) return;
+  const cols = rawHeaders.length, missing = DEFAULT_KEYS.filter(k => !COL[k]).length;
+  const ok = cols > 30 && missing < 4;
+  el.className = 'ds-chip ' + (ok ? 'ok' : 'warn');
+  el.textContent = ok ? `Sheet data • ${cols} columns` : `Limited data (${cols} columns) — sheet headers not recognised`;
+  el.setAttribute('data-tip', ok ? 'Live data from the Chartink Data sheet.' : 'Some sheet columns could not be matched. Open the browser console and look for [Screener] messages.');
+}
+
+// quick filters whose sheet column is missing are greyed out instead of silently returning zero stocks
+const CHIP_NEEDS = { rsi60: ['rsi'], rsi70: ['rsi'], rsiLow: ['rsi'], near52wh: ['away52'], closeEma10: ['close', 'ema10'], closeEma20: ['close', 'ema20'], closeEma50: ['close', 'ema50'], closeEma200: ['close', 'ema200'],
+  closeVwap: ['close', 'vwap'], emaStack: ['ema10', 'ema20', 'ema50', 'ema200'], pullback10ema: ['close', 'ema10'], pullback20ema: ['close', 'ema20'], near15D: ['close', 'high15'], nearWeek: ['close', 'highW'],
+  nearMonth: ['close', 'highM'], nearQuarter: ['close', 'highQ'], nearYear: ['close', 'highY'], roceFilter: ['roce'], opmFilter: ['opm'], epsFilter: ['eps'], salesGrowth: ['salesQ', 'salesQ4'], profitGrowth: ['npQ', 'npQ4'],
+  peFilter: ['pe'], pbFilter: ['pb'], undervaluedBV: ['bv', 'close'], lowDebt: ['de'], currentRatioMin: ['cr'], promoFilter: ['promo'], fiiRising: ['fii', 'fii1'], diiRising: ['dii', 'dii1'] };
+const chipAvailable = k => !CHIP_NEEDS[k] || CHIP_NEEDS[k].every(c => COL[c]);
+function markChipAvailability() {
+  document.querySelectorAll('.fr .chip[onclick]').forEach(ch => {
+    const m = /toggleChip\(this,\s*'([^']+)'\)/.exec(ch.getAttribute('onclick') || ''); if (!m) return;
+    const ok = chipAvailable(m[1]); ch.classList.toggle('na', !ok);
+    if (!ok) ch.setAttribute('data-tip', 'This column is not available in the sheet, so the filter is disabled.');
+  });
+}
