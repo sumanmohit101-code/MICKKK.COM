@@ -26,6 +26,7 @@
   --c-purple: #c084fc; --c-blue2: #60a5fa; --c-orange: #fb923c; --c-cyan: #00f0ff;
   --c-slate: #94a3b8; --c-slate3: #475569; --c-text2: #cbd5e1; --c-text3: #e2e8f0;
   --loader-bg: rgba(7, 13, 24, 0.94); --overlay: rgba(0, 0, 0, 0.78);
+  --row-tint: rgba(15, 28, 48, 0.4); --row-tint-bd: rgba(26, 42, 68, 0.3); --count-bg: rgba(0, 0, 0, 0.35); --sticky-shadow: rgba(0, 0, 0, 0.45);
   /* shell */
   --sh-sidebar: #0a1020; --sh-card: #0d162b; --sh-border: #17243e;
   --sh-text: #f1f5f9; --sh-muted: #94a3b8; --sh-hover: rgba(30, 41, 59, 0.6);
@@ -49,6 +50,7 @@ html:not(.dark) {
   --c-purple: #9333ea; --c-blue2: #2563eb; --c-orange: #ea580c; --c-cyan: #0284c7;
   --c-slate: #64748b; --c-slate3: #94a3b8; --c-text2: #334155; --c-text3: #1e293b;
   --loader-bg: rgba(241, 245, 249, 0.94); --overlay: rgba(15, 23, 42, 0.55);
+  --row-tint: #f1f5f9; --row-tint-bd: #e2e8f0; --count-bg: rgba(15, 23, 42, 0.10); --sticky-shadow: rgba(15, 23, 42, 0.10);
   --sh-sidebar: #ffffff; --sh-card: #f8fafc; --sh-border: #e2e8f0;
   --sh-text: #1e293b; --sh-muted: #64748b; --sh-hover: #f1f5f9;
   --sh-active-bg: #ecfdf5; --sh-active-text: #059669;
@@ -224,3 +226,10 @@ html:not(.dark) .ico-moon { display: none; }
   background: var(--sh-card); color: var(--sh-text); border: 1px solid var(--sh-border); font: 700 12px 'Plus Jakarta Sans','Inter',sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,.35);
   pointer-events: none; transition: opacity .18s, transform .18s; }
 #mkToast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- hover tips ---------- */
+#mkTip { position: fixed; z-index: 3500; max-width: 280px; padding: 8px 11px; border-radius: 9px; pointer-events: none; opacity: 0; transform: translateY(3px);
+  background: #0b1224; color: #e8eefc; border: 1px solid #243556; box-shadow: 0 10px 28px rgba(0,0,0,.4);
+  font: 500 11.5px/1.45 'Plus Jakarta Sans','Inter',sans-serif; transition: opacity .12s, transform .12s; white-space: normal; text-transform: none; letter-spacing: 0; }
+#mkTip.on { opacity: 1; transform: none; }
+html:not(.dark) #mkTip { background: #0f172a; color: #f1f5f9; border-color: #0f172a; }
