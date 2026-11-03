@@ -48,7 +48,32 @@
     el.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
   }
 
+
+  /* ---------------- HOVER TIPS: any element with data-tip="..." ---------------- */
+  function initTips() {
+    var tip = document.createElement('div'); tip.id = 'mkTip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip);
+    var cur = null, t = null;
+    function show(el) {
+      var text = el.getAttribute('data-tip'); if (!text) return;
+      tip.textContent = text; tip.classList.add('on');
+      var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+      var left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8);
+      var top = r.bottom + 8; if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 8);
+      tip.style.left = left + 'px'; tip.style.top = top + 'px';
+    }
+    function hide() { clearTimeout(t); cur = null; tip.classList.remove('on'); }
+    document.addEventListener('mouseover', function (e) {
+      var el = e.target.closest && e.target.closest('[data-tip]');
+      if (!el || el === cur) return;
+      if (el.closest('#sidebar.sidebar-collapsed')) return;      // sidebar has its own tooltip
+      cur = el; clearTimeout(t); t = setTimeout(function () { if (cur === el) show(el); }, 280);
+    });
+    document.addEventListener('mouseout', function (e) { if (cur && !(e.relatedTarget && cur.contains(e.relatedTarget))) hide(); });
+    document.addEventListener('scroll', hide, true); document.addEventListener('mousedown', hide, true);
+  }
+
   function init() {
+    initTips();
     var saved = lsGet(SIDEBAR_KEY);
     var small = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     // first paint without animation, so the page never "slides" on load
