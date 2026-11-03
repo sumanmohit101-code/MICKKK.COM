@@ -164,27 +164,27 @@
     <!-- Page view tabs (unchanged) -->
     <div class="mk-tabs-row">
     <div class="view-switch-btn-group">
-        <button class="page-tab-btn active" id="tab-master" onclick="switchAppView('master')">
-          <i data-lucide="layout-grid" style="width:13px;height:13px;"></i> Master
+        <button class="page-tab-btn active" id="tab-master" data-tip="Filter and sort the full NSE stock list with technical, fundamental and pattern filters." onclick="switchAppView('master')">
+          <i data-lucide="layout-grid" style="width:13px;height:13px;"></i> Screener
         </button>
 
-        <button class="page-tab-btn" id="tab-relative" onclick="switchAppView('relative')">
-          <i data-lucide="activity" style="width:13px;height:13px;"></i> Relative Returns
+        <button class="page-tab-btn" id="tab-relative" data-tip="See which stocks are outperforming or underperforming a chosen benchmark index." onclick="switchAppView('relative')">
+          <i data-lucide="activity" style="width:13px;height:13px;"></i> Relative Performance
         </button>
 
-        <button class="page-tab-btn" id="tab-ranking" onclick="switchAppView('ranking')">
-          <i data-lucide="grid" style="width:13px;height:13px;"></i> RS Ranking Matrix
+        <button class="page-tab-btn" id="tab-ranking" data-tip="Relative strength ranks from five scoring models, plus an overall rank." onclick="switchAppView('ranking')">
+          <i data-lucide="grid" style="width:13px;height:13px;"></i> RS Rankings
         </button>
 
-        <button class="page-tab-btn" id="tab-gainers" onclick="switchAppView('gainers')">
-          <i data-lucide="trending-up" style="width:13px;height:13px;"></i> RS Gainers & Trend
+        <button class="page-tab-btn" id="tab-gainers" data-tip="Stocks whose short-term relative strength is rising fastest." onclick="switchAppView('gainers')">
+          <i data-lucide="trending-up" style="width:13px;height:13px;"></i> RS Movers
         </button>
 
-        <button class="page-tab-btn" id="tab-early" data-pro onclick="switchAppView('early')">
-          <i data-lucide="rocket" style="width:13px;height:13px;"></i> Early Trend
+        <button class="page-tab-btn" id="tab-early" data-pro data-tip="Stocks whose relative strength is turning up early, before they become obvious leaders." onclick="switchAppView('early')">
+          <i data-lucide="rocket" style="width:13px;height:13px;"></i> Early Leaders
         </button>
 
-        <button class="page-tab-btn" id="tab-history" data-pro onclick="switchAppView('history')">
+        <button class="page-tab-btn" id="tab-history" data-pro data-tip="One-year history of RS ranks with a rank-trend chart and a day-by-day heatmap." onclick="switchAppView('history')">
          <i data-lucide="history" style="width:13px;height:13px;"></i> RS History
          </button>
       </div>
@@ -202,10 +202,10 @@
           <div class="flt-title"><i data-lucide="sliders-horizontal"></i> Filters <span class="flt-badge" id="activeFilterCount">No filters</span><button type="button" class="flt-collapse" id="fltToggle" onclick="toggleFilterPanel()">Hide filters ▴</button></div>
           <div class="flt-actions">
             <button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
-            <button class="btn-tool btn-tool-danger" onclick="clearAllFilterChips()"><i data-lucide="x"></i> Clear</button>
+            <button class="btn-tool btn-tool-danger" onclick="clearAllFilterChips()"><i data-lucide="x"></i> Clear Chips</button>
             <button class="btn-tool btn-tool-accent" onclick="openColumnModal()"><i data-lucide="columns"></i> Columns</button>
-            <button class="btn-tool" onclick="copyTableData()"><i data-lucide="copy"></i> Copy</button>
-            <button class="btn-tool btn-tool-success" data-pro onclick="exportToCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+            <button class="btn-tool" onclick="copyTableData()"><i data-lucide="copy"></i> Copy Symbols</button>
+            <button class="btn-tool btn-tool-success" data-pro onclick="exportToCSV()"><i data-lucide="file-spreadsheet"></i> Export CSV</button>
           </div>
         </div>
 
@@ -239,21 +239,21 @@
           <div class="fr">
             <div class="fr-label t-tech"><i data-lucide="line-chart"></i><span>Technical</span></div>
             <div class="fr-body fr-groups">
-              <div class="fg"><span class="fg-t">Momentum</span><span class="chip" onclick="toggleChip(this, 'rsi60')">RSI ≥ 60</span><span class="chip" onclick="toggleChip(this, 'rsi70')">RSI ≥ 70</span><span class="chip" onclick="toggleChip(this, 'rsiLow')">RSI ≤ 30</span></div>
-              <div class="fg"><span class="fg-t">Price above</span><span class="chip" onclick="toggleChip(this, 'closeEma10')">EMA 10</span><span class="chip" onclick="toggleChip(this, 'closeEma20')">EMA 20</span><span class="chip" onclick="toggleChip(this, 'closeEma50')">EMA 50</span><span class="chip" onclick="toggleChip(this, 'closeEma200')">EMA 200</span><span class="chip" onclick="toggleChip(this, 'closeVwap')">VWAP</span><span class="chip" onclick="toggleChip(this, 'emaStack')">Bullish EMA stack</span></div>
-              <div class="fg"><span class="fg-t">Pullback to</span><span class="chip" onclick="toggleChip(this, 'pullback10ema')">EMA 10</span><span class="chip" onclick="toggleChip(this, 'pullback20ema')">EMA 20</span><span class="cg-note">within</span><input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"><i class="sfx solo">%</i></div>
-              <div class="fg"><span class="fg-t">Near high (≤3%)</span><span class="chip" onclick="toggleChip(this, 'near15D')">15D</span><span class="chip" onclick="toggleChip(this, 'nearWeek')">1W</span><span class="chip" onclick="toggleChip(this, 'nearMonth')">1M</span><span class="chip" onclick="toggleChip(this, 'nearQuarter')">1Q</span><span class="chip" onclick="toggleChip(this, 'nearYear')">1Y</span><span class="chip" onclick="toggleChip(this, 'near52wh')">52W (≤5%)</span></div>
+              <div class="fg"><span class="fg-t">Momentum</span><span class="chip" data-tip="RSI (14) is 60 or higher: positive momentum." onclick="toggleChip(this, 'rsi60')">RSI ≥ 60</span><span class="chip" data-tip="RSI (14) is 70 or higher: very strong momentum (can also mean overbought)." onclick="toggleChip(this, 'rsi70')">RSI ≥ 70</span><span class="chip" data-tip="RSI (14) is 30 or lower: oversold." onclick="toggleChip(this, 'rsiLow')">RSI ≤ 30</span></div>
+              <div class="fg"><span class="fg-t">Price above</span><span class="chip" data-tip="Price is above its 10-day moving average (short-term trend)." onclick="toggleChip(this, 'closeEma10')">EMA 10</span><span class="chip" data-tip="Price is above its 20-day moving average." onclick="toggleChip(this, 'closeEma20')">EMA 20</span><span class="chip" data-tip="Price is above its 50-day moving average (medium-term trend)." onclick="toggleChip(this, 'closeEma50')">EMA 50</span><span class="chip" data-tip="Price is above its 200-day moving average (long-term trend)." onclick="toggleChip(this, 'closeEma200')">EMA 200</span><span class="chip" data-tip="Price is above VWAP (volume-weighted average price)." onclick="toggleChip(this, 'closeVwap')">VWAP</span><span class="chip" data-tip="Moving averages are in bullish order: EMA 10 > 20 > 50 > 200." onclick="toggleChip(this, 'emaStack')">EMA 10 &gt; 20 &gt; 50 &gt; 200</span></div>
+              <div class="fg"><span class="fg-t">Pullback to</span><span class="chip" data-tip="Price is within the chosen % of its 10-day EMA: a pullback to short-term support." onclick="toggleChip(this, 'pullback10ema')">EMA 10</span><span class="chip" data-tip="Price is within the chosen % of its 20-day EMA." onclick="toggleChip(this, 'pullback20ema')">EMA 20</span><span class="cg-note">within</span><input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"><i class="sfx solo">%</i></div>
+              <div class="fg"><span class="fg-t">Near high (≤3%)</span><span class="chip" data-tip="Price is within 3% of its high from 15 days ago." onclick="toggleChip(this, 'near15D')">15D</span><span class="chip" data-tip="Price is within 3% of its 1-week high." onclick="toggleChip(this, 'nearWeek')">1W</span><span class="chip" data-tip="Price is within 3% of its 1-month high." onclick="toggleChip(this, 'nearMonth')">1M</span><span class="chip" data-tip="Price is within 3% of its 3-month high." onclick="toggleChip(this, 'nearQuarter')">1Q</span><span class="chip" data-tip="Price is within 3% of its 1-year high." onclick="toggleChip(this, 'nearYear')">1Y</span><span class="chip" data-tip="Price is within 5% of its 52-week high." onclick="toggleChip(this, 'near52wh')">52W (≤5%)</span></div>
             </div>
           </div>
 
           <div class="fr">
             <div class="fr-label t-fund"><i data-lucide="shield-check"></i><span>Fundamental</span></div>
             <div class="fr-body fr-groups">
-              <div class="fg"><span class="fg-t">Quality</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'roceFilter')">ROCE ≥</span><input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'opmFilter')">OPM ≥</span><input type="number" id="param-opm" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'epsFilter')">EPS &gt;</span><input type="number" id="param-eps" class="param-input" value="0" step="1" onchange="applyAllFilters()"></span></div>
-              <div class="fg"><span class="fg-t">Growth (YoY)</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'salesGrowth')">Sales ≥</span><input type="number" id="param-sg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'profitGrowth')">Profit ≥</span><input type="number" id="param-pg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span></div>
-              <div class="fg"><span class="fg-t">Valuation</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'peFilter')">P/E ≤</span><input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'pbFilter')">P/B &lt;</span><input type="number" id="param-pb" class="param-input" value="5" step="0.5" onchange="applyAllFilters()"></span><span class="chip" onclick="toggleChip(this, 'undervaluedBV')">Book Value &gt; CMP</span></div>
-              <div class="fg"><span class="fg-t">Safety</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'lowDebt')">Debt/Eq ≤</span><input type="number" id="param-de" class="param-input" value="1" step="0.1" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" onclick="toggleChip(this, 'currentRatioMin')">Current Ratio ≥</span><input type="number" id="param-cr" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"></span></div>
-              <div class="fg"><span class="fg-t">Holding</span><span class="cg"><span class="chip" onclick="toggleChip(this, 'promoFilter')">Promoter ≥</span><input type="number" id="param-promo" class="param-input" value="50" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="chip" onclick="toggleChip(this, 'fiiRising')">FII rising</span><span class="chip" onclick="toggleChip(this, 'diiRising')">DII rising</span></div>
+              <div class="fg"><span class="fg-t">Quality</span><span class="cg"><span class="chip" data-tip="Return on capital employed is at least this value. Shows how efficiently the company uses capital." onclick="toggleChip(this, 'roceFilter')">ROCE ≥</span><input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Operating profit margin is at least this value." onclick="toggleChip(this, 'opmFilter')">OPM ≥</span><input type="number" id="param-opm" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Earnings per share is above this value." onclick="toggleChip(this, 'epsFilter')">EPS &gt;</span><input type="number" id="param-eps" class="param-input" value="0" step="1" onchange="applyAllFilters()"></span></div>
+              <div class="fg"><span class="fg-t">Growth (YoY)</span><span class="cg"><span class="chip" data-tip="Quarterly sales grew at least this much versus the same quarter last year." onclick="toggleChip(this, 'salesGrowth')">Sales ≥</span><input type="number" id="param-sg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Quarterly net profit grew at least this much versus the same quarter last year." onclick="toggleChip(this, 'profitGrowth')">Profit ≥</span><input type="number" id="param-pg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span></div>
+              <div class="fg"><span class="fg-t">Valuation</span><span class="cg"><span class="chip" data-tip="Price-to-earnings ratio is positive and at or below this value." onclick="toggleChip(this, 'peFilter')">P/E ≤</span><input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="Price-to-book ratio is positive and below this value." onclick="toggleChip(this, 'pbFilter')">P/B &lt;</span><input type="number" id="param-pb" class="param-input" value="5" step="0.5" onchange="applyAllFilters()"></span><span class="chip" data-tip="Book value per share is higher than the current price." onclick="toggleChip(this, 'undervaluedBV')">Book Value &gt; CMP</span></div>
+              <div class="fg"><span class="fg-t">Safety</span><span class="cg"><span class="chip" data-tip="Debt-to-equity is at or below this value. Lower means less leverage." onclick="toggleChip(this, 'lowDebt')">Debt/Eq ≤</span><input type="number" id="param-de" class="param-input" value="1" step="0.1" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="Current ratio is at least this value. Higher means better short-term liquidity." onclick="toggleChip(this, 'currentRatioMin')">Current Ratio ≥</span><input type="number" id="param-cr" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"></span></div>
+              <div class="fg"><span class="fg-t">Holding</span><span class="cg"><span class="chip" data-tip="Promoter holding is at least this %." onclick="toggleChip(this, 'promoFilter')">Promoter ≥</span><input type="number" id="param-promo" class="param-input" value="50" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="chip" data-tip="FII holding increased versus the previous quarter." onclick="toggleChip(this, 'fiiRising')">FII rising</span><span class="chip" data-tip="DII holding increased versus the previous quarter." onclick="toggleChip(this, 'diiRising')">DII rising</span></div>
             </div>
           </div>
 
@@ -275,7 +275,7 @@
 
       <!-- Summary + view switcher -->
       <div class="summary-strip">
-        <div class="sum-left">Universe: <b>NSE Capital Markets</b> &nbsp;•&nbsp; Showing <span class="count-highlight" id="shown-count">0</span> of <span class="count-highlight" id="total-count">0</span> stocks</div>
+        <div class="sum-left">Universe: <b>NSE Capital Markets</b> &nbsp;•&nbsp; Showing <span class="count-highlight" id="shown-count">0</span> of <span class="count-highlight" id="total-count">0</span> stocks <span id="dataSource" class="ds-chip"></span></div>
         <div class="view-matrix-row">
           <span class="view-matrix-label">VIEW:</span>
           <button class="matrix-btn active" data-view="default" onclick="switchMatrixView(this,'default')"><i data-lucide="layout-list"></i> Default</button>
@@ -309,24 +309,24 @@
 <div class="benchmark-tiles-grid">
   <div class="bench-tile" id="tile-n500" onclick="selectRelativeBenchmark('Relative Returns (N500)', 'NIFTY 500')">
     <div class="bench-tile-left">
-      <div class="bench-tile-name">📊 NIFTY 500</div>
-      <div class="bench-tile-sub">Broad Market Alpha (500 Stocks)</div>
+      <div class="bench-tile-name">NIFTY 500</div>
+      <div class="bench-tile-sub">Broad market (500 stocks)</div>
     </div>
-    <span class="bench-badge-tag" style="display:none;">ACTIVE BENCHMARK</span>
+    <span class="bench-badge-tag" style="display:none;">SELECTED</span>
   </div>
 
   <div class="bench-tile active" id="tile-cnxsmall" onclick="selectRelativeBenchmark('Relative Returns (CNX SMALLCAP)', 'CNX SMALLCAP')">
     <div class="bench-tile-left">
-      <div class="bench-tile-name">🚀 CNX SMALLCAP</div>
-      <div class="bench-tile-sub">SmallCap Outperformance Alpha</div>
+      <div class="bench-tile-name">CNX SMALLCAP</div>
+      <div class="bench-tile-sub">Small-cap benchmark</div>
     </div>
-    <span class="bench-badge-tag">ACTIVE BENCHMARK</span>
+    <span class="bench-badge-tag">SELECTED</span>
   </div>
 
         <div class="bench-tile" id="tile-midsmall" onclick="selectRelativeBenchmark('Relative Returns (MIDSMALL 400)', 'MIDSMALL 400')">
           <div class="bench-tile-left">
-            <div class="bench-tile-name">⚡ MIDSMALL 400</div>
-            <div class="bench-tile-sub">Mid & SmallCap Combined Alpha</div>
+            <div class="bench-tile-name">MIDSMALL 400</div>
+            <div class="bench-tile-sub">Mid + small-cap benchmark</div>
           </div>
           <span class="bench-badge-tag" style="display:none;">ACTIVE</span>
         </div>
@@ -367,26 +367,26 @@
 
           <div class="action-btn-group">
             <button class="btn-tool" onclick="resetRelativeFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
-            <button class="btn-tool" onclick="copyRelativeSymbols()"><i data-lucide="copy"></i> Copy</button>
-            <button class="btn-tool btn-tool-success" onclick="exportRelativeCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+            <button class="btn-tool" onclick="copyRelativeSymbols()"><i data-lucide="copy"></i> Copy Symbols</button>
+            <button class="btn-tool btn-tool-success" onclick="exportRelativeCSV()"><i data-lucide="file-spreadsheet"></i> Export CSV</button>
           </div>
         </div>
 
         <!-- Outperformance Multi-Select Chips -->
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--s2);">
-          <span style="font-size: 10.5px; font-weight: 700; color: var(--c-slate);">Beat Benchmark:</span>
-          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatD')">⚡ Daily (&gt;0%)</span>
-          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatW')">📈 Weekly (&gt;0%)</span>
-          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beat15D')">🚀 15-Day (&gt;0%)</span>
-          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatM')">💎 1-Month (&gt;0%)</span>
-          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatQ')">🔥 Quarterly (&gt;0%)</span>
-          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatY')">☀️ Yearly (&gt;0%)</span>
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--c-slate);">Outperforming benchmark:</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatD')">Daily</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatW')">Weekly</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beat15D')">15 Days</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatM')">Monthly</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatQ')">Quarterly</span>
+          <span class="chip chip-outperform" onclick="toggleOutperformChip(this, 'beatY')">Yearly</span>
         </div>
       </div>
 
       <!-- Relative Summary Strip -->
       <div class="summary-strip">
-        <div>Relative Baseline: <b id="relativeCurrentTabName" style="color:var(--accent-cyan);">Relative Returns (N500)</b></div>
+        <div>Benchmark: <b id="relativeCurrentTabName" style="color:var(--accent-cyan);">Relative Returns (N500)</b></div>
         <div>Showing <span class="count-highlight" id="rel-shown-count">0</span> of <span class="count-highlight" id="rel-total-count">0</span> Stocks</div>
       </div>
 
@@ -398,13 +398,13 @@
               <tr>
                 <th class="sticky-col" onclick="sortRelativeTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
                 <th class="sticky-sec" onclick="sortRelativeTable('Sector')">SECTOR / INDUSTRY ⇅</th>
-                <th onclick="sortRelativeTable('Daily Relative % Change')">1D REL % ⇅</th>
-                <th onclick="sortRelativeTable('Weekly Relative % Change')">1W REL % ⇅</th>
-                <th onclick="sortRelativeTable('15 Days Relative % Change')">15D REL % ⇅</th>
-                <th onclick="sortRelativeTable('1 Month Relative % Change')">1M REL % ⇅</th>
-                <th onclick="sortRelativeTable('Quarterly Relative % Change')">Q REL % ⇅</th>
-                <th onclick="sortRelativeTable('Half Yearly Relative % Change')">HY REL % ⇅</th>
-                <th onclick="sortRelativeTable('Yearly Relative % Change')">1Y REL % ⇅</th>
+                <th onclick="sortRelativeTable('Daily Relative % Change')">1D REL. RETURN ⇅</th>
+                <th onclick="sortRelativeTable('Weekly Relative % Change')">1W REL. RETURN ⇅</th>
+                <th onclick="sortRelativeTable('15 Days Relative % Change')">15D REL. RETURN ⇅</th>
+                <th onclick="sortRelativeTable('1 Month Relative % Change')">1M REL. RETURN ⇅</th>
+                <th onclick="sortRelativeTable('Quarterly Relative % Change')">3M REL. RETURN ⇅</th>
+                <th onclick="sortRelativeTable('Half Yearly Relative % Change')">6M REL. RETURN ⇅</th>
+                <th onclick="sortRelativeTable('Yearly Relative % Change')">1Y REL. RETURN ⇅</th>
               </tr>
             </thead>
             <tbody id="relative-table-body"></tbody>
@@ -422,27 +422,27 @@
       <!-- 6 Top 10 Leader Cards (Sequence: Overall -> T1 -> T2 -> T3 -> T4 -> T5) -->
       <div class="rs-leaders-grid" id="rsLeadersCardsGrid">
         <div class="rs-leader-card">
-          <div class="rs-leader-title" style="color:var(--c-amber);"><i data-lucide="crown" style="width:12px;height:12px;"></i> OVERALL RS (TOP 10)</div>
+          <div class="rs-leader-title" style="color:var(--c-amber);"><i data-lucide="crown" style="width:12px;height:12px;"></i> Overall RS · Top 10</div>
           <div class="rs-leader-content" id="lead-overall">Loading...</div>
         </div>
         <div class="rs-leader-card">
-          <div class="rs-leader-title" style="color:#f97316;"><i data-lucide="flame" style="width:12px;height:12px;"></i> T1: SELF NT (TOP 10)</div>
+          <div class="rs-leader-title" style="color:#f97316;"><i data-lucide="flame" style="width:12px;height:12px;"></i> Absolute RS (Near-Term) · Top 10</div>
           <div class="rs-leader-content" id="lead-snt">Loading...</div>
         </div>
         <div class="rs-leader-card">
-          <div class="rs-leader-title" style="color:#a855f7;"><i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i> T2: SELF DEF (TOP 10)</div>
+          <div class="rs-leader-title" style="color:#a855f7;"><i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i> Absolute RS (Standard) · Top 10</div>
           <div class="rs-leader-content" id="lead-sdef">Loading...</div>
         </div>
         <div class="rs-leader-card">
-          <div class="rs-leader-title" style="color:#ec4899;"><i data-lucide="rocket" style="width:12px;height:12px;"></i> T3: REL NT (TOP 10)</div>
+          <div class="rs-leader-title" style="color:#ec4899;"><i data-lucide="rocket" style="width:12px;height:12px;"></i> Relative RS (Near-Term) · Top 10</div>
           <div class="rs-leader-content" id="lead-rnt">Loading...</div>
         </div>
         <div class="rs-leader-card">
-          <div class="rs-leader-title" style="color:var(--accent-cyan);"><i data-lucide="gem" style="width:12px;height:12px;"></i> T4: REL DEF (TOP 10)</div>
+          <div class="rs-leader-title" style="color:var(--accent-cyan);"><i data-lucide="gem" style="width:12px;height:12px;"></i> Relative RS (Standard) · Top 10</div>
           <div class="rs-leader-content" id="lead-rdef">Loading...</div>
         </div>
         <div class="rs-leader-card">
-          <div class="rs-leader-title" style="color:var(--c-sky);"><i data-lucide="zap" style="width:12px;height:12px;"></i> T5: SHORT TERM (TOP 10)</div>
+          <div class="rs-leader-title" style="color:var(--c-sky);"><i data-lucide="zap" style="width:12px;height:12px;"></i> Short-Term RS · Top 10</div>
           <div class="rs-leader-content" id="lead-st">Loading...</div>
         </div>
       </div>
@@ -464,29 +464,29 @@
           </select>
 
           <div class="action-btn-group">
-            <button class="btn-tool btn-tool-accent" onclick="openRSWeightModal()"><i data-lucide="sliders"></i> RS Weights Config</button>
+            <button class="btn-tool btn-tool-accent" onclick="openRSWeightModal()"><i data-lucide="sliders"></i> RS Model Weights</button>
             <button class="btn-tool" onclick="resetRankingFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
-            <button class="btn-tool" onclick="copyRankingSymbols()"><i data-lucide="copy"></i> Copy</button>
-            <button class="btn-tool btn-tool-success" onclick="exportRankingCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+            <button class="btn-tool" onclick="copyRankingSymbols()"><i data-lucide="copy"></i> Copy Symbols</button>
+            <button class="btn-tool btn-tool-success" onclick="exportRankingCSV()"><i data-lucide="file-spreadsheet"></i> Export CSV</button>
           </div>
         </div>
 
         <!-- RS Top Filter Chips -->
         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--s2);">
-          <span style="font-size: 10px; font-weight: 700; color: var(--c-slate);">RS Top Filters:</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'overall50')">🏆 Overall Top 50</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'overall100')">💎 Overall Top 100</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'st50')">⚡ Short-Term Top 50</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'snt50')">🔥 Self NT Top 50</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'sdef50')">📦 Self Def Top 50</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'rnt50')">🚀 Rel NT Top 50</span>
-          <span class="chip" onclick="toggleRSTopChip(this, 'rdef50')">☀️ Rel Def Top 50</span>
+          <span style="font-size: 10px; font-weight: 700; color: var(--c-slate);">Quick filters:</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'overall50')">Overall · Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'overall100')">Overall · Top 100</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'st50')">Short-Term · Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'snt50')">Absolute (Near-Term) · Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'sdef50')">Absolute (Standard) · Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'rnt50')">Relative (Near-Term) · Top 50</span>
+          <span class="chip" onclick="toggleRSTopChip(this, 'rdef50')">Relative (Standard) · Top 50</span>
         </div>
       </div>
 
       <!-- Ranking Summary Strip -->
       <div class="summary-strip">
-        <div>Relative Strength Benchmark: <b style="color:var(--accent-cyan);">CNX SMALLCAP</b> (5 Models Weighted Ensemble)</div>
+        <div>Benchmark: <b style="color:var(--accent-cyan);">CNX SMALLCAP</b> · combined score of 5 RS models</div>
         <div>Showing <span class="count-highlight" id="rank-shown-count">0</span> of <span class="count-highlight" id="rank-total-count">0</span> Stocks</div>
       </div>
 
@@ -499,17 +499,17 @@
                 <th class="sticky-col" onclick="sortRankingTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
                 <th class="sticky-sec" onclick="sortRankingTable('Sector')">SECTOR / INDUSTRY ⇅</th>
                 <th onclick="sortRankingTable('OVERALL_RANK')" style="color:var(--accent-cyan); background:var(--s2);">OVERALL RS RANK ⇅</th>
-                <th onclick="sortRankingTable('AVG_RANK')" style="color:var(--c-amber);">AVG RANK (5) ⇅</th>
-                <th onclick="sortRankingTable('SELF_NT_SCORE')">T1: SELF NT SCORE ⇅</th>
-                <th onclick="sortRankingTable('SELF_NT_RANK')">T1 RANK ⇅</th>
-                <th onclick="sortRankingTable('SELF_DEF_SCORE')">T2: SELF DEF SCORE ⇅</th>
-                <th onclick="sortRankingTable('SELF_DEF_RANK')">T2 RANK ⇅</th>
-                <th onclick="sortRankingTable('REL_NT_SCORE')">T3: REL NT SCORE ⇅</th>
-                <th onclick="sortRankingTable('REL_NT_RANK')">T3 RANK ⇅</th>
-                <th onclick="sortRankingTable('REL_DEF_SCORE')">T4: REL DEF SCORE ⇅</th>
-                <th onclick="sortRankingTable('REL_DEF_RANK')">T4 RANK ⇅</th>
-                <th onclick="sortRankingTable('ST_SCORE')">T5: SHORT TERM SCORE ⇅</th>
-                <th onclick="sortRankingTable('ST_RANK')">T5 RANK ⇅</th>
+                <th onclick="sortRankingTable('AVG_RANK')" style="color:var(--c-amber);">AVERAGE RANK ⇅</th>
+                <th onclick="sortRankingTable('SELF_NT_SCORE')">ABS. RS NEAR-TERM · SCORE ⇅</th>
+                <th onclick="sortRankingTable('SELF_NT_RANK')">ABS. RS NEAR-TERM · RANK ⇅</th>
+                <th onclick="sortRankingTable('SELF_DEF_SCORE')">ABS. RS STANDARD · SCORE ⇅</th>
+                <th onclick="sortRankingTable('SELF_DEF_RANK')">ABS. RS STANDARD · RANK ⇅</th>
+                <th onclick="sortRankingTable('REL_NT_SCORE')">REL. RS NEAR-TERM · SCORE ⇅</th>
+                <th onclick="sortRankingTable('REL_NT_RANK')">REL. RS NEAR-TERM · RANK ⇅</th>
+                <th onclick="sortRankingTable('REL_DEF_SCORE')">REL. RS STANDARD · SCORE ⇅</th>
+                <th onclick="sortRankingTable('REL_DEF_RANK')">REL. RS STANDARD · RANK ⇅</th>
+                <th onclick="sortRankingTable('ST_SCORE')">SHORT-TERM RS · SCORE ⇅</th>
+                <th onclick="sortRankingTable('ST_RANK')">SHORT-TERM RS · RANK ⇅</th>
               </tr>
             </thead>
             <tbody id="ranking-table-body"></tbody>
@@ -527,7 +527,7 @@
         <h2 style="color: var(--text-strong); font-size: 14px; margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
           📈 Top 100 Short-Term RS Gainers & Momentum Leaders
         </h2>
-        <p style="color: var(--text-muted); font-size: 10.5px;">Tracks daily rank jumps, short-term momentum acceleration and leadership velocity.</p>
+        <p style="color: var(--text-muted); font-size: 10.5px;">Tracks daily rank changes and short-term momentum to show which stocks are gaining leadership.</p>
       </div>
 
       <div class="table-card">
@@ -537,10 +537,10 @@
             <tr>
               <th class="sticky-col" onclick="sortGainersTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
               <th class="sticky-sec" onclick="sortGainersTable('SECTOR')">SECTOR / INDUSTRY ⇅</th>
-              <th onclick="sortGainersTable('PREV_RANK')">PREV ST RANK ⇅</th>
-              <th onclick="sortGainersTable('CURRENT_RANK')">CURRENT ST RANK ⇅</th>
-              <th onclick="sortGainersTable('JUMP')" style="color:#10b981;">RANK JUMP (🔼) ⇅</th>
-              <th onclick="sortGainersTable('RATING')">ST RS RATING ⇅</th>
+              <th onclick="sortGainersTable('PREV_RANK')">PREVIOUS RANK ⇅</th>
+              <th onclick="sortGainersTable('CURRENT_RANK')">CURRENT RANK ⇅</th>
+              <th onclick="sortGainersTable('JUMP')" style="color:#10b981;">RANK CHANGE ⇅</th>
+              <th onclick="sortGainersTable('RATING')">SHORT-TERM RS RATING ⇅</th>
               <th onclick="sortGainersTable('OVERALL_RANK')">OVERALL RS RANK ⇅</th>
             </tr>
           </thead>
@@ -577,23 +577,23 @@
 
       <div class="action-btn-group">
         <button class="btn-tool" onclick="resetEarlyFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
-        <button class="btn-tool" onclick="copyEarlySymbols()"><i data-lucide="copy"></i> Copy</button>
-        <button class="btn-tool btn-tool-success" onclick="exportEarlyCSV()"><i data-lucide="file-spreadsheet"></i> CSV</button>
+        <button class="btn-tool" onclick="copyEarlySymbols()"><i data-lucide="copy"></i> Copy Symbols</button>
+        <button class="btn-tool btn-tool-success" onclick="exportEarlyCSV()"><i data-lucide="file-spreadsheet"></i> Export CSV</button>
       </div>
     </div>
 
     <!-- Quick Signal Filter Chips -->
     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--s2);">
-      <span style="font-size: 10px; font-weight: 700; color: var(--c-slate);">Early Signals:</span>
-      <span class="chip" onclick="toggleEarlySignalChip(this, 'stage2')">🚀 Early Stage 2 Breakout</span>
-      <span class="chip" onclick="toggleEarlySignalChip(this, 'stage1')">🌱 Stage 1 Base Turnaround</span>
-      <span class="chip" onclick="toggleEarlySignalChip(this, 'fresh')">⚡ Fresh Uptrend Ignition</span>
+      <span style="font-size: 10px; font-weight: 700; color: var(--c-slate);">Signal type:</span>
+      <span class="chip" onclick="toggleEarlySignalChip(this, 'stage2')">Early Stage 2 Breakout</span>
+      <span class="chip" onclick="toggleEarlySignalChip(this, 'stage1')">Stage 1 Base Reversal</span>
+      <span class="chip" onclick="toggleEarlySignalChip(this, 'fresh')">New Uptrend Start</span>
     </div>
   </div>
 
   <!-- Summary Strip -->
   <div class="summary-strip">
-    <div>Early RS Breakouts Matrix: <b style="color:var(--accent-cyan);">Near-Term RS Acceleration Jump Ahead of Default RS</b></div>
+    <div>Early RS Leaders: <b style="color:var(--accent-cyan);">near-term RS is improving faster than standard RS</b></div>
     <div>Showing <span class="count-highlight" id="early-shown-count">0</span> Stocks</div>
   </div>
 
@@ -605,12 +605,12 @@
           <tr>
             <th class="sticky-col" onclick="sortEarlyTable('SYMBOL')">STOCK / SYMBOL ⇅</th>
             <th class="sticky-sec" onclick="sortEarlyTable('SECTOR')">SECTOR ⇅</th>
-            <th onclick="sortEarlyTable('EARLY_SIGNAL')">EARLY SIGNAL ⇅</th>
+            <th onclick="sortEarlyTable('EARLY_SIGNAL')">SIGNAL ⇅</th>
             <th onclick="sortEarlyTable('NEAR_TERM_RANK')">NEAR-TERM RS RANK ⇅</th>
-            <th onclick="sortEarlyTable('DEFAULT_RANK')">DEFAULT RS RANK ⇅</th>
-            <th onclick="sortEarlyTable('RS_VELOCITY')" style="color:#10b981;">RS VELOCITY (🔼) ⇅</th>
-            <th onclick="sortEarlyTable('AWAY_200_EMA')">AWAY 200 EMA ⇅</th>
-            <th onclick="sortEarlyTable('OFF_52W_HIGH')">% OFF 52W HIGH ⇅</th>
+            <th onclick="sortEarlyTable('DEFAULT_RANK')">STANDARD RS RANK ⇅</th>
+            <th onclick="sortEarlyTable('RS_VELOCITY')" style="color:#10b981;">RS MOMENTUM ⇅</th>
+            <th onclick="sortEarlyTable('AWAY_200_EMA')">DISTANCE FROM 200 EMA ⇅</th>
+            <th onclick="sortEarlyTable('OFF_52W_HIGH')">BELOW 52W HIGH % ⇅</th>
             <th onclick="sortEarlyTable('RSI')">RSI (14) ⇅</th>
             <th onclick="sortEarlyTable('STAGE')">STAGE ⇅</th>
           </tr>
@@ -638,36 +638,36 @@
           <button class="tf-pill" onclick="changeHistoryTF(this, 7)">1W</button>
           <button class="tf-pill" onclick="changeHistoryTF(this, 15)">15D</button>
           <button class="tf-pill" onclick="changeHistoryTF(this, 30)">1M</button>
-          <button class="tf-pill" onclick="changeHistoryTF(this, 90)">3M (Q)</button>
+          <button class="tf-pill" onclick="changeHistoryTF(this, 90)">3M</button>
           <button class="tf-pill" onclick="changeHistoryTF(this, 180)">6M</button>
-          <button class="tf-pill active" onclick="changeHistoryTF(this, 365)">All (1Y)</button>
+          <button class="tf-pill active" onclick="changeHistoryTF(this, 365)">1Y</button>
         </div>
       </div>
 
       <!-- Right Dropdowns: RS Model & Top Stocks Count -->
       <div class="chart-select-group">
         <select id="historyModelSelect" class="history-select" onchange="renderHistoryChartAndTable()">
-  <option value="Overall" selected>🏆 Overall RS Rank</option>
-  <option value="Short Term">⚡ Short Term RS Rank</option>
-  <option value="Self Near">🔥 Self RS (Near-Term)</option>
-  <option value="Self Def">📊 Self RS (Default)</option>
-  <option value="Rel Near">🚀 Relative RS (Near-Term)</option>
-  <option value="Rel Def">💎 Relative RS (Default)</option>
+  <option value="Overall" selected>Overall RS Rank</option>
+  <option value="Short Term">Short-Term RS Rank</option>
+  <option value="Self Near">Absolute RS (Near-Term)</option>
+  <option value="Self Def">Absolute RS (Standard)</option>
+  <option value="Rel Near">Relative RS (Near-Term)</option>
+  <option value="Rel Def">Relative RS (Standard)</option>
 </select>
 
         <select id="historyTopCountSelect" class="history-select" onchange="renderHistoryChartAndTable()">
-          <option value="10" selected>Top 10 Stocks</option>
-          <option value="20">Top 20 Stocks</option>
-          <option value="50">Top 50 Stocks</option>
-          <option value="100">Top 100 Stocks</option>
-          <option value="300">All 300 Stocks</option>
+          <option value="10" selected>Top 10</option>
+          <option value="20">Top 20</option>
+          <option value="50">Top 50</option>
+          <option value="100">Top 100</option>
+          <option value="300">All 300</option>
         </select>
       </div>
     </div>
 
     <div class="chart-title-tag">
       <i data-lucide="trending-up" style="width:13px;height:13px;"></i>
-      <span>RANK TREND TRAJECTORY (RANK 1 = TOP LEADER)</span>
+      <span>Rank trend — Rank 1 is the strongest stock</span>
     </div>
 
     <!-- Dynamic Stock Legend Chips -->
@@ -679,21 +679,22 @@
     </div>
   </div>
 
-  <!-- Date-Wise Historical Heatmap Matrix Table -->
-  <div class="heatmap-table-card">
-    <div style="padding: 10px 14px; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 11px; font-weight: 800; color: var(--text-strong); display: flex; align-items: center; gap: 6px;">
-        <i data-lucide="calendar" style="width:12px;height:12px;color:var(--accent-cyan);"></i> Date-Wise Historical Heatmap Matrix
-      </span>
-      <span style="font-size: 10px; color: var(--text-muted);" id="historySnapshotCount">0 Snapshots Shown</span>
+  <!-- Day-by-day rank heatmap -->
+  <div class="heatmap-table-card hm-card">
+    <div class="hm-head">
+      <div class="hm-title"><i data-lucide="calendar-days"></i><b>Stocks — Day-by-Day Rank Heatmap</b><span id="historySnapshotCount">0 snapshots</span></div>
+      <div class="hm-controls">
+        <div class="hm-search"><i data-lucide="search"></i><input id="hmSearch" type="text" placeholder="Search stock…" autocomplete="off" oninput="paintHistoryHeatmap()"></div>
+        <label>Sort rows <select id="hmSort" onchange="paintHistoryHeatmap()" data-tip="Choose how the rows are ordered."><option value="latest">By latest rank</option><option value="gain">Biggest improvement</option><option value="drop">Biggest decline</option><option value="name">Name (A–Z)</option></select></label>
+        <label>Rows <select id="hmRows" onchange="paintHistoryHeatmap()" data-tip="How many stocks to show."><option value="all">All items</option><option value="10">Top 10</option><option value="25">Top 25</option><option value="50">Top 50</option></select></label>
+      </div>
     </div>
-    <div class="table-wrapper" style="max-height: 420px;">
-      <table>
-        <thead id="history-matrix-thead"></thead>
-        <tbody id="history-matrix-tbody"></tbody>
-      </table>
+    <div class="hm-legend"><span>Rank colour:</span><i class="hm-pill hm-t1">1–10</i><i class="hm-pill hm-t2">11–30</i><i class="hm-pill hm-t3">31–100</i><i class="hm-pill hm-t4">100+</i><em>Newest date first. Rank 1 = strongest stock.</em></div>
+    <div class="hm-wrap" id="hmWrap">
+      <table class="hm-table"><thead id="history-matrix-thead"></thead><tbody id="history-matrix-tbody"></tbody></table>
     </div>
   </div>
+
 
 </div>
 
@@ -709,7 +710,7 @@
       <div class="rs-weight-grid">
         <!-- Type 1 -->
         <div class="rs-weight-card">
-          <div class="rs-w-title"><span>TYPE 1: Self RS (Near-Term)</span><span>100%</span></div>
+          <div class="rs-w-title"><span>MODEL 1 · Absolute RS (Near-Term)</span><span>100%</span></div>
           <div class="rs-w-row"><span>Weekly % Change</span><span class="rs-w-val">40.0%</span></div>
           <div class="rs-w-row"><span>15 Days % Change</span><span class="rs-w-val">30.0%</span></div>
           <div class="rs-w-row"><span>1 Month % Change</span><span class="rs-w-val">20.0%</span></div>
@@ -717,7 +718,7 @@
         </div>
         <!-- Type 2 -->
         <div class="rs-weight-card">
-          <div class="rs-w-title"><span>TYPE 2: Self RS (Default)</span><span>100%</span></div>
+          <div class="rs-w-title"><span>MODEL 2 · Absolute RS (Standard)</span><span>100%</span></div>
           <div class="rs-w-row"><span>Weekly % Change</span><span class="rs-w-val">10.0%</span></div>
           <div class="rs-w-row"><span>1 Month % Change</span><span class="rs-w-val">20.0%</span></div>
           <div class="rs-w-row"><span>Quarterly % Change</span><span class="rs-w-val">25.0%</span></div>
@@ -726,7 +727,7 @@
         </div>
         <!-- Type 3 -->
         <div class="rs-weight-card">
-          <div class="rs-w-title"><span>TYPE 3: Relative RS (Near-Term)</span><span>vs CNX SmallCap</span></div>
+          <div class="rs-w-title"><span>MODEL 3 · Relative RS (Near-Term)</span><span>vs CNX Smallcap</span></div>
           <div class="rs-w-row"><span>Weekly Relative %</span><span class="rs-w-val">40.0%</span></div>
           <div class="rs-w-row"><span>15 Days Relative %</span><span class="rs-w-val">30.0%</span></div>
           <div class="rs-w-row"><span>1 Month Relative %</span><span class="rs-w-val">20.0%</span></div>
@@ -734,7 +735,7 @@
         </div>
         <!-- Type 4 -->
         <div class="rs-weight-card">
-          <div class="rs-w-title"><span>TYPE 4: Relative RS (Default)</span><span>vs CNX SmallCap</span></div>
+          <div class="rs-w-title"><span>MODEL 4 · Relative RS (Standard)</span><span>vs CNX Smallcap</span></div>
           <div class="rs-w-row"><span>Weekly Relative %</span><span class="rs-w-val">10.0%</span></div>
           <div class="rs-w-row"><span>1 Month Relative %</span><span class="rs-w-val">20.0%</span></div>
           <div class="rs-w-row"><span>Quarterly Relative %</span><span class="rs-w-val">25.0%</span></div>
@@ -743,8 +744,8 @@
         </div>
         <!-- Type 5 & Overall -->
         <div class="rs-weight-card" style="grid-column: 1 / -1;">
-          <div class="rs-w-title"><span>TYPE 5: Short-Term RS & Overall Rank Score</span><span>Ensemble</span></div>
-          <div class="rs-w-row"><span>Type 5 (Short Term RS)</span><span class="rs-w-val">Weekly (40%) + 15D (35%) + 1M (25%) Momentum</span></div>
+          <div class="rs-w-title"><span>MODEL 5 · Short-Term RS and Overall Rank</span><span>Ensemble</span></div>
+          <div class="rs-w-row"><span>Short-Term RS</span><span class="rs-w-val">Weekly (40%) + 15D (35%) + 1M (25%) Momentum</span></div>
           <div class="rs-w-row"><span>Overall RS Calculation</span><span class="rs-w-val">Average Rank of (Type 1 + Type 2 + Type 3 + Type 4 + Type 5) / 5</span></div>
         </div>
       </div>
@@ -805,6 +806,7 @@
 
   <script src="./mickkk-cache.js"></script>
   <script src="./mickkk-shell.js"></script>
+  <script src="./mickkk-labels.js"></script>
   <script src="./screener.js"></script>
   <script src="./screener-master.js"></script>
   <!-- Login gate (needs ./auth.js next to it). Must be served over http/https -->
