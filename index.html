@@ -625,7 +625,39 @@
       window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
     }
 
+    // Remembered login (saved by auth.js): show the logged-in navbar at once, Firebase re-checks in the background.
+    function paintNavFromSession() {
+      try {
+        const s = JSON.parse(localStorage.getItem("mickkk_session") || "null");
+        if (!s || !s.uid || Date.now() - (s.t || 0) > 30 * 24 * 3600 * 1000) return;
+        loggedUserEmail = s.email || '';
+        const out = document.getElementById('navAuthLoggedOut');
+        const inn = document.getElementById('navAuthLoggedIn');
+        const nameEl = document.getElementById('navUserName');
+        const avatarEl = document.getElementById('navUserAvatar');
+        const badge = document.getElementById('navUserRoleBadge');
+        if (out) out.style.display = 'none';
+        if (inn) inn.style.display = 'flex';
+        if (nameEl) nameEl.innerText = s.name || 'Trader';
+        if (badge) {
+          badge.innerText = s.role === 'pro' ? 'Pro Member \u26A1' : 'Free Member';
+          badge.className = `text-[9px] font-bold uppercase tracking-wider ${s.role === 'pro' ? 'text-emerald-500' : 'text-amber-500'}`;
+        }
+        if (avatarEl) {
+          if (s.photo && /^https:\/\//.test(s.photo)) {
+            const img = document.createElement('img');
+            img.src = s.photo; img.alt = 'avatar'; img.referrerPolicy = 'no-referrer';
+            img.className = 'w-full h-full object-cover';
+            avatarEl.replaceChildren(img);
+          } else {
+            avatarEl.innerText = (s.name || 'U')[0].toUpperCase();
+          }
+        }
+      } catch (e) {}
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
+      paintNavFromSession();
       if (window.lucide) lucide.createIcons();
       syncIcons(document.documentElement.classList.contains("dark"));
       captureReferralCode();
