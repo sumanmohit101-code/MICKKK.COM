@@ -5,6 +5,11 @@
    Use on ANY page, one line (after the page's other scripts):
        <script type="module" src="./mickkk-gate.js"></script>
 
+   Login is REMEMBERED: after one login every page opens instantly (no "Checking login..." screen).
+   auth.js stores a small copy of the last confirmed login; this file uses it to open the page at once
+   and lets Firebase re-verify in the background. Only if Firebase says "not logged in" (or there is no
+   remembered login at all) the full-screen login appears.
+
    What it does
    - Shows a full-screen "Continue with Google" screen until the user is logged in.
    - After login: hides the gate, fills .auth-user-* elements (via auth.js),
@@ -72,8 +77,12 @@ function injectUI() {
     </div>`;
   document.body.appendChild(g);
   $('mkGateBtn').addEventListener('click', doLogin);
+}
 
-  // Block clicks on Pro-locked controls (capture phase = before the page's own handlers)
+// Block clicks on Pro-locked controls (capture phase = before the page's own handlers)
+let clicksInstalled = false;
+function installProLockClicks() {
+  if (clicksInstalled) return; clicksInstalled = true;
   document.addEventListener('click', (e) => {
     const el = e.target.closest && e.target.closest('.pro-locked');
     if (!el) return;
@@ -98,7 +107,7 @@ function hideGate() {
 async function doLogin() {
   const btn = $('mkGateBtn'); $('mkGateErr').textContent = '';
   btn.disabled = true; btn.lastElementChild.textContent = 'Opening Google…';
-  try { await A.loginWithGoogle(); }                      // onAuthStateChanged continues the flow
+  try { if (!A) A = await import('./auth.js'); await A.loginWithGoogle(); }                      // onAuthStateChanged continues the flow
   catch (e) { if (e && e.code !== 'auth/popup-closed-by-user') $('mkGateErr').textContent = 'Login failed. Please try again.'; }
   btn.disabled = false; btn.lastElementChild.textContent = 'Continue with Google';
 }
@@ -125,27 +134,75 @@ window.MickkkGate = {
   isPro, requirePro, applyRoleUI
 };
 window.userRole = 'free';
-window.mkLogout = () => (A ? A.logoutUser() : location.reload());
+
+/* ---------- Remembered login (written by auth.js) ---------- */
+const SESSION_KEY = 'mickkk_session';
+const SESSION_MAX_AGE = 30 * 24 * 3600 * 1000;      // forget after 30 days without a confirmed visit
+function readSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    if (s && s.uid && (Date.now() - (s.t || 0)) < SESSION_MAX_AGE) return s;
+  } catch (e) {}
+  return null;
+}
+function paintUser(s) {                               // fills the sidebar before Firebase has answered
+  document.querySelectorAll('.auth-user-name').forEach(el => el.textContent = s.name || 'Trader');
+  document.querySelectorAll('.auth-user-email').forEach(el => el.textContent = s.email || '');
+  document.querySelectorAll('.auth-user-avatar').forEach(el => {
+    if (s.photo && /^https:\/\//.test(s.photo)) {
+      const img = document.createElement('img');
+      img.src = s.photo; img.alt = 'avatar'; img.referrerPolicy = 'no-referrer';
+      img.className = 'w-full h-full rounded-lg object-cover';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+      el.replaceChildren(img);
+    } else {
+      el.textContent = (s.name || 'U').charAt(0).toUpperCase();
+    }
+  });
+}
+async function loadAuth() { if (!A) A = await import('./auth.js'); return A; }
+
+window.mkLogout = async () => {
+  try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+  try { (await loadAuth()).logoutUser(); } catch (e) { location.href = 'index.html'; }
+};
 window.mkLogin = () => showLogin();
 
 async function boot() {
   const wait = () => new Promise(r => (document.body ? r() : document.addEventListener('DOMContentLoaded', r, { once: true })));
   await wait();
-  injectUI();
+  installProLockClicks();
+
+  const cached = readSession();
+  if (cached) {
+    // Already logged in earlier -> open the page NOW. No overlay, no "Checking login...".
+    state.user = { uid: cached.uid, displayName: cached.name, email: cached.email, photoURL: cached.photo, cached: true };
+    state.role = cached.role === 'pro' ? 'pro' : 'free'; state.ready = true;
+    window.userRole = state.role;
+    paintUser(cached); applyRoleUI();
+    window.dispatchEvent(new CustomEvent('mickkk:authed', { detail: { user: state.user, role: state.role, cached: true } }));
+  } else {
+    injectUI();                                       // nobody remembered: show "Checking login..." until Firebase answers
+  }
+
   try {
-    A = await import('./auth.js');
+    await loadAuth();
   } catch (e) {
     console.error('auth.js failed to load', e);
-    showLogin('Login service could not load. Open this page from your website (http/https), not from a local file.');
-    return;
+    if (!cached) showLogin('Login service could not load. Open this page from your website (http/https), not from a local file.');
+    return;                                           // remembered users keep using the page
   }
+
   A.initAuthListener(async (user, role) => {
-    state.user = user; state.role = role === 'pro' ? 'pro' : 'free'; state.ready = true;
-    window.userRole = state.role;
+    const newRole = role === 'pro' ? 'pro' : 'free';
+    const changed = !state.ready || !state.user || state.user.uid !== user.uid || state.role !== newRole;
+    state.user = user; state.role = newRole; state.ready = true;
+    window.userRole = newRole;
     hideGate(); applyRoleUI();
-    window.dispatchEvent(new CustomEvent('mickkk:authed', { detail: { user, role: state.role } }));
+    if (changed) window.dispatchEvent(new CustomEvent('mickkk:authed', { detail: { user, role: newRole } }));
   }, () => {
     state.user = null; state.role = 'free'; state.ready = false; window.userRole = 'free';
+    applyRoleUI();
     showLogin();
     window.dispatchEvent(new CustomEvent('mickkk:loggedout'));
   });
