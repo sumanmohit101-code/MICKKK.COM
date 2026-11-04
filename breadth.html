@@ -52,6 +52,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
 
+  <link rel="stylesheet" href="./mickkk-shell.css">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
@@ -59,49 +60,6 @@
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
-
-    :root { 
-      --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
-      --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; 
-    }
-    .dark { 
-      --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
-      --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; 
-    }
-    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
-    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
-               background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
-    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
-    .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
-
-    /* Sidebar Collapsed Mode */
-    .sidebar-collapsed { width: 4.2rem !important; }
-    .sidebar-collapsed .brand-text,
-    .sidebar-collapsed .nav-text,
-    .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
-    .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
-    .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-
-    .sidebar-collapsed .nav-item:hover::after,
-    .sidebar-collapsed .side-collapsed-user:hover::after {
-      content: attr(data-title);
-      position: absolute;
-      left: 4.2rem;
-      background: #0f172a;
-      color: #fff;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 6px;
-      white-space: nowrap;
-      z-index: 100;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      border: 1px solid #1e293b;
-    }
-
-    .collapse-float-btn { position: absolute; right: -12px; top: 22px; z-index: 60; }
 
     .bi-bar-container { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 90px; }
     .bi-bar-track { position: relative; flex: 1; height: 11px; background: rgba(100, 116, 139, 0.2); border-radius: 2px; overflow: hidden; }
@@ -138,149 +96,12 @@
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
 
-  <!-- Shared Mickkk SVG Icon -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
-      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
-      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
-      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
-      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
-      <symbol id="mick-icon" viewBox="0 0 100 100">
-        <g clip-path="url(#mkClip)">
-          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
-          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
-          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
-        </g>
-        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
-        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
-        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
-        <g class="mk-glow">
-          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
-          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
-        </g>
-      </symbol>
-    </defs>
-  </svg>
-
-  <!-- ================= LEFT SIDEBAR ================= -->
-  <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
-    
-    <button onclick="toggleSidebar()" aria-label="Toggle Navigation Sidebar" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
-      <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
-    </button>
-
-    <div>
-      <a href="index.html" title="Mickkk.com Home" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
-        <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
-        <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
-          <div class="flex items-baseline whitespace-nowrap">
-            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
-            <span class="mk-tag text-[6.5px] tracking-[0.2em]">Market Intelligence</span>
-            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
-          </div>
-        </div>
-      </a>
-
-      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
-
-      <!-- Navigation Links -->
-      <nav class="space-y-1 text-xs font-semibold">
-        <a href="overview.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
-        </a>
-        <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
-          <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
-        </a>
-        <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="scan" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Stock Screener</span>
-        </a>
-        <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="layers" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Index Terminal</span>
-        </a>
-        <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
-        </a>
-        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
-        </a>
-        <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
-        </a>
-        <a href="#" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Trading Journal</span>
-        </a>
-        <a href="#" data-title="Analytics" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Analytics</span>
-        </a>
-        <a href="#" data-title="Watchlist" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="bookmark" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Watchlist</span>
-        </a>
-        <a href="#" data-title="Market Tools" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="wrench" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Tools</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- ================= BOTTOM PANEL ================= -->
-    <div>
-      <!-- Expanded Mode -->
-      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
-        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-          
-          <div class="flex items-center gap-2 min-w-0">
-            <div id="sideUserAvatar" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
-              M
-            </div>
-            <div class="min-w-0 flex flex-col justify-center">
-              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Trader</div>
-              <div class="flex items-center gap-1.5">
-                <span id="sidePlanBadge" class="text-[9px] font-bold text-amber-500 truncate">Free Plan</span>
-                <button onclick="openProModal()" id="sideUpgradeLink" class="text-[9px] font-extrabold text-emerald-500 hover:underline cursor-pointer">Upgrade</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1 text-slate-400">
-            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
-              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
-            </button>
-            <button onclick="handleLogout()" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-
-        </div>
-        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
-      </div>
-
-      <!-- Collapsed Mode -->
-      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-        <!-- Collapsed Avatar with Plan Tooltip -->
-        <div id="sideCollapsedUserWrap" data-title="Plan: Free" class="side-collapsed-user relative cursor-pointer" onclick="openProModal()">
-          <div id="sideUserAvatarMini" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
-            M
-          </div>
-          <span id="sidePlanDotMini" class="w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1"></span>
-        </div>
-
-        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-          <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
-          <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
-        </button>
-        <button onclick="handleLogout()" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
+  <!-- Sidebar is built by mickkk-nav.js (menu list lives in that one file) -->
+  <aside id="sidebar" class="mk-sidebar" data-active="breadth" data-pro-text="Unlock 1-Year historical breadth curves, multi-timeframe scans, All-4 indices relative strength, and 1-click CSV data export."></aside>
+  <script src="./mickkk-nav.js"></script>
 
   <!-- ================= RIGHT CONTENT AREA ================= -->
-  <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
+  <div id="mainContent" class="mk-main flex-1">
     <main class="p-5 md:p-7 space-y-5 w-full">
 
       <!-- Header Title Banner -->
@@ -615,44 +436,12 @@
     </main>
   </div>
 
-  <!-- ================= PRO UPGRADE MODAL ================= -->
-  <div id="proModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-cardDark border border-slate-200 dark:border-borderDark rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative">
-      <button onclick="closeProModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 cursor-pointer">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div class="text-center space-y-3">
-        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
-          <i data-lucide="zap" class="w-6 h-6"></i>
-        </div>
-        <h3 class="text-lg font-black text-slate-900 dark:text-white">Upgrade to Pro Institutional</h3>
-        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Unlock 1-Year historical breadth curves, multi-timeframe scans, All-4 indices relative strength, and 1-click CSV data export.
-        </p>
-
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-borderDark text-left space-y-2 text-xs font-bold">
-          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>1-Year Full Historical Breadth</span></div>
-          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>All Timeframes (90D, 180D, 1Y, All)</span></div>
-          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>All-4 Indices Relative Strength Compare</span></div>
-          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>1-Click Daily CSV Reports</span></div>
-          <div class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i><span>VIP WhatsApp Breadth Alerts</span></div>
-        </div>
-
-        <button onclick="openWhatsAppTrialModal()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer">
-          <i data-lucide="message-circle" class="w-4 h-4"></i>
-          <span>Claim 7-Day Free Pro on WhatsApp</span>
-        </button>
-        <p class="text-[10px] text-slate-400">Instant verification • Zero fees</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= HIGH-PERFORMANCE JAVASCRIPT ENGINE ================= -->
+  <script src="./mickkk-cache.js"></script>
   <script>
-    const SPREADSHEET_ID = "1N5LGJUqsTMIKicd9G_hBGIV_sGS2MSjqEziILduitJ8";
+    // Data comes through the Cloudflare Worker (mickkk-cache.js): Google Sheet is hit ~once per 5 min, not once per visitor.
     const SHEET_NAME = "Market Breadth Signals";
-    const BREADTH_CACHE_KEY = "mbi_market_data_cache_v2";
+    const BREADTH_KEY = "breadth:dataset:v2";               // IndexedDB cache key (MKC)
+    const OLD_LS_KEY = "mbi_market_data_cache_v2";          // old localStorage cache, removed once
     
     let rawDataset = [];
     let filteredDataset = [];
@@ -663,7 +452,6 @@
     let refreshCountdown = 300;
     
     let userRole = 'free'; 
-    let userEmailGlobal = '';
 
     const crosshairPlugin = {
       id: 'crosshair',
@@ -692,53 +480,14 @@
       }
     }
 
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      const mainContent = document.getElementById("mainContent");
-      const arrow = document.getElementById("collapseArrow");
+    // Sidebar + theme toggles live in mickkk-shell.js. Charts need a redraw when the theme flips.
+    window.addEventListener("mickkk:theme", () => renderAllCharts());
 
-      sidebar.classList.toggle("sidebar-collapsed");
-      const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
-
-      if (isCollapsed) {
-        mainContent.classList.remove("ml-60");
-        mainContent.classList.add("ml-[4.2rem]");
-        if (arrow) arrow.setAttribute("data-lucide", "chevron-right");
-      } else {
-        mainContent.classList.remove("ml-[4.2rem]");
-        mainContent.classList.add("ml-60");
-        if (arrow) arrow.setAttribute("data-lucide", "chevron-left");
-      }
-      try { localStorage.setItem("mickkk_sidebar_collapsed", isCollapsed ? "true" : "false"); } catch (e) {}
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function initSidebarState() {
-      try {
-        if (localStorage.getItem("mickkk_sidebar_collapsed") === "true") {
-          toggleSidebar();
-        }
-      } catch (e) {}
-    }
-
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle("dark");
-      syncThemeIcons(isDark);
-      try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch (e) {}
-      renderAllCharts();
-    }
-
-    function syncThemeIcons(isDark) {
-      const sunIconSide = document.getElementById("sunIconSide");
-      const moonIconSide = document.getElementById("moonIconSide");
-      const sunIconMini = document.getElementById("sunIconMini");
-      const moonIconMini = document.getElementById("moonIconMini");
-
-      if (sunIconSide) sunIconSide.classList.toggle("hidden", isDark);
-      if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
-      if (sunIconMini) sunIconMini.classList.toggle("hidden", isDark);
-      if (moonIconMini) moonIconMini.classList.toggle("hidden", !isDark);
-    }
+    // Role (free/pro) comes from mickkk-gate.js. Fires at once for a remembered login, again only if the role changed.
+    window.addEventListener("mickkk:authed", (e) => {
+      userRole = (e.detail && e.detail.role) || 'free';
+      applyRoleRestrictions();
+    });
 
     function updateClock() {
       const now = new Date();
@@ -782,10 +531,6 @@
     // Role-based Access Handler
     function applyRoleRestrictions() {
       const tierBadge = document.getElementById('tierBadge');
-      const sidePlanBadge = document.getElementById('sidePlanBadge');
-      const sideUpgradeLink = document.getElementById('sideUpgradeLink');
-      const sideCollapsedUserWrap = document.getElementById('sideCollapsedUserWrap');
-      const sidePlanDotMini = document.getElementById('sidePlanDotMini');
       const tableOverlay = document.getElementById('tableLockOverlay');
       const tableIndicator = document.getElementById('tableRowIndicator');
       const lockIcons = document.querySelectorAll('.pro-lock-icon');
@@ -796,15 +541,6 @@
         if (tierBadge) {
           tierBadge.innerText = 'PRO INSTITUTIONAL ⚡';
           tierBadge.className = 'text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
-        }
-        if (sidePlanBadge) {
-          sidePlanBadge.innerText = 'Pro Plan ⚡';
-          sidePlanBadge.className = 'text-[9px] font-bold text-emerald-500 uppercase tracking-wider truncate';
-        }
-        if (sideUpgradeLink) sideUpgradeLink.style.display = 'none';
-        if (sideCollapsedUserWrap) sideCollapsedUserWrap.setAttribute('data-title', 'Plan: Pro Institutional ⚡');
-        if (sidePlanDotMini) {
-          sidePlanDotMini.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1';
         }
         if (tableOverlay) tableOverlay.style.display = 'none';
         if (tableIndicator) tableIndicator.innerText = 'Full History Unlocked';
@@ -824,15 +560,6 @@
         if (tierBadge) {
           tierBadge.innerText = 'Starter • Free Plan';
           tierBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
-        }
-        if (sidePlanBadge) {
-          sidePlanBadge.innerText = 'Free Plan';
-          sidePlanBadge.className = 'text-[9px] font-bold text-amber-500 truncate';
-        }
-        if (sideUpgradeLink) sideUpgradeLink.style.display = 'inline';
-        if (sideCollapsedUserWrap) sideCollapsedUserWrap.setAttribute('data-title', 'Plan: Free (Upgrade to Pro)');
-        if (sidePlanDotMini) {
-          sidePlanDotMini.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white dark:border-cardDark absolute -top-1 -right-1';
         }
         if (tableOverlay) tableOverlay.style.display = 'flex';
         if (tableIndicator) tableIndicator.innerText = 'Latest 5 Days (Free)';
@@ -892,59 +619,33 @@
       applyDateRangeFilter();
     }
 
-    function openProModal() {
-      const modal = document.getElementById('proModal');
-      if (modal) modal.classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeProModal() {
-      const modal = document.getElementById('proModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function openWhatsAppTrialModal() {
-      // ⚠️ Yahan apna WhatsApp number daalein
-      const myWhatsAppNumber = "917086054184";
-      const emailText = userEmailGlobal ? ` for my registered email: ${userEmailGlobal}` : "";
-      const msg = encodeURIComponent(`Hi Mickkk Team! Please activate my 7-day Pro Free Trial${emailText}.`);
-      window.open(`https://wa.me/${myWhatsAppNumber}?text=${msg}`, '_blank');
-      closeProModal();
-    }
-
     function renderFromCache() {
       try {
-        const cached = localStorage.getItem(BREADTH_CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            rawDataset = parsed;
-            applyRoleRestrictions();
-          }
+        const parsed = MKC.get(BREADTH_KEY);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          rawDataset = parsed;
+          applyRoleRestrictions();
         }
       } catch (e) {
         console.warn("Breadth cache read error:", e);
       }
     }
 
-    function loadDashboardData(isManual = false) {
+    async function loadDashboardData(isManual = false) {
       const spin = document.getElementById("manualSpinIcon");
       if (isManual && spin) spin.classList.add("animate-spin");
-
-      const script = document.createElement("script");
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetData&sheet=${encodeURIComponent(SHEET_NAME)}&_ts=${Date.now()}`;
-      script.src = url;
-
-      script.onload = () => {
+      try {
+        if (isManual) MKC.forceFor(8000);                          // skip the browser cache once; the Worker still protects Google
+        const res = await MKC.gviz(SHEET_NAME, "breadth");         // worker: route=gviz&ss=breadth
+        const t = await res.text();
+        const a = t.indexOf("("), b = t.lastIndexOf(")");
+        if (a < 0 || b <= a) throw new Error("bad sheet response");
+        window.handleGoogleSheetData(JSON.parse(t.slice(a + 1, b)));
+      } catch (e) {
+        console.warn("Breadth load failed:", e);
+      } finally {
         if (isManual && spin) spin.classList.remove("animate-spin");
-        script.remove();
-      };
-      script.onerror = () => {
-        if (isManual && spin) spin.classList.remove("animate-spin");
-        script.remove();
-      };
-
-      document.body.appendChild(script);
+      }
     }
 
     function parseCustomDate(dStr) {
@@ -1017,9 +718,7 @@
       parsed.sort((a, b) => a.dateTimestamp - b.dateTimestamp);
       rawDataset = parsed;
 
-      try {
-        localStorage.setItem(BREADTH_CACHE_KEY, JSON.stringify(rawDataset));
-      } catch (e) {}
+      MKC.set(BREADTH_KEY, rawDataset);
 
       applyRoleRestrictions();
     };
@@ -1453,10 +1152,11 @@
       document.body.removeChild(link);
     }
 
-    function initializeApp() {
-      initSidebarState();
+    async function initializeApp() {
+      try { await MKC.init(); } catch (e) {}
+      try { localStorage.removeItem(OLD_LS_KEY); } catch (e) {}   // old big localStorage cache, no longer used
+      if (window.MickkkGate && window.MickkkGate.ready) userRole = window.MickkkGate.role;
       safeInitChartPlugins();
-      syncThemeIcons(document.documentElement.classList.contains("dark"));
       if (window.lucide) lucide.createIcons();
       updateClock();
       setInterval(updateClock, 1000);
@@ -1472,50 +1172,9 @@
     }
   </script>
 
-  <!-- Central Authentication & Route Guard Wiring -->
-  <script type="module">
-    import { logoutUser, initAuthListener, requireAuth } from './auth.js';
-
-    // Route Guard
-    requireAuth();
-
-    window.handleLogout = async () => {
-      await logoutUser();
-    };
-
-    initAuthListener(
-      (user, role) => {
-        userRole = role || 'free';
-        userEmailGlobal = user.email || '';
-
-        const nameEl = document.getElementById('sideUserName');
-        const avatarEl = document.getElementById('sideUserAvatar');
-        const avatarElMini = document.getElementById('sideUserAvatarMini');
-
-        if (nameEl) nameEl.innerText = user.displayName || 'Trader';
-        if (avatarEl) {
-          if (user.photoURL) {
-            avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
-          } else {
-            avatarEl.innerText = (user.displayName || 'U')[0].toUpperCase();
-          }
-        }
-        if (avatarElMini) {
-          if (user.photoURL) {
-            avatarElMini.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
-          } else {
-            avatarElMini.innerText = (user.displayName || 'U')[0].toUpperCase();
-          }
-        }
-
-        applyRoleRestrictions();
-        if (window.lucide) lucide.createIcons();
-      },
-      () => {
-        // If not logged in, requireAuth will redirect
-      }
-    );
-  </script>
-
+  <!-- Shared Mickkk files (same ones Overview and Screener use) -->
+  <script src="./mickkk-shell.js"></script>
+  <!-- Login is remembered: no "Checking login" on every page. Needs ./auth.js next to it, served over http/https -->
+  <script type="module" src="./mickkk-gate.js"></script>
 </body>
 </html>
