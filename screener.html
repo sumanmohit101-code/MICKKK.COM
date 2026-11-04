@@ -196,80 +196,26 @@
     <!-- ========================================================================= -->
     <div id="view-master" class="app-view-container">
 
-      <!-- ===================== FILTER PANEL ===================== -->
-      <div class="flt-card">
-        <div class="flt-head">
-          <div class="flt-title"><i data-lucide="sliders-horizontal"></i> Filters <span class="flt-badge" id="activeFilterCount">No filters</span><button type="button" class="flt-collapse" id="fltToggle" onclick="toggleFilterPanel()">Hide filters ▴</button></div>
-          <div class="flt-actions">
-            <button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
-            <button class="btn-tool btn-tool-danger" onclick="clearAllFilterChips()"><i data-lucide="x"></i> Clear Chips</button>
-            <button class="btn-tool btn-tool-accent" onclick="openColumnModal()"><i data-lucide="columns"></i> Columns</button>
-            <button class="btn-tool" onclick="copyTableData()"><i data-lucide="copy"></i> Copy Symbols</button>
-            <button class="btn-tool btn-tool-success" data-pro onclick="exportToCSV()"><i data-lucide="file-spreadsheet"></i> Export CSV</button>
-          </div>
+      <!-- ===================== COMPACT TOOLBAR ===================== -->
+      <div class="tb-card">
+        <div class="tb">
+          <div class="tb-search"><i data-lucide="search"></i><input type="text" id="search-input" placeholder="Search symbol or company…" oninput="applyAllFilters()"></div>
+          <div id="ms-sector" class="tb-ms"></div>
+          <div id="ms-industry" class="tb-ms"></div>
+          <div id="ms-cap" class="tb-ms tb-ms-sm"></div>
+          <button type="button" class="btn-tool tb-filters" id="fltBtn" onclick="toggleFilterDrawer()" data-tip="Open the full filter panel: price, volume, momentum, technical, fundamental and custom filters."><i data-lucide="sliders-horizontal"></i> Filters <span class="tb-count" id="fltBtnCount" hidden>0</span></button>
+          <span class="tb-spacer"></span>
+          <button class="btn-tool btn-tool-accent" onclick="openColumnModal()"><i data-lucide="columns"></i> Columns</button>
+          <button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button>
+          <button class="btn-tool" onclick="copyTableData()" data-tip="Copy the symbols of all stocks shown, ready to paste into a watchlist."><i data-lucide="copy"></i> Copy</button>
+          <button class="btn-tool btn-tool-success" data-pro onclick="exportToCSV()"><i data-lucide="file-spreadsheet"></i> Export</button>
         </div>
-
-        <div class="flt-basic">
-          <div class="flt-field flt-search-f"><label>Search</label>
-            <div class="search-wrap"><i data-lucide="search" class="search-icon"></i>
-              <input type="text" id="search-input" class="search-input" placeholder="Symbol or company name…" oninput="applyAllFilters()"></div></div>
-          <div class="flt-field"><label>Sector</label><div id="ms-sector"></div></div>
-          <div class="flt-field"><label>Industry</label><div id="ms-industry"></div></div>
-          <div class="flt-field"><label>Market Cap</label><div id="ms-cap"></div></div>
-        </div>
-
-        <div class="rf-card">
-          <div class="rf-head"><i data-lucide="sliders-horizontal"></i> Range Filters <span class="rf-hint">type a Min and/or Max — blank = no limit</span></div>
-          <div class="rf-grid" id="rangeFilters"></div>
-        </div>
-
-        <div class="flt-rows">
-          <div class="fr">
-            <div class="fr-label t-scan"><i data-lucide="sparkles"></i><span>Patterns &amp; Scanners</span><em id="scanTotal"></em></div>
-            <div class="fr-body">
-              <div class="fr-tools">
-                <div class="seg" id="scanMode"><button class="on" data-mode="all" onclick="setScannerMode('all')">Match ALL</button><button data-mode="any" onclick="setScannerMode('any')">Match ANY</button></div>
-                <input id="scanSearch" class="flt-mini-search" type="text" placeholder="Find pattern…" oninput="renderScannerChips()">
-                <button class="flt-link" id="scanToggle" onclick="toggleScanExpand()">Show all</button>
-              </div>
-              <div class="scan-grid collapsed" id="chartinkScannersRow"><span class="flt-hint">Loading live scanners…</span></div>
-            </div>
-          </div>
-
-          <div class="fr">
-            <div class="fr-label t-tech"><i data-lucide="line-chart"></i><span>Technical</span></div>
-            <div class="fr-body fr-groups">
-              <div class="fg"><span class="fg-t">Momentum</span><span class="chip" data-tip="RSI (14) is 60 or higher: positive momentum." onclick="toggleChip(this, 'rsi60')">RSI ≥ 60</span><span class="chip" data-tip="RSI (14) is 70 or higher: very strong momentum (can also mean overbought)." onclick="toggleChip(this, 'rsi70')">RSI ≥ 70</span><span class="chip" data-tip="RSI (14) is 30 or lower: oversold." onclick="toggleChip(this, 'rsiLow')">RSI ≤ 30</span></div>
-              <div class="fg"><span class="fg-t">Price above</span><span class="chip" data-tip="Price is above its 10-day moving average (short-term trend)." onclick="toggleChip(this, 'closeEma10')">EMA 10</span><span class="chip" data-tip="Price is above its 20-day moving average." onclick="toggleChip(this, 'closeEma20')">EMA 20</span><span class="chip" data-tip="Price is above its 50-day moving average (medium-term trend)." onclick="toggleChip(this, 'closeEma50')">EMA 50</span><span class="chip" data-tip="Price is above its 200-day moving average (long-term trend)." onclick="toggleChip(this, 'closeEma200')">EMA 200</span><span class="chip" data-tip="Price is above VWAP (volume-weighted average price)." onclick="toggleChip(this, 'closeVwap')">VWAP</span><span class="chip" data-tip="Moving averages are in bullish order: EMA 10 > 20 > 50 > 200." onclick="toggleChip(this, 'emaStack')">EMA 10 &gt; 20 &gt; 50 &gt; 200</span></div>
-              <div class="fg"><span class="fg-t">Pullback to</span><span class="chip" data-tip="Price is within the chosen % of its 10-day EMA: a pullback to short-term support." onclick="toggleChip(this, 'pullback10ema')">EMA 10</span><span class="chip" data-tip="Price is within the chosen % of its 20-day EMA." onclick="toggleChip(this, 'pullback20ema')">EMA 20</span><span class="cg-note">within</span><input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"><i class="sfx solo">%</i></div>
-              <div class="fg"><span class="fg-t">Near high (≤3%)</span><span class="chip" data-tip="Price is within 3% of its high from 15 days ago." onclick="toggleChip(this, 'near15D')">15D</span><span class="chip" data-tip="Price is within 3% of its 1-week high." onclick="toggleChip(this, 'nearWeek')">1W</span><span class="chip" data-tip="Price is within 3% of its 1-month high." onclick="toggleChip(this, 'nearMonth')">1M</span><span class="chip" data-tip="Price is within 3% of its 3-month high." onclick="toggleChip(this, 'nearQuarter')">1Q</span><span class="chip" data-tip="Price is within 3% of its 1-year high." onclick="toggleChip(this, 'nearYear')">1Y</span><span class="chip" data-tip="Price is within 5% of its 52-week high." onclick="toggleChip(this, 'near52wh')">52W (≤5%)</span></div>
-            </div>
-          </div>
-
-          <div class="fr">
-            <div class="fr-label t-fund"><i data-lucide="shield-check"></i><span>Fundamental</span></div>
-            <div class="fr-body fr-groups">
-              <div class="fg"><span class="fg-t">Quality</span><span class="cg"><span class="chip" data-tip="Return on capital employed is at least this value. Shows how efficiently the company uses capital." onclick="toggleChip(this, 'roceFilter')">ROCE ≥</span><input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Operating profit margin is at least this value." onclick="toggleChip(this, 'opmFilter')">OPM ≥</span><input type="number" id="param-opm" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Earnings per share is above this value." onclick="toggleChip(this, 'epsFilter')">EPS &gt;</span><input type="number" id="param-eps" class="param-input" value="0" step="1" onchange="applyAllFilters()"></span></div>
-              <div class="fg"><span class="fg-t">Growth (YoY)</span><span class="cg"><span class="chip" data-tip="Quarterly sales grew at least this much versus the same quarter last year." onclick="toggleChip(this, 'salesGrowth')">Sales ≥</span><input type="number" id="param-sg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Quarterly net profit grew at least this much versus the same quarter last year." onclick="toggleChip(this, 'profitGrowth')">Profit ≥</span><input type="number" id="param-pg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span></div>
-              <div class="fg"><span class="fg-t">Valuation</span><span class="cg"><span class="chip" data-tip="Price-to-earnings ratio is positive and at or below this value." onclick="toggleChip(this, 'peFilter')">P/E ≤</span><input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="Price-to-book ratio is positive and below this value." onclick="toggleChip(this, 'pbFilter')">P/B &lt;</span><input type="number" id="param-pb" class="param-input" value="5" step="0.5" onchange="applyAllFilters()"></span><span class="chip" data-tip="Book value per share is higher than the current price." onclick="toggleChip(this, 'undervaluedBV')">Book Value &gt; CMP</span></div>
-              <div class="fg"><span class="fg-t">Safety</span><span class="cg"><span class="chip" data-tip="Debt-to-equity is at or below this value. Lower means less leverage." onclick="toggleChip(this, 'lowDebt')">Debt/Eq ≤</span><input type="number" id="param-de" class="param-input" value="1" step="0.1" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="Current ratio is at least this value. Higher means better short-term liquidity." onclick="toggleChip(this, 'currentRatioMin')">Current Ratio ≥</span><input type="number" id="param-cr" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"></span></div>
-              <div class="fg"><span class="fg-t">Holding</span><span class="cg"><span class="chip" data-tip="Promoter holding is at least this %." onclick="toggleChip(this, 'promoFilter')">Promoter ≥</span><input type="number" id="param-promo" class="param-input" value="50" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="chip" data-tip="FII holding increased versus the previous quarter." onclick="toggleChip(this, 'fiiRising')">FII rising</span><span class="chip" data-tip="DII holding increased versus the previous quarter." onclick="toggleChip(this, 'diiRising')">DII rising</span></div>
-            </div>
-          </div>
-
-          <div class="fr">
-            <div class="fr-label t-cust"><i data-lucide="plus-circle"></i><span>Custom Filter</span></div>
-            <div class="fr-body">
-              <div class="cf-builder">
-                <select id="cfCol" class="cf-sel"></select>
-                <select id="cfOp" class="cf-sel cf-op"><option value="&gt;=">≥</option><option value="&lt;=">≤</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select>
-                <input type="number" id="cfVal" class="cf-val" placeholder="Value" step="any" onkeydown="if(event.key==='Enter')addCustomFilter()">
-                <button class="btn-tool btn-tool-success" onclick="addCustomFilter()"><i data-lucide="plus"></i> Add</button>
-                <span class="cf-help">Pick any sheet column (ROCE, Sales, FII, ATR…) — all added filters apply together.</span>
-              </div>
-              <div class="cf-list" id="cfList"></div>
-            </div>
-          </div>
+        <div class="active-sum" id="activeSummary" hidden></div>
+        <div class="pat-strip">
+          <span class="pat-label"><i data-lucide="sparkles"></i> Patterns <em id="scanTotal"></em></span>
+          <div class="seg" id="scanMode"><button class="on" data-mode="all" onclick="setScannerMode('all')">Match ALL</button><button data-mode="any" onclick="setScannerMode('any')">Match ANY</button></div>
+          <div class="scan-grid pat-chips collapsed" id="chartinkScannersRow"><span class="flt-hint">Loading live scanners…</span></div>
+          <div class="pat-tools"><input id="scanSearch" class="flt-mini-search" type="text" placeholder="Find pattern…" oninput="renderScannerChips()"><button class="flt-link" id="scanToggle" onclick="toggleScanExpand()">Show all</button></div>
         </div>
       </div>
 
@@ -803,6 +749,47 @@
       <p class="mk-modal-note">Instant verification • Zero fees</p>
     </div>
   </div>
+
+  <!-- ===================== FILTER DRAWER ===================== -->
+  <aside id="filterDrawer" class="fdr" aria-hidden="true">
+    <div class="fdr-head">
+      <div class="fdr-title"><i data-lucide="sliders-horizontal"></i> Filters <span class="flt-badge" id="activeFilterCount">No filters</span></div>
+      <div class="fdr-actions"><button class="btn-tool" onclick="resetAllFilters()"><i data-lucide="rotate-ccw"></i> Reset</button><button class="fdr-x" onclick="toggleFilterDrawer(false)" aria-label="Close">×</button></div>
+    </div>
+    <div class="fdr-body">
+      <section class="fdr-sec open"><h4>Range Filters <em>Min / Max, blank = no limit</em></h4><div class="fdr-in"><div class="rf-grid" id="rangeFilters"></div></div></section>
+
+      <section class="fdr-sec open"><h4>Technical</h4><div class="fdr-in">
+        <div class="fg"><span class="fg-t">Momentum</span><div class="fg-c"><span class="chip" data-tip="RSI (14) is 60 or higher: positive momentum." onclick="toggleChip(this, 'rsi60')">RSI ≥ 60</span><span class="chip" data-tip="RSI (14) is 70 or higher: very strong momentum (can also mean overbought)." onclick="toggleChip(this, 'rsi70')">RSI ≥ 70</span><span class="chip" data-tip="RSI (14) is 30 or lower: oversold." onclick="toggleChip(this, 'rsiLow')">RSI ≤ 30</span><span class="chip" data-tip="Stochastic RSI is 20 or lower: oversold." onclick="toggleChip(this, 'stochLow')">StochRSI ≤ 20</span><span class="chip" data-tip="Stochastic RSI is 80 or higher: overbought / strong." onclick="toggleChip(this, 'stochHigh')">StochRSI ≥ 80</span><span class="chip" data-tip="MACD line is above its signal line: bullish momentum." onclick="toggleChip(this, 'macdBull')">MACD bullish</span><span class="cg"><span class="chip" data-tip="ADX (14) is at least this value. Above 25 usually means a strong trend." onclick="toggleChip(this, 'adxStrong')">ADX ≥</span><input type="number" id="param-adx" class="param-input" value="25" step="5" onchange="applyAllFilters()"></span></div></div>
+        <div class="fg"><span class="fg-t">Price above</span><div class="fg-c"><span class="chip" data-tip="Price is above its 10-day moving average (short-term trend)." onclick="toggleChip(this, 'closeEma10')">EMA 10</span><span class="chip" data-tip="Price is above its 20-day moving average." onclick="toggleChip(this, 'closeEma20')">EMA 20</span><span class="chip" data-tip="Price is above its 50-day moving average (medium-term trend)." onclick="toggleChip(this, 'closeEma50')">EMA 50</span><span class="chip" data-tip="Price is above its 200-day moving average (long-term trend)." onclick="toggleChip(this, 'closeEma200')">EMA 200</span><span class="chip" data-tip="Price is above VWAP (volume-weighted average price)." onclick="toggleChip(this, 'closeVwap')">VWAP</span><span class="chip" data-tip="Price is above the Supertrend (10,3) line: uptrend." onclick="toggleChip(this, 'aboveSuper')">Supertrend</span><span class="chip" data-tip="Price is above the Ichimoku cloud: strong trend." onclick="toggleChip(this, 'aboveCloud')">Ichimoku cloud</span><span class="chip" data-tip="Price is above the upper Bollinger Band (20,2): a breakout or a stretched move." onclick="toggleChip(this, 'bbUpper')">Upper Bollinger</span><span class="chip" data-tip="Moving averages are in bullish order: EMA 10 > 20 > 50 > 200." onclick="toggleChip(this, 'emaStack')">EMA 10 &gt; 20 &gt; 50 &gt; 200</span></div></div>
+        <div class="fg"><span class="fg-t">Pullback to</span><div class="fg-c"><span class="chip" data-tip="Price is within the chosen % of its 10-day EMA: a pullback to short-term support." onclick="toggleChip(this, 'pullback10ema')">EMA 10</span><span class="chip" data-tip="Price is within the chosen % of its 20-day EMA." onclick="toggleChip(this, 'pullback20ema')">EMA 20</span><span class="cg-note">within</span><input type="number" id="param-pullback" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"><i class="sfx solo">%</i></div></div>
+        <div class="fg"><span class="fg-t">Near high (within 3%)</span><div class="fg-c"><span class="chip" data-tip="Price is within 3% of its high from 15 days ago." onclick="toggleChip(this, 'near15D')">15D</span><span class="chip" data-tip="Price is within 3% of its 1-week high." onclick="toggleChip(this, 'nearWeek')">1W</span><span class="chip" data-tip="Price is within 3% of its 1-month high." onclick="toggleChip(this, 'nearMonth')">1M</span><span class="chip" data-tip="Price is within 3% of its 3-month high." onclick="toggleChip(this, 'nearQuarter')">1Q</span><span class="chip" data-tip="Price is within 3% of its 1-year high." onclick="toggleChip(this, 'nearYear')">1Y</span><span class="chip" data-tip="Price is within 5% of its 52-week high." onclick="toggleChip(this, 'near52wh')">52W (within 5%)</span></div></div>
+      </div></section>
+
+      <section class="fdr-sec open"><h4>Built-in Scans <em>calculated from the sheet</em></h4><div class="fdr-in">
+        <div class="fg"><div class="fg-c"><span class="chip" data-tip="Stage-2 uptrend: price above 50/150/200 EMA (in order), 30% above the 52-week low, within 25% of the high, and RS rating 70+." onclick="toggleChip(this, 'scanMinervini')">Trend Template (Stage 2)</span><span class="chip" data-tip="Price is within 1% of its 52-week high." onclick="toggleChip(this, 'scan52Break')">52W High Breakout</span><span class="chip" data-tip="Volatility contraction: 30D range up to 15%, 10D up to 8%, 5D up to 5%, with price above the 50 and 200 EMA." onclick="toggleChip(this, 'scanVCP')">Volatility Contraction</span><span class="chip" data-tip="RS rating 80+, price above the 50 EMA and RSI between 55 and 75: strong but not overheated." onclick="toggleChip(this, 'scanMomentum')">Momentum Leaders</span><span class="chip" data-tip="RSI at or below 35 while price is still above the 200 EMA: a dip inside an uptrend." onclick="toggleChip(this, 'scanOversold')">Oversold in Uptrend</span></div></div>
+      </div></section>
+
+      <section class="fdr-sec open"><h4>Fundamental</h4><div class="fdr-in">
+        <div class="fg"><span class="fg-t">Quality</span><div class="fg-c"><span class="cg"><span class="chip" data-tip="Return on capital employed is at least this value. Shows how efficiently the company uses capital." onclick="toggleChip(this, 'roceFilter')">ROCE ≥</span><input type="number" id="param-roce" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Return on net worth is at least this %." onclick="toggleChip(this, 'roeFilter')">ROE ≥</span><input type="number" id="param-roe" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Operating profit margin is at least this value." onclick="toggleChip(this, 'opmFilter')">OPM ≥</span><input type="number" id="param-opm" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Earnings per share is above this value." onclick="toggleChip(this, 'epsFilter')">EPS &gt;</span><input type="number" id="param-eps" class="param-input" value="0" step="1" onchange="applyAllFilters()"></span></div></div>
+        <div class="fg"><span class="fg-t">Growth (YoY)</span><div class="fg-c"><span class="cg"><span class="chip" data-tip="Quarterly sales grew at least this much versus the same quarter last year." onclick="toggleChip(this, 'salesGrowth')">Sales ≥</span><input type="number" id="param-sg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="cg"><span class="chip" data-tip="Quarterly net profit grew at least this much versus the same quarter last year." onclick="toggleChip(this, 'profitGrowth')">Profit ≥</span><input type="number" id="param-pg" class="param-input" value="15" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span></div></div>
+        <div class="fg"><span class="fg-t">Valuation</span><div class="fg-c"><span class="cg"><span class="chip" data-tip="Price-to-earnings ratio is positive and at or below this value." onclick="toggleChip(this, 'peFilter')">P/E ≤</span><input type="number" id="param-pe" class="param-input" value="40" step="5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="Price-to-book ratio is positive and below this value." onclick="toggleChip(this, 'pbFilter')">P/B &lt;</span><input type="number" id="param-pb" class="param-input" value="5" step="0.5" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="EV/EBITDA is positive and at or below this value." onclick="toggleChip(this, 'evFilter')">EV/EBITDA ≤</span><input type="number" id="param-ev" class="param-input" value="15" step="1" onchange="applyAllFilters()"></span><span class="chip" data-tip="Book value per share is higher than the current price." onclick="toggleChip(this, 'undervaluedBV')">Book Value &gt; CMP</span></div></div>
+        <div class="fg"><span class="fg-t">Safety</span><div class="fg-c"><span class="cg"><span class="chip" data-tip="Debt-to-equity is at or below this value. Lower means less leverage." onclick="toggleChip(this, 'lowDebt')">Debt/Eq ≤</span><input type="number" id="param-de" class="param-input" value="1" step="0.1" onchange="applyAllFilters()"></span><span class="cg"><span class="chip" data-tip="Current ratio is at least this value. Higher means better short-term liquidity." onclick="toggleChip(this, 'currentRatioMin')">Current Ratio ≥</span><input type="number" id="param-cr" class="param-input" value="1.5" step="0.5" onchange="applyAllFilters()"></span></div></div>
+        <div class="fg"><span class="fg-t">Holding</span><div class="fg-c"><span class="cg"><span class="chip" data-tip="Promoter holding is at least this %." onclick="toggleChip(this, 'promoFilter')">Promoter ≥</span><input type="number" id="param-promo" class="param-input" value="50" step="5" onchange="applyAllFilters()"><i class="sfx">%</i></span><span class="chip" data-tip="FII holding increased versus the previous quarter." onclick="toggleChip(this, 'fiiRising')">FII rising</span><span class="chip" data-tip="DII holding increased versus the previous quarter." onclick="toggleChip(this, 'diiRising')">DII rising</span></div></div>
+      </div></section>
+
+      <section class="fdr-sec"><h4>Custom Filter <em>any numeric column</em></h4><div class="fdr-in">
+        <div class="cf-builder">
+          <select id="cfCol" class="cf-sel"></select>
+          <select id="cfOp" class="cf-sel cf-op"><option value="&gt;=">≥</option><option value="&lt;=">≤</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select>
+          <input type="number" id="cfVal" class="cf-val" placeholder="Value" step="any" onkeydown="if(event.key==='Enter')addCustomFilter()">
+          <button class="btn-tool btn-tool-success" onclick="addCustomFilter()"><i data-lucide="plus"></i> Add</button>
+        </div>
+        <div class="cf-list" id="cfList"></div>
+      </div></section>
+    </div>
+    <div class="fdr-foot"><button class="mk-btn-primary" onclick="toggleFilterDrawer(false)">Show <b id="fdrCount">0</b> stocks</button></div>
+  </aside>
 
   <script src="./mickkk-cache.js"></script>
   <script src="./mickkk-shell.js"></script>
