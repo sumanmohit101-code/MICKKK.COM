@@ -56,6 +56,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
 
+  <link rel="stylesheet" href="./mickkk-shell.css">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
@@ -63,191 +64,16 @@
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
-
-    /* ===== Mickkk Logo ===== */
-    :root { 
-      --mk-m1:#0b1329; --mk-m2:#3b4a63; --mk-word:#0b1329; --mk-tag:#475569;
-      --mk-g1:#047857; --mk-g2:#10b981; --mk-g3:#14d994; --mk-com1:#059669; --mk-com2:#10b981; 
-    }
-    .dark { 
-      --mk-m1:#ffffff; --mk-m2:#c3cddd; --mk-word:#ffffff; --mk-tag:#cbd5e1;
-      --mk-g1:#16a34a; --mk-g2:#10d98a; --mk-g3:#00f5a0; --mk-com1:#00f5a0; --mk-com2:#10d98a; 
-    }
-    .mk-word { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--mk-word); letter-spacing:-0.035em; line-height:1; }
-    .mk-com  { font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:-0.01em; line-height:1;
-               background:linear-gradient(90deg,var(--mk-com1),var(--mk-com2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .mk-dot  { display:inline-block; width:.28em; height:.28em; border-radius:50%; background:var(--mk-com1); margin:0 .03em 0 .06em; }
-    .mk-tag  { font-family:'Montserrat',sans-serif; font-weight:600; color:var(--mk-tag); text-transform:uppercase; white-space:nowrap; line-height:1; }
-    .dark .mk-glow { filter: drop-shadow(0 0 2.5px rgba(0,245,160,.55)); }
-    .mk-logo:hover .mk-icon { transform: scale(1.07); }
-    .mk-icon { transition: transform .25s ease; }
-
-    /* Sidebar Collapsed Mode */
-    .sidebar-collapsed { width: 4.2rem !important; }
-    .sidebar-collapsed .brand-text,
-    .sidebar-collapsed .nav-text,
-    .sidebar-collapsed .sidebar-bottom-expanded { display: none !important; }
-    .sidebar-collapsed .sidebar-bottom-collapsed { display: flex !important; }
-    .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-    .sidebar-collapsed .brand-container { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-
-    .sidebar-collapsed .nav-item:hover::after {
-      content: attr(data-title);
-      position: absolute;
-      left: 4.2rem;
-      background: #0f172a;
-      color: #fff;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 6px;
-      white-space: nowrap;
-      z-index: 100;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      border: 1px solid #1e293b;
-    }
-
-    .collapse-float-btn { position: absolute; right: -12px; top: 22px; z-index: 60; }
   </style>
 </head>
 <body class="bg-[#f8fafc] dark:bg-brandDark text-slate-800 dark:text-slate-100 flex min-h-screen transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
   
-  <!-- Mickkk logo icon (shared symbol) -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <linearGradient id="mkM" gradientUnits="userSpaceOnUse" x1="6" y1="10" x2="50" y2="92"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2)"/></linearGradient>
-      <linearGradient id="mkMR" gradientUnits="userSpaceOnUse" x1="48" y1="54" x2="84" y2="14"><stop offset="0" style="stop-color:var(--mk-m1)"/><stop offset="1" style="stop-color:var(--mk-m2);stop-opacity:.25"/></linearGradient>
-      <linearGradient id="mkG" gradientUnits="userSpaceOnUse" x1="20" y1="92" x2="96" y2="6"><stop offset="0" style="stop-color:var(--mk-g1)"/><stop offset=".55" style="stop-color:var(--mk-g2)"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
-      <linearGradient id="mkShaft" gradientUnits="userSpaceOnUse" x1="20" y1="86" x2="82" y2="24"><stop offset="0" style="stop-color:var(--mk-g2);stop-opacity:0"/><stop offset=".4" style="stop-color:var(--mk-g2);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--mk-g3)"/></linearGradient>
-      <clipPath id="mkClip"><path d="M0 0H100V100H22L0 78Z"/></clipPath>
-      <symbol id="mick-icon" viewBox="0 0 100 100">
-        <g clip-path="url(#mkClip)">
-          <path d="M48 54 L80 18 L80 94" fill="none" stroke="url(#mkMR)" stroke-width="19" stroke-linejoin="round"/>
-          <path d="M15 96 L15 18 L48 54" fill="none" stroke="url(#mkM)" stroke-width="19" stroke-linejoin="round"/>
-          <path d="M8 16 L48 54 L48 62 L8 24Z" fill="#fff" opacity=".28"/>
-        </g>
-        <rect x="32" y="80" width="8" height="12" rx="1.6" fill="url(#mkG)"/>
-        <rect x="43" y="68" width="8" height="24" rx="1.6" fill="url(#mkG)"/>
-        <rect x="54" y="56" width="8" height="36" rx="1.6" fill="url(#mkG)"/>
-        <g class="mk-glow">
-          <polygon points="20,88 77,22 83,29" fill="url(#mkShaft)"/>
-          <polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/>
-        </g>
-      </symbol>
-    </defs>
-  </svg>
-
-  <!-- ================= LEFT SIDEBAR ================= -->
-  <aside id="sidebar" class="w-60 bg-white dark:bg-sidebarDark border-r border-slate-200 dark:border-borderDark flex flex-col justify-between p-3.5 shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 shadow-sm">
-    
-    <button onclick="toggleSidebar()" aria-label="Toggle Navigation Sidebar" class="collapse-float-btn w-6 h-6 rounded-full bg-white dark:bg-cardDark border border-slate-300 dark:border-borderDark hover:border-emerald-500 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer">
-      <i data-lucide="chevron-left" id="collapseArrow" class="w-3.5 h-3.5"></i>
-    </button>
-
-    <div>
-      <a href="index.html" title="Mickkk.com Home" class="mk-logo brand-container flex items-center gap-2.5 w-full px-0.5 py-1">
-        <svg viewBox="0 0 100 100" class="mk-icon w-11 h-11 shrink-0" aria-label="Mickkk"><use href="#mick-icon"/></svg>
-        <div class="brand-text min-w-0 flex-1 flex flex-col justify-center gap-1.5">
-          <div class="flex items-baseline whitespace-nowrap">
-            <span class="mk-word text-[23px]">Mickkk</span><span class="mk-dot" style="font-size:23px"></span><span class="mk-com text-[17px]">com</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
-            <span class="mk-tag text-[7.5px] tracking-[0.16em]">Trade Smarter</span>
-            <span class="h-[1.5px] w-3 bg-emerald-500 dark:bg-[#00f5a0] rounded-full shrink-0"></span>
-          </div>
-        </div>
-      </a>
-
-      <div class="border-b border-slate-200 dark:border-borderDark my-3.5"></div>
-
-      <!-- Navigation Links -->
-      <nav class="space-y-1 text-xs font-semibold">
-        <a href="overview.html" data-title="Market Overview" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold border-l-4 border-emerald-500">
-          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Overview</span>
-        </a>
-        <a href="breadth.html" data-title="Market Breadth" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="activity" class="w-4 h-4 shrink-0 text-emerald-500"></i> <span class="nav-text">Market Breadth</span>
-        </a>
-        <a href="#" data-title="Stock Screener" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="scan" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Stock Screener</span>
-        </a>
-        <a href="#" data-title="Index Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="layers" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Index Terminal</span>
-        </a>
-        <a href="#" data-title="Sector & Industry" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Sector & Industry</span>
-        </a>
-        <a href="#" data-title="Charts" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="candlestick-chart" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Charts</span>
-        </a>
-        <a href="#" data-title="IPO Terminal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="rocket" class="w-4 h-4 shrink-0"></i> <span class="nav-text">IPO Terminal</span>
-        </a>
-        <a href="#" data-title="Trading Journal" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Trading Journal</span>
-        </a>
-        <a href="#" data-title="Analytics" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Analytics</span>
-        </a>
-        <a href="#" data-title="Watchlist" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="bookmark" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Watchlist</span>
-        </a>
-        <a href="#" data-title="Market Tools" class="nav-item relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all">
-          <i data-lucide="wrench" class="w-4 h-4 shrink-0"></i> <span class="nav-text">Market Tools</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- ================= BOTTOM PANEL ================= -->
-    <div>
-      <div class="sidebar-bottom-expanded space-y-2 pt-3 border-t border-slate-100 dark:border-borderDark">
-        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-          
-          <div class="flex items-center gap-2 min-w-0">
-            <div id="sideUserAvatar" class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-sm">
-              M
-            </div>
-            <div class="min-w-0">
-              <div id="sideUserName" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Trader</div>
-              <div class="flex items-center gap-1.5">
-                <span id="sideUserRole" class="text-[9px] font-extrabold text-amber-500 uppercase tracking-wider truncate">Free Tier</span>
-                <button onclick="openWhatsAppTrialModal()" id="sideUpgradeLink" class="text-[9px] font-black text-emerald-500 hover:underline cursor-pointer">Upgrade</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1 text-slate-400">
-            <button onclick="toggleTheme()" class="p-1 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-              <i data-lucide="sun" id="sunIconSide" class="w-3.5 h-3.5"></i>
-              <i data-lucide="moon" id="moonIconSide" class="w-3.5 h-3.5 hidden"></i>
-            </button>
-
-            <!-- Logout button -->
-            <button onclick="handleLogout()" id="sideLogoutBtn" class="p-1 hover:text-rose-500 text-slate-400 cursor-pointer" title="Logout">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-
-        </div>
-        <div class="text-center text-[10px] text-slate-400 font-mono-num">v1.0.42</div>
-      </div>
-
-      <!-- Collapsed Bottom -->
-      <div class="sidebar-bottom-collapsed hidden flex-col items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-cardDark border border-slate-200 dark:border-borderDark">
-        <button onclick="toggleTheme()" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer" title="Toggle Theme">
-          <i data-lucide="sun" id="sunIconMini" class="w-4 h-4"></i>
-          <i data-lucide="moon" id="moonIconMini" class="w-4 h-4 hidden"></i>
-        </button>
-        <button onclick="handleLogout()" id="sideMiniLogoutBtn" class="p-1 text-slate-400 hover:text-rose-500 cursor-pointer" title="Logout">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
+  <!-- Sidebar is built by mickkk-nav.js (menu list lives in that one file) -->
+  <aside id="sidebar" class="mk-sidebar" data-active="overview"></aside>
+  <script src="./mickkk-nav.js"></script>
 
   <!-- ================= RIGHT CONTENT AREA ================= -->
-  <div id="mainContent" class="flex-1 ml-60 flex flex-col min-w-0 transition-all duration-300">
+  <div id="mainContent" class="mk-main flex-1">
     <main class="p-5 md:p-7 space-y-6 w-full">
 
       <!-- Header Title Banner + Top Toolbar with Search, Auto-Refresh, Clock & Pro Trial Hook -->
@@ -673,80 +499,35 @@
     </div>
   </div>
 
+  <script src="./mickkk-cache.js"></script>
   <!-- ================= HIGH-PERFORMANCE JAVASCRIPT ENGINE ================= -->
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGXkNmnhPB8mzbpw2Zc2EowqVcHGu-ATOPHjsJ6a0escQkpxFXVPz5zynSjg1EIttYgA/exec";
-    const CACHE_KEY = "mickkk_market_overview_cache_v2";
-
-    const BREADTH_SPREADSHEET_ID = "1N5LGJUqsTMIKicd9G_hBGIV_sGS2MSjqEziILduitJ8";
+    // Data comes through the Cloudflare Worker (mickkk-cache.js) -> Google is hit ~once per 5 min, not once per visitor.
+    const OVERVIEW_KEY = "overview:v1";          // IndexedDB cache key (MKC)
+    const BREADTH_KEY  = "overview:breadth";     // last breadth meter reading
     const BREADTH_SHEET_NAME = "Market Breadth Signals";
-    const BREADTH_CACHE_KEY = "mbi_market_data_cache_v1";
+    const BREADTH_CACHE_KEY = "mbi_market_data_cache_v1";   // written by the Breadth page (optional instant paint)
+    const OLD_LS_KEY = "mickkk_market_overview_cache_v2";   // old localStorage cache, removed once
 
     let allDataStore = {};
     let glChartInstance = null;
     let adChartInstance = null;
     let hlChartInstance = null;
 
-    let userRole = 'free';
-    let userEmailGlobal = '';
-
-    // Sidebar Toggle
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      const mainContent = document.getElementById("mainContent");
-      const arrow = document.getElementById("collapseArrow");
-
-      sidebar.classList.toggle("sidebar-collapsed");
-      const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
-
-      if (isCollapsed) {
-        mainContent.classList.remove("ml-60");
-        mainContent.classList.add("ml-[4.2rem]");
-        if (arrow) arrow.setAttribute("data-lucide", "chevron-right");
-      } else {
-        mainContent.classList.remove("ml-[4.2rem]");
-        mainContent.classList.add("ml-60");
-        if (arrow) arrow.setAttribute("data-lucide", "chevron-left");
-      }
-      try {
-        localStorage.setItem("mickkk_sidebar_collapsed", isCollapsed ? "true" : "false");
-      } catch (e) {}
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function initSidebarState() {
-      try {
-        if (localStorage.getItem("mickkk_sidebar_collapsed") === "true") {
-          toggleSidebar();
-        }
-      } catch (e) {}
-    }
-
-    // Theme Switcher Logic
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle("dark");
-      syncThemeIcons(isDark);
-      try {
-        localStorage.setItem("theme", isDark ? "dark" : "light");
-      } catch (e) {}
-
+    // Sidebar + theme toggles live in mickkk-shell.js. Charts need a redraw when the theme flips.
+    window.addEventListener("mickkk:theme", () => {
       if (allDataStore.indices) {
         renderCharts(allDataStore.glIntraday || [], allDataStore.adIntraday || [], allDataStore.hlIntraday || []);
       }
-    }
+    });
 
-    function syncThemeIcons(isDark) {
-      const sunIconSide = document.getElementById("sunIconSide");
-      const moonIconSide = document.getElementById("moonIconSide");
-      const sunIconMini = document.getElementById("sunIconMini");
-      const moonIconMini = document.getElementById("moonIconMini");
-
-      if (sunIconSide) sunIconSide.classList.toggle("hidden", isDark);
-      if (moonIconSide) moonIconSide.classList.toggle("hidden", !isDark);
-      if (sunIconMini) sunIconMini.classList.toggle("hidden", isDark);
-      if (moonIconMini) moonIconMini.classList.toggle("hidden", !isDark);
+    // "Claim 7-Day Pro" button is only for free users (role comes from mickkk-gate.js)
+    function applyOverviewRole(role) {
+      const b = document.getElementById("overviewProTrialBtn");
+      if (b) b.style.display = role === "pro" ? "none" : "";
     }
+    window.addEventListener("mickkk:authed", (e) => applyOverviewRole(e.detail && e.detail.role));
+    if (window.MickkkGate && window.MickkkGate.ready) applyOverviewRole(window.MickkkGate.role);
 
     // Live Clock & 5-Min Timer
     let countdownSeconds = 300;
@@ -770,37 +551,32 @@
     setInterval(updateClockAndTimer, 1000);
     updateClockAndTimer();
 
-    // WhatsApp Pro Trial Trigger
-    function openWhatsAppTrialModal() {
-      // ⚠️ Yahan apna WhatsApp number dalein
-      const myWhatsAppNumber = "917086054184";
-      const emailText = userEmailGlobal ? ` for my registered email: ${userEmailGlobal}` : "";
-      const msg = encodeURIComponent(`Hi Mickkk Team! Please activate my 7-day Pro Free Trial${emailText}.`);
-      window.open(`https://wa.me/${myWhatsAppNumber}?text=${msg}`, '_blank');
+    function paintAll(data) {
+      renderSparklineCards(data.indices || []);
+      renderIndicesTable(data.indices || []);
+      renderGainersLosers(data.gainers || [], data.losers || []);
+      renderCountsStats(data);
+      renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
+      renderBottomTables(data);
     }
 
-    // ================= 🚀 INSTANT LOCALSTORAGE SWR PAINT =================
+    // ================= 🚀 INSTANT PAINT from IndexedDB (stale-while-revalidate) =================
     function renderFromCache() {
       try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const data = JSON.parse(cached);
-          if (data && data.indices) {
-            allDataStore = data;
-            renderSparklineCards(data.indices || []);
-            renderIndicesTable(data.indices || []);
-            renderGainersLosers(data.gainers || [], data.losers || []);
-            renderCountsStats(data);
-            renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
-            renderBottomTables(data);
-          }
+        const data = MKC.get(OVERVIEW_KEY);
+        if (data && data.indices) {
+          allDataStore = data;
+          paintAll(data);
         }
 
-        const breadthCached = localStorage.getItem(BREADTH_CACHE_KEY);
-        if (breadthCached) {
-          const bData = JSON.parse(breadthCached);
-          if (Array.isArray(bData) && bData.length > 0) {
-            updateBreadthSpeedometer(bData[bData.length - 1]);
+        const b = MKC.get(BREADTH_KEY);
+        if (b) {
+          updateBreadthSpeedometer(b);
+        } else {
+          const breadthCached = localStorage.getItem(BREADTH_CACHE_KEY);
+          if (breadthCached) {
+            const bData = JSON.parse(breadthCached);
+            if (Array.isArray(bData) && bData.length > 0) updateBreadthSpeedometer(bData[bData.length - 1]);
           }
         }
       } catch (e) {
@@ -808,28 +584,20 @@
       }
     }
 
-    // Data Fetcher
+    // Data Fetcher (through the Worker edge cache)
     async function fetchTerminalData(isManual = false) {
       const spin = document.getElementById("manualSpinIcon");
       if (isManual && spin) spin.classList.add("animate-spin");
 
       try {
-        const response = await fetch(WEB_APP_URL);
+        if (isManual) MKC.forceFor(8000);           // skip the browser cache once; the Worker still protects Google
+        const response = await MKC.fetch("overview");
         const data = await response.json();
-        
+
         if (data && data.indices) {
           allDataStore = data;
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-          } catch(e) {}
-
-          renderSparklineCards(data.indices || []);
-          renderIndicesTable(data.indices || []);
-          renderGainersLosers(data.gainers || [], data.losers || []);
-          renderCountsStats(data);
-          renderCharts(data.glIntraday || [], data.adIntraday || [], data.hlIntraday || []);
-          renderBottomTables(data);
-
+          MKC.set(OVERVIEW_KEY, data);
+          paintAll(data);
           checkUrlSearchParam();
         }
       } catch (err) {
@@ -863,14 +631,16 @@
       if (needle) needle.style.transform = `rotate(${angle}deg)`;
     }
 
-    function loadLiveBreadthMeter() {
-      const script = document.createElement("script");
-      const url = `https://docs.google.com/spreadsheets/d/${BREADTH_SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleBreadthMeterGViz&sheet=${encodeURIComponent(BREADTH_SHEET_NAME)}&_ts=${Date.now()}`;
-      script.src = url;
-
-      script.onload = () => script.remove();
-      script.onerror = () => script.remove();
-      document.body.appendChild(script);
+    async function loadLiveBreadthMeter() {
+      try {
+        const res = await MKC.gviz(BREADTH_SHEET_NAME, "breadth");   // worker: route=gviz&ss=breadth
+        const t = await res.text();
+        const a = t.indexOf("("), b = t.lastIndexOf(")");
+        if (a < 0 || b <= a) return;
+        window.handleBreadthMeterGViz(JSON.parse(t.slice(a + 1, b)));
+      } catch (e) {
+        console.warn("Breadth meter load failed:", e);
+      }
     }
 
     window.handleBreadthMeterGViz = function(gviz) {
@@ -887,6 +657,7 @@
         signalLabel: s(35) === '-' ? (v(27) >= 3 ? 'Bullish' : (v(27) <= -3 ? 'Bearish' : 'Neutral')) : s(35)
       };
 
+      MKC.set(BREADTH_KEY, rowObj);
       updateBreadthSpeedometer(rowObj);
     };
 
@@ -1318,9 +1089,9 @@
       document.getElementById("fullViewModal").classList.add("hidden");
     }
 
-    function init() {
-      initSidebarState();
-      syncThemeIcons(document.documentElement.classList.contains("dark"));
+    async function init() {
+      try { await MKC.init(); } catch (e) {}
+      try { localStorage.removeItem(OLD_LS_KEY); } catch (e) {}   // old 100s-of-KB localStorage cache, no longer used
       if (window.lucide) lucide.createIcons();
       renderFromCache();
       fetchTerminalData(false);
@@ -1333,60 +1104,9 @@
     }
   </script>
 
-  <!-- Central Authentication & Route Guard Wiring -->
-  <script type="module">
-    import { logoutUser, initAuthListener, requireAuth } from './auth.js';
-
-    // Route Guard
-    requireAuth();
-
-    window.handleLogout = async () => {
-      await logoutUser();
-    };
-
-    initAuthListener(
-      (user, role) => {
-        userRole = role || 'free';
-        userEmailGlobal = user.email || '';
-
-        const nameEl = document.getElementById('sideUserName');
-        const avatarEl = document.getElementById('sideUserAvatar');
-        const roleEl = document.getElementById('sideUserRole');
-        const upgradeLink = document.getElementById('sideUpgradeLink');
-        const proBtn = document.getElementById('overviewProTrialBtn');
-
-        if (nameEl) nameEl.innerText = user.displayName || 'Trader';
-        if (avatarEl) {
-          if (user.photoURL) {
-            avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`;
-          } else {
-            avatarEl.innerText = (user.displayName || 'U')[0].toUpperCase();
-          }
-        }
-
-        if (userRole === 'pro') {
-          if (roleEl) {
-            roleEl.innerText = 'Pro Member ⚡';
-            roleEl.className = 'text-[9px] font-extrabold text-emerald-500 uppercase tracking-wider truncate';
-          }
-          if (upgradeLink) upgradeLink.style.display = 'none';
-          if (proBtn) proBtn.style.display = 'none';
-        } else {
-          if (roleEl) {
-            roleEl.innerText = 'Free Tier';
-            roleEl.className = 'text-[9px] font-extrabold text-amber-500 uppercase tracking-wider truncate';
-          }
-          if (upgradeLink) upgradeLink.style.display = 'inline';
-          if (proBtn) proBtn.style.display = 'flex';
-        }
-
-        if (window.lucide) lucide.createIcons();
-      },
-      () => {
-        // If logged out, requireAuth will redirect
-      }
-    );
-  </script>
-
+  <!-- Shared Mickkk files (same ones the Screener uses) -->
+  <script src="./mickkk-shell.js"></script>
+  <!-- Login gate (needs ./auth.js next to it). Must be served over http/https -->
+  <script type="module" src="./mickkk-gate.js"></script>
 </body>
 </html>
