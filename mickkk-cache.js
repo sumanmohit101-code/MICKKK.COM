@@ -11,8 +11,16 @@
 (function () {
   'use strict';
   var WORKER = 'https://mickkk-com-cache.sumanmohit101.workers.dev/';
-  var SHEET_ID = '13SG0bcfTGXLQfq14hb_rRrTUALq5GYUQuNegP_AH42Y';
+  // Spreadsheets readable through the worker's gviz route (names must match worker.js)
+  var SHEETS = {
+    main:    '13SG0bcfTGXLQfq14hb_rRrTUALq5GYUQuNegP_AH42Y',
+    breadth: '1N5LGJUqsTMIKicd9G_hBGIV_sGS2MSjqEziILduitJ8'
+  };
+  var SHEET_ID = SHEETS.main;
   var DIRECT = {
+    overview: 'https://script.google.com/macros/s/AKfycbyGXkNmnhPB8mzbpw2Zc2EowqVcHGu-ATOPHjsJ6a0escQkpxFXVPz5zynSjg1EIttYgA/exec',
+    market_data: 'https://script.google.com/macros/s/AKfycbyyYuQNZ4cxpr99Nuoog9W5gRmsKXgGImGD0y7TRCr06onMr_ACsXU5dpKWML6cgl2wog/exec',
+    ltp: 'https://script.google.com/macros/s/AKfycbwTO-Cu6ZFADy0HS563bj73xXuV49dFQo5leiOVQcUahGU0AYIZv0TMdfk9Fh6qlLdumQ/exec',
     screener: 'https://script.google.com/macros/s/AKfycbwyf03hzfg05WOcl_TImieFbqTb7djfEuAmM5v31CVqMS2Du1-2GYX72xd26e4jsbFm8g/exec',
     scanners: 'https://script.google.com/macros/s/AKfycbzVL6f0CG_zF7c19DscTYxgAaDgKpS7ZQJc3NESbtdvwcyNESl08H3b-QoKuJfqFSOdXg/exec'
   };
@@ -89,7 +97,8 @@
         } catch (e) {
           // fallback: straight to Google
           if (route === 'gviz') {
-            return fetch('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent((params || {}).sheet || ''));
+            var sid = SHEETS[(params || {}).ss || 'main'] || SHEET_ID;
+            return fetch('https://docs.google.com/spreadsheets/d/' + sid + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent((params || {}).sheet || ''));
           }
           var base = DIRECT[route]; if (!base) throw e;
           var q = new URLSearchParams(params || {}).toString();
@@ -100,7 +109,8 @@
       p.finally(function () { setTimeout(function () { inflight.delete(key); }, 1500); }).catch(function () {});
       return p.then(function (r) { return r.clone(); });
     },
-    gviz: function (sheet) { return MKC.fetch('gviz', { sheet: sheet }); },
+    /** read a sheet tab. 2nd arg = which spreadsheet: omit for main, 'breadth' for the breadth sheet */
+    gviz: function (sheet, ss) { var p = { sheet: sheet }; if (ss && ss !== 'main') p.ss = ss; return MKC.fetch('gviz', p); },
     /** one-shot "bypass browser cache" window used by the Refresh button */
     forceFor: function (ms) { MKC.force = true; setTimeout(function () { MKC.force = false; }, ms || 8000); }
   };
