@@ -37,7 +37,9 @@
   window.openProModal = function () { var m = $('proModal'); if (m) m.classList.add('open'); };
   window.closeProModal = function () { var m = $('proModal'); if (m) m.classList.remove('open'); };
   window.openWhatsAppTrialModal = function () {
-    var msg = encodeURIComponent('Hi Mickkk Team! Please activate my 7-day Pro Free Trial.');
+    var u = window.MickkkGate && window.MickkkGate.user;
+    var emailText = u && u.email ? ' for my registered email: ' + u.email : '';
+    var msg = encodeURIComponent('Hi Mickkk Team! Please activate my 7-day Pro Free Trial' + emailText + '.');
     window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg, '_blank');
     window.closeProModal();
   };
