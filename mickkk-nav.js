@@ -53,13 +53,15 @@
     '<polygon points="97,6 88,38 64,14" fill="url(#mkG)" stroke="url(#mkG)" stroke-width="2.5" stroke-linejoin="round"/></g>' +
     '</symbol></defs></svg>';
 
+  var DEFAULT_PRO_TEXT = 'Unlock the full Stock Master universe, deep RS history, extended trend analytics and complete unblurred market archives.';
+
   var PRO_MODAL =
     '<div id="proModal" class="mk-modal" role="dialog" aria-modal="true">' +
     '<div class="mk-modal-card">' +
     '<button class="mk-modal-close" onclick="closeProModal()" aria-label="Close"><i data-lucide="x"></i></button>' +
     '<div class="mk-modal-icon"><i data-lucide="zap"></i></div>' +
     '<h3>Upgrade to Pro Institutional</h3>' +
-    '<p class="sub">Unlock the full Stock Master universe, deep RS history, extended trend analytics and complete unblurred market archives.</p>' +
+    '<p class="sub">%%PROTEXT%%</p>' +
     '<button onclick="openWhatsAppTrialModal()" class="mk-modal-btn"><i data-lucide="message-circle"></i><span>Claim 7-Day Free Pro on WhatsApp</span></button>' +
     '<p class="mk-modal-note">Instant verification \u2022 Zero fees</p>' +
     '</div></div>';
@@ -130,5 +132,8 @@
     a.addEventListener('click', function (e) { e.preventDefault(); });
   });
 
-  if (!document.getElementById('proModal')) document.body.insertAdjacentHTML('beforeend', PRO_MODAL);
+  // Each page can show its own upgrade text:  <aside id="sidebar" data-pro-text="Unlock ...">
+  var proText = sb.getAttribute('data-pro-text') || DEFAULT_PRO_TEXT;
+  proText = proText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (!document.getElementById('proModal')) document.body.insertAdjacentHTML('beforeend', PRO_MODAL.replace('%%PROTEXT%%', proText));
 })();
