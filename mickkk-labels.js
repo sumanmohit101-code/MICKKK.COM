@@ -107,7 +107,7 @@
     'columns': 'Choose which columns appear in the table.',
     'copy symbols': 'Copy the symbols of all stocks shown, ready to paste into a watchlist.',
     'copy': 'Copy the symbols of all stocks shown.',
-    'export csv': 'Download the table as a CSV file (Pro feature).', 'csv': 'Download the table as a CSV file (Pro feature).',
+    'export csv': 'Download the table as a CSV file (Pro feature).', 'export': 'Download the table as a CSV file (Pro feature).', 'csv': 'Download the table as a CSV file (Pro feature).',
     'refresh': 'Reload the latest data. Data is cached for about 5 minutes to keep the site fast.',
     'default': 'Recommended columns.', 'all': 'Show every column from the sheet.', 'technicals': 'Price, momentum, moving averages and ranges.',
     'valuation': 'Market cap, P/E, P/B, ROCE and similar ratios.', 'sales & profit': 'Sales, profit and margin columns.', 'holding': 'FII, DII and promoter holding.',
