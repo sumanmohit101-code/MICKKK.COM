@@ -53,7 +53,10 @@ const ALIASES = {
   high15: ['15dagohigh', '15dhigh'], highW: ['1wagohigh', '1whigh'], highM: ['1magohigh', '1mhigh'], highQ: ['1qagohigh', '1qhigh'], highY: ['1yagohigh', '1yhigh'],
   roce: ['roce'], cr: ['currentratio'], eps: ['eps'], de: ['debttoequity'], pe: ['yearlype', 'pe'], pb: ['pb'], bv: ['bookvalue'], opm: ['opm'],
   salesQ: ['qsales'], salesQ4: ['sales4qago'], npQ: ['netprofitq'], npQ4: ['netprofit4qago'],
-  fii: ['totalfii'], fii1: ['totalfii1qago'], dii: ['totaldii'], dii1: ['totaldii1qago'], promo: ['totalpromoter']
+  fii: ['totalfii'], fii1: ['totalfii1qago'], dii: ['totaldii'], dii1: ['totaldii1qago'], promo: ['totalpromoter'],
+  macd: ['macdline'], macdSig: ['macdsignal'], supertrend: ['supertrend103'], ichTop: ['ichimokucloudtop'], ichBot: ['ichimokucloudbottom'],
+  stochRsi: ['stochrsi14'], pctB: ['bbollinger'], bbUp: ['upperbb202'], bbLow: ['lowerbb202'], adx: ['adx14'], atr: ['atr14'],
+  roe: ['returnonnetworth'], roa: ['returnonassets'], ev: ['evebitda'], ps: ['pricesalesq']
 };
 const RET_KEYS = ['d', 'w', 'd15', 'm', 'q', 'h', 'y'];
 const RANGE_KEYS = ['drange', 'range3', 'range5', 'range10', 'range20', 'range30'];
@@ -104,9 +107,15 @@ const KNOWN_HEADERS = ['S.No', 'NSE Symbol', 'Stock Name', 'BSE Code', 'Market C
   '5ema', '10ema', '20ema', '50ema', '100ema', '150ema', '200ema', '15D ago high', '1W ago high', '1M ago high', '1Q ago high', '1Y ago high', 'ROCE', 'ROCE 1Y ago', 'ROCE 2Y ago', 'Current Ratio', 'Debt to equity',
   'EPS', 'Prev Year EPS', 'Y SALES', 'Sales 1Y ago', 'Sales 2Y ago', 'Sales 3Y ago', 'Q Sales', 'Sales 1Q ago', 'Sales 2Q ago', 'Sales 3Q ago', 'Sales 4Q ago', 'Net Profit Q', 'Net Profit 1Q ago', 'Net Profit 2Q ago',
   'Net Profit 3Q ago', 'Net Profit 4Q ago', 'Net Profit Y', 'Net Profit 1Y ago', 'Net Profit 2Y ago', 'Net Profit 3Y ago', 'PB', 'ADX(14)', 'ATR(14)', 'VWAP', 'Book Value', 'Yearly PE', 'MMS-MS', 'MMS - M EMA', 'OPM', 'OPM 1Y ago',
-  'OPM 2Y ago', 'OPM 3Y ago', 'Total FII', 'Total FII 1Q ago', 'Total DII', 'Total DII 1Q ago', 'Total Promoter', 'Return on Networth %', 'Return on Assets %', 'P/B Yearly', 'EV/EBITDA', 'EV/EBITDA 1Q ago'];
+  'OPM 2Y ago', 'OPM 3Y ago', 'Total FII', 'Total FII 1Q ago', 'Total DII', 'Total DII 1Q ago', 'Total Promoter', 'Return on Networth %', 'Return on Assets %', 'P/B Yearly', 'EV/EBITDA', 'EV/EBITDA 1Q ago',
+  'Total DII 2Q ago', 'Total DII 3Q ago', 'Total Promoter (b)', 'Total Promoter 1Q ago', 'Total Promoter 2Q ago', 'Total Promoter 3Q ago', 'EV/EBITDA 2Q ago', 'EV/EBITDA 3Q ago',
+  'Price/Sales Q', 'Price/Sales 1Q ago', 'Price/Sales 2Q ago', 'Price/Sales 3Q ago', 'Price/Sales Y', 'Upper BB(20,2)', 'Lower BB(20,2)', 'Supertrend(10,3)', 'Ichimoku Cloud Top', 'Ichimoku Cloud Bottom',
+  'StochRSI(14)', '%B (Bollinger)', 'MACD Line', 'MACD Signal'];
+// first columns of the sheet, in order. Used only when Google returns blank header cells for numeric columns.
+const ORDER_PREFIX = ['S.No', 'NSE Symbol', 'Stock Name', 'BSE Code', 'Market Cap Category', 'Sector', 'Industry', 'Close', 'Volume', 'Market Cap', '20D AVG TURNOVER', '30D AVG TURNOVER', 'RS RATING', 'RS RATING_M',
+  'Abs RS', 'Abs RS_M', 'D', 'W', '15D', 'M', 'Q', 'H', 'Y', '52WH Away', '52W High', '52W Low', 'RSI', 'Away EMA 200', 'D range', '3D range', '5D range', '10D range', '20D range', '30D range'];
 const KNOWN_SORTED = KNOWN_HEADERS.slice().sort((a, b) => b.length - a.length);
-const squash = x => String(x == null ? '' : x).replace(/\s+/g, ' ').trim();
+const squash = x => String(x == null ? '' : x).replace(/\s+/g, ' ').replace(/\s+\)/g, ')').trim();
 function cleanLabel(raw) {
   let l = squash(raw); if (!l) return '';
   const low = l.toLowerCase();
@@ -120,6 +129,7 @@ function cleanLabel(raw) {
 function cellText(c) { return (c && c.v !== null && c.v !== undefined) ? String(c.f != null ? c.f : c.v).trim() : ''; }
 
 function parseGVizMasterData(gviz) {
+  window.__partialHeaders = false;
   if (!gviz || !gviz.table || !gviz.table.rows) return null;
   const labels = (gviz.table.cols || []).map(c => (c && c.label ? cleanLabel(c.label) : ''));
   const rows = gviz.table.rows;
@@ -130,7 +140,14 @@ function parseGVizMasterData(gviz) {
     const s = score(arr);
     if (s > best.s) best = { s, arr, dataStart: i + 1, shape: 'row ' + (i + 1) };
   }
-  const names = best.arr;                                  // keeps column POSITIONS (blank headers stay blank)
+  const names = best.arr.slice();                          // keeps column POSITIONS (blank headers stay blank)
+  if (best.shape !== 'labels') {
+    // Google turns header cells of numeric columns into blanks (mixed text/number columns). If the headers that DO
+    // exist match the known column order, restore the blanks from that order.
+    let agree = 0, bad = 0;
+    names.forEach((n, i) => { if (n && ORDER_PREFIX[i]) (NORM(n) === NORM(ORDER_PREFIX[i]) ? agree++ : bad++); });
+    if (agree >= 4 && bad === 0) { names.forEach((n, i) => { if (!n && i < ORDER_PREFIX.length) names[i] = ORDER_PREFIX[i]; }); window.__partialHeaders = true; }
+  }
   const symIdx = (() => { let i = names.findIndex(n => NORM(n) === 'nsesymbol'); if (i < 0) i = names.findIndex(n => NORM(n) === 'symbol'); return i; })();
   window.__masterDebug = { shape: best.shape, score: best.s, symIdx, sampleLabels: (gviz.table.cols || []).slice(0, 8).map(c => c && c.label), cleaned: names.slice(0, 12), rows: rows.length };
   if (symIdx < 0 || best.s < 2) { console.warn('[Screener] header row not recognised', window.__masterDebug); return null; }
@@ -162,7 +179,7 @@ function parseGVizMasterData(gviz) {
     }
     out.push(row);
   }
-  return out.length ? { headers, rows: out, pct: [...pct] } : null;
+  return out.length ? { headers, rows: out, pct: [...pct], partial: !!window.__partialHeaders && best.shape !== 'labels' } : null;
 }
 
 async function tryGviz(res) {
@@ -174,7 +191,14 @@ async function tryGviz(res) {
 
 async function loadMasterStockData() {
   let parsed = null, updated = null;
-  try { parsed = await tryGviz(await MKC.gviz('Chartink Data')); } catch (e) { console.warn('[Screener] sheet read failed', e); }
+  const attempt = async fn => { try { return await tryGviz(await fn()); } catch (e) { console.warn('[Screener] sheet read failed', e); return null; } };
+  // the sheet has 3 top rows (title, info, headers) => headers=3 makes Google return clean column names
+  parsed = await attempt(() => MKC.gviz('Chartink Data', 3));
+  if (!parsed || parsed.partial || parsed.headers.length < 25) {               // worker not updated / answer incomplete: read Google directly
+    const p2 = await attempt(() => MKC.gvizDirect('Chartink Data', 3));
+    if (p2 && (!parsed || p2.headers.length > parsed.headers.length)) parsed = p2;
+    if (parsed && parsed.partial) console.warn('[Screener] only the first columns could be restored; redeploy worker.js (headers=3) to get all columns');
+  }
 
   if (!parsed) {                                             // last resort: Apps Script web app
     try {
@@ -428,7 +452,12 @@ document.addEventListener('click', e => {
 });
 function toggleScannerChip() { /* handled by delegated click */ }
 function setScannerMode(mode) { scannerMode = mode; document.querySelectorAll('#scanMode button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode)); applyAllFilters(); }
-function toggleScanExpand() { scanExpanded = !scanExpanded; $id('chartinkScannersRow').classList.toggle('collapsed', !scanExpanded); $id('scanToggle').textContent = scanExpanded ? 'Show less' : 'Show all'; }
+function toggleScanExpand(force) {
+  scanExpanded = typeof force === 'boolean' ? force : !scanExpanded;
+  $id('chartinkScannersRow').classList.toggle('collapsed', !scanExpanded); $id('chartinkScannersRow').classList.toggle('expanded', scanExpanded);
+  $id('scanToggle').textContent = scanExpanded ? 'Show less' : 'Show all';
+}
+document.addEventListener('click', e => { if (scanExpanded && !(e.target.closest && e.target.closest('.pat-strip'))) toggleScanExpand(false); });
 
 // =========================================================================
 // FILTERS
@@ -444,7 +473,7 @@ function resetAllFilters() {
   if (msSector) { msSector.clear(); buildIndustryOptions(); msIndustry.clear(); msCap.clear(); }
   document.querySelectorAll('.rf-in').forEach(i => i.value = '');
   customFilters = []; renderCustomFilters();
-  const defs = { 'param-pullback': 1.5, 'param-roce': 15, 'param-eps': 0, 'param-pe': 40, 'param-pb': 5, 'param-de': 1, 'param-cr': 1.5, 'param-sg': 15, 'param-pg': 15, 'param-opm': 15, 'param-promo': 50 };
+  const defs = { 'param-pullback': 1.5, 'param-roce': 15, 'param-eps': 0, 'param-pe': 40, 'param-pb': 5, 'param-de': 1, 'param-cr': 1.5, 'param-sg': 15, 'param-pg': 15, 'param-opm': 15, 'param-promo': 50, 'param-adx': 25, 'param-roe': 15, 'param-ev': 15 };
   Object.keys(defs).forEach(id => { const el = $id(id); if (el) el.value = defs[id]; });
   clearAllFilterChips();
 }
@@ -456,7 +485,7 @@ function applyAllFilters() {
   const A = new Set([...activeChips].filter(chipAvailable)), scn = [...activeScannerChips], anyMode = scannerMode === 'any';
   const ranges = activeRanges(), cfs = customFilters;
   const P = { pull: paramNum('param-pullback', 1.5), roce: paramNum('param-roce', 15), eps: paramNum('param-eps', 0), pe: paramNum('param-pe', 40), pb: paramNum('param-pb', 5),
-    de: paramNum('param-de', 1), cr: paramNum('param-cr', 1.5), sg: paramNum('param-sg', 15), pg: paramNum('param-pg', 15), opm: paramNum('param-opm', 15), promo: paramNum('param-promo', 50) };
+    de: paramNum('param-de', 1), cr: paramNum('param-cr', 1.5), sg: paramNum('param-sg', 15), pg: paramNum('param-pg', 15), opm: paramNum('param-opm', 15), promo: paramNum('param-promo', 50), adx: paramNum('param-adx', 25), roe: paramNum('param-roe', 15), ev: paramNum('param-ev', 15) };
 
   filteredDataset = rawDataset.filter(r => {
     if (q) { const s = r.Symbol.toLowerCase(), n = String(r['Stock Name'] || '').toLowerCase(); if (!s.includes(q) && !n.includes(q)) return false; }
@@ -486,6 +515,28 @@ function applyAllFilters() {
       if (A.has(chip)) { const hi = nv(r, key); if (close == null || hi == null || hi <= 0 || ((hi - close) / hi * 100) > 3) return false; }
     }
 
+    if (A.has('macdBull')) { const a = nv(r, 'macd'), b = nv(r, 'macdSig'); if (a == null || b == null || a <= b) return false; }
+    if (A.has('aboveSuper')) { const v = nv(r, 'supertrend'); if (close == null || v == null || close <= v) return false; }
+    if (A.has('aboveCloud')) { const v = nv(r, 'ichTop'); if (close == null || v == null || close <= v) return false; }
+    if (A.has('bbUpper')) { const v = nv(r, 'bbUp'); if (close == null || v == null || close < v) return false; }
+    if (A.has('stochLow')) { const v = nv(r, 'stochRsi'); if (v == null || v > 20) return false; }
+    if (A.has('stochHigh')) { const v = nv(r, 'stochRsi'); if (v == null || v < 80) return false; }
+    if (A.has('adxStrong')) { const v = nv(r, 'adx'); if (v == null || v < P.adx) return false; }
+    // built-in scans (calculated from the sheet columns)
+    if (A.has('scanMinervini')) {
+      const e50 = nv(r, 'ema50'), e150 = nv(r, 'ema150'), e200 = nv(r, 'ema200'), lo = nv(r, 'low52'), aw = nv(r, 'away52'), rs = rsOf(r.Symbol);
+      if ([close, e50, e150, e200, lo, aw].some(x => x == null) || rs == null) return false;
+      if (!(close > e150 && close > e200 && e150 > e200 && e50 > e150 && close > e50 && close >= lo * 1.3 && aw >= -25 && rs >= 70)) return false;
+    }
+    if (A.has('scan52Break')) { const aw = nv(r, 'away52'); if (aw == null || aw < -1) return false; }
+    if (A.has('scanVCP')) {
+      const a = nv(r, 'range30'), b = nv(r, 'range10'), c = nv(r, 'range5'), e50 = nv(r, 'ema50'), e200 = nv(r, 'ema200');
+      if ([a, b, c, e50, e200, close].some(x => x == null) || !(a <= 15 && b <= 8 && c <= 5 && close > e50 && close > e200)) return false;
+    }
+    if (A.has('scanMomentum')) { const e50 = nv(r, 'ema50'), rs = rsOf(r.Symbol); if ([close, e50, rsi].some(x => x == null) || rs == null || !(rs >= 80 && close > e50 && rsi >= 55 && rsi <= 75)) return false; }
+    if (A.has('scanOversold')) { const e200 = nv(r, 'ema200'); if ([close, e200, rsi].some(x => x == null) || !(rsi <= 35 && close > e200)) return false; }
+    if (A.has('roeFilter')) { const v = nv(r, 'roe'); if (v == null || v < P.roe) return false; }
+    if (A.has('evFilter')) { const v = nv(r, 'ev'); if (v == null || v <= 0 || v > P.ev) return false; }
     if (A.has('roceFilter')) { const v = nv(r, 'roce'); if (v == null || v < P.roce) return false; }
     if (A.has('epsFilter')) { const v = nv(r, 'eps'); if (v == null || v <= P.eps) return false; }
     if (A.has('peFilter')) { const v = nv(r, 'pe'); if (v == null || v <= 0 || v > P.pe) return false; }
@@ -502,16 +553,63 @@ function applyAllFilters() {
     return true;
   });
 
+  const fc = $id('fdrCount'); if (fc) fc.textContent = filteredDataset.length;
   updateActiveCount();
   sortDataset();
   renderMasterTable();
 }
 function updateActiveCount() {
   let n = activeChips.size + activeScannerChips.size + customFilters.length + activeRanges().length;
+  const nDrawer = n;                                                 // things that live inside the drawer
   if (msSector) n += msSector.selected.size + msIndustry.selected.size + msCap.selected.size;
   if ($id('search-input').value.trim()) n++;
   const el = $id('activeFilterCount'); if (el) { el.textContent = n ? `${n} active` : 'No filters'; el.classList.toggle('on', n > 0); }
+  const b = $id('fltBtnCount'); if (b) { const d = nDrawer - activeScannerChips.size; b.textContent = d; b.hidden = d <= 0; }
+  renderActiveSummary();
 }
+
+// one thin line showing what is applied, each with an x to remove it
+let _asItems = [];
+function renderActiveSummary() {
+  const box = $id('activeSummary'); if (!box) return;
+  const items = [];
+  const q = $id('search-input').value.trim();
+  if (q) items.push({ t: `Search: ${q}`, rm: () => { $id('search-input').value = ''; } });
+  [['Sector', msSector], ['Industry', msIndustry], ['Market cap', msCap]].forEach(([n, ms]) => {
+    if (ms && ms.selected.size) items.push({ t: `${n}: ${[...ms.selected].slice(0, 2).join(', ')}${ms.selected.size > 2 ? ' +' + (ms.selected.size - 2) : ''}`, rm: () => { ms.clear(); if (n === 'Sector') buildIndustryOptions(); } });
+  });
+  activeRanges().forEach(x => items.push({ t: `${x.f.label}: ${x.mn != null ? x.mn : '…'} – ${x.mx != null ? x.mx : '…'}`,
+    rm: () => document.querySelectorAll(`.rf-in[data-rf="${x.f.id}"]`).forEach(i => i.value = '') }));
+  activeChips.forEach(k => {
+    const el = document.querySelector(`.fdr .chip[onclick*="'${k}'"]`), inp = el && el.closest('.cg') ? el.closest('.cg').querySelector('input') : null;
+    items.push({ t: (el ? el.textContent.trim() : k) + (inp ? ' ' + inp.value : ''), rm: () => { activeChips.delete(k); if (el) el.classList.remove('active'); } });
+  });
+  activeScannerChips.forEach(k => items.push({ t: patternInfo(k).label, rm: () => { activeScannerChips.delete(k); renderScannerChips(); } }));
+  customFilters.forEach(c => items.push({ t: `${HDR_LABEL[c.col] || c.col} ${c.op} ${c.val}`, rm: () => { customFilters.splice(customFilters.indexOf(c), 1); renderCustomFilters(); } }));
+  _asItems = items;
+  box.hidden = !items.length;
+  box.innerHTML = items.length ? '<span class="as-l">Applied</span>' + items.map((it, i) => `<span class="as-chip">${esc(it.t)}<button type="button" data-i="${i}" aria-label="Remove">×</button></span>`).join('')
+    + (items.length > 1 ? '<button type="button" class="as-clear" data-all="1">Clear all</button>' : '') : '';
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#activeSummary button');
+  if (!b) return;
+  if (b.dataset.all) { resetAllFilters(); return; }
+  const it = _asItems[+b.dataset.i]; if (it) { it.rm(); applyAllFilters(); }
+});
+
+// filter drawer (right side): the table stays visible and updates live
+function toggleFilterDrawer(force) {
+  const d = $id('filterDrawer'); if (!d) return;
+  const open = typeof force === 'boolean' ? force : !d.classList.contains('open');
+  d.classList.toggle('open', open); d.setAttribute('aria-hidden', open ? 'false' : 'true');
+  const main = $id('mainContent'); if (main) main.classList.toggle('fdr-pushed', open && window.innerWidth > 1100);
+  const b = $id('fltBtn'); if (b) b.classList.toggle('on', open);
+}
+document.addEventListener('click', e => {                          // accordion headers inside the drawer
+  const h = e.target.closest && e.target.closest('.fdr-sec > h4'); if (h) h.parentElement.classList.toggle('open');
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleFilterDrawer(false); });
 
 // =========================================================================
 // SORT / RS RATING (rating comes straight from the RS Ranking sheet)
@@ -734,16 +832,6 @@ function exportToCSV() {
 }
 function setupAutoRefreshTimer() { if (typeof autoRefreshTimer !== 'undefined' && autoRefreshTimer) clearInterval(autoRefreshTimer); }
 
-// collapse / expand the big filter area (remembered)
-function toggleFilterPanel(force) {
-  const card = document.querySelector('.flt-card'); if (!card) return;
-  const hide = typeof force === 'boolean' ? force : !card.classList.contains('flt-collapsed');
-  card.classList.toggle('flt-collapsed', hide);
-  $id('fltToggle').textContent = hide ? 'Show filters ▾' : 'Hide filters ▴';
-  try { localStorage.setItem('mickkk_filters_hidden', hide ? '1' : '0'); } catch (e) {}
-}
-document.addEventListener('DOMContentLoaded', () => { try { if (localStorage.getItem('mickkk_filters_hidden') === '1') toggleFilterPanel(true); } catch (e) {} });
-
 // small status line so it is obvious which source the table is using
 function showDataSource() {
   const el = $id('dataSource'); if (!el) return;
@@ -758,10 +846,13 @@ function showDataSource() {
 const CHIP_NEEDS = { rsi60: ['rsi'], rsi70: ['rsi'], rsiLow: ['rsi'], near52wh: ['away52'], closeEma10: ['close', 'ema10'], closeEma20: ['close', 'ema20'], closeEma50: ['close', 'ema50'], closeEma200: ['close', 'ema200'],
   closeVwap: ['close', 'vwap'], emaStack: ['ema10', 'ema20', 'ema50', 'ema200'], pullback10ema: ['close', 'ema10'], pullback20ema: ['close', 'ema20'], near15D: ['close', 'high15'], nearWeek: ['close', 'highW'],
   nearMonth: ['close', 'highM'], nearQuarter: ['close', 'highQ'], nearYear: ['close', 'highY'], roceFilter: ['roce'], opmFilter: ['opm'], epsFilter: ['eps'], salesGrowth: ['salesQ', 'salesQ4'], profitGrowth: ['npQ', 'npQ4'],
+  macdBull: ['macd', 'macdSig'], aboveSuper: ['close', 'supertrend'], aboveCloud: ['close', 'ichTop'], bbUpper: ['close', 'bbUp'], stochLow: ['stochRsi'], stochHigh: ['stochRsi'], adxStrong: ['adx'],
+  roeFilter: ['roe'], evFilter: ['ev'],
+  scanMinervini: ['close', 'ema50', 'ema150', 'ema200', 'low52', 'away52'], scan52Break: ['away52'], scanVCP: ['range30', 'range10', 'range5', 'ema50', 'ema200', 'close'], scanMomentum: ['close', 'ema50', 'rsi'], scanOversold: ['rsi', 'ema200', 'close'],
   peFilter: ['pe'], pbFilter: ['pb'], undervaluedBV: ['bv', 'close'], lowDebt: ['de'], currentRatioMin: ['cr'], promoFilter: ['promo'], fiiRising: ['fii', 'fii1'], diiRising: ['dii', 'dii1'] };
 const chipAvailable = k => !CHIP_NEEDS[k] || CHIP_NEEDS[k].every(c => COL[c]);
 function markChipAvailability() {
-  document.querySelectorAll('.fr .chip[onclick]').forEach(ch => {
+  document.querySelectorAll('.fdr .chip[onclick]').forEach(ch => {
     const m = /toggleChip\(this,\s*'([^']+)'\)/.exec(ch.getAttribute('onclick') || ''); if (!m) return;
     const ok = chipAvailable(m[1]); ch.classList.toggle('na', !ok);
     if (!ok) ch.setAttribute('data-tip', 'This column is not available in the sheet, so the filter is disabled.');
